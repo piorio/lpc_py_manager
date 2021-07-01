@@ -3,3 +3,6 @@ LpcManager/migrations/__pycache__/*.*
 LpcManager/__pycache__/*.*
 .idea/*.*
 .idea/vcs.xml
+lpc_py_manager/__pycache__/
+venv/
+
