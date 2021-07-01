@@ -1,0 +1,5 @@
+db.sqlite3
+LpcManager/migrations/__pycache__/*.*
+LpcManager/__pycache__/*.*
+.idea/*.*
+.idea/vcs.xml
