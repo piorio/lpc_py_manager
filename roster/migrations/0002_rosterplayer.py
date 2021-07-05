@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('LpcManager', '0001_initial'),
+        ('roster', '0001_initial'),
     ]
 
     operations = [
@@ -24,9 +24,9 @@ class Migration(migrations.Migration):
                 ('passing', models.IntegerField(default=0, validators=[django.core.validators.MaxValueValidator(10), django.core.validators.MinValueValidator(0)])),
                 ('position', models.CharField(max_length=50)),
                 ('strength', models.IntegerField(default=0, validators=[django.core.validators.MaxValueValidator(10), django.core.validators.MinValueValidator(0)])),
-                ('primary_skills', models.ManyToManyField(related_name='primary_skills', to='LpcManager.Skill')),
-                ('secondary_skills', models.ManyToManyField(related_name='secondary_skills', to='LpcManager.Skill')),
-                ('traits', models.ManyToManyField(to='LpcManager.Trait')),
+                ('primary_skills', models.ManyToManyField(related_name='primary_skills', to='roster.Skill')),
+                ('secondary_skills', models.ManyToManyField(related_name='secondary_skills', to='roster.Skill')),
+                ('traits', models.ManyToManyField(to='roster.Trait')),
             ],
         ),
     ]

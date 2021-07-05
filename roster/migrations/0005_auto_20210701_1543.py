@@ -8,14 +8,14 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('LpcManager', '0004_auto_20210701_1504'),
+        ('roster', '0004_auto_20210701_1504'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='rosterplayer',
             name='skills',
-            field=models.ManyToManyField(related_name='skills', to='LpcManager.Skill'),
+            field=models.ManyToManyField(related_name='skills', to='roster.Skill'),
         ),
         migrations.CreateModel(
             name='RosterTeam',
@@ -27,13 +27,13 @@ class Migration(migrations.Migration):
                 ('re_roll_max', models.IntegerField(default=0, validators=[django.core.validators.MaxValueValidator(16), django.core.validators.MinValueValidator(0)])),
                 ('special_rules', models.CharField(max_length=50)),
                 ('tier', models.IntegerField(default=0, validators=[django.core.validators.MaxValueValidator(5), django.core.validators.MinValueValidator(0)])),
-                ('race', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='LpcManager.race')),
+                ('race', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='roster.race')),
             ],
         ),
         migrations.AddField(
             model_name='rosterplayer',
             name='roster_team',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to='LpcManager.rosterteam'),
+            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to='roster.rosterteam'),
             preserve_default=False,
         ),
     ]

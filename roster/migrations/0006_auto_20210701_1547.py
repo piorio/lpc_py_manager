@@ -6,29 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('LpcManager', '0005_auto_20210701_1543'),
+        ('roster', '0005_auto_20210701_1543'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='rosterplayer',
             name='primary_skills',
-            field=models.ManyToManyField(blank=True, related_name='primary_skills', to='LpcManager.Skill'),
+            field=models.ManyToManyField(blank=True, related_name='primary_skills', to='roster.Skill'),
         ),
         migrations.AlterField(
             model_name='rosterplayer',
             name='secondary_skills',
-            field=models.ManyToManyField(blank=True, related_name='secondary_skills', to='LpcManager.Skill'),
+            field=models.ManyToManyField(blank=True, related_name='secondary_skills', to='roster.Skill'),
         ),
         migrations.AlterField(
             model_name='rosterplayer',
             name='skills',
-            field=models.ManyToManyField(blank=True, related_name='skills', to='LpcManager.Skill'),
+            field=models.ManyToManyField(blank=True, related_name='skills', to='roster.Skill'),
         ),
         migrations.AlterField(
             model_name='rosterplayer',
             name='traits',
-            field=models.ManyToManyField(blank=True, to='LpcManager.Trait'),
+            field=models.ManyToManyField(blank=True, to='roster.Trait'),
         ),
         migrations.AlterField(
             model_name='rosterteam',

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('LpcManager', '0006_auto_20210701_1547'),
+        ('roster', '0006_auto_20210701_1547'),
     ]
 
     operations = [

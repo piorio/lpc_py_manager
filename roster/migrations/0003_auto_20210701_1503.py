@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('LpcManager', '0002_rosterplayer'),
+        ('roster', '0002_rosterplayer'),
     ]
 
     operations = [
