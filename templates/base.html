@@ -67,7 +67,7 @@
                     {% if user.is_authenticated %}
                         <hr>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{% url 'all_teams' %}" class="nav-link">
                                 <span data-feather="file"></span>
                                 All Teams
                             </a>
@@ -157,6 +157,14 @@
         <main role="main" class="container">
             <!-- <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p> -->
             <!-- <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p> -->
+            {% for message in messages %}
+                <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ message | safe }}
+                </div>
+            {% endfor %}
             {% block content %}
             {% endblock %}
         </main>

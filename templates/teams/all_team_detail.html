@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}All Team detail{% endblock %}
+
+{% block content %}
+
+    <h1>Details</h1>
+    <ul>
+        <li>Name: {{ team.name }}</li>
+        <li>Treasury: {{ team.treasury }}</li>
+        <li>Value: {{ team.value }}</li>
+    </ul>
+
+{% endblock %}
