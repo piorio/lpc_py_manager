@@ -11,3 +11,4 @@ roster/__pycache__/
 roster/migrations/__pycache__/
 teams/__pycache__/
 teams/migrations/__pycache__/
+lpc_py_manager/secret_settings.py
