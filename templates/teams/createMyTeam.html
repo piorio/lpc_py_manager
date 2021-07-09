@@ -1,9 +1,38 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}All Team detail{% endblock %}
 
 {% block content %}
 
     <h1>Create a new team</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-6">
+                {{ form.name | as_crispy_field }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                {{ form.treasury | as_crispy_field }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                {{ form.roster | as_crispy_field }}
+            </div>
+        </div>
+
+        <br>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+
+    </form>
 
 {% endblock %}
