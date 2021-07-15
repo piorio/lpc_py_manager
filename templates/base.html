@@ -71,13 +71,13 @@
                     {% if user.is_authenticated %}
                         <hr>
                         <li class="nav-item">
-                            <a href="{% url 'all_teams' %}" class="nav-link">
+                            <a href="{% url 'teams:all_teams' %}" class="nav-link">
                                 <span data-feather="file"></span>
                                 All Teams
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'my_teams' %}" class="nav-link">
+                            <a href="{% url 'teams:my_teams' %}" class="nav-link">
                                 <span data-feather="file"></span>
                                 My Teams
                             </a>

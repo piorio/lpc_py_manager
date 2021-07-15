@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
 from .models import Team
 from .forms import CreateMyTeamForm
@@ -33,7 +33,7 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
 def get_create_my_team(request):
     roster_teams = RosterTeam.objects.all()
     team = tuple((t.id, t.name) for t in roster_teams)
-    if request.method == 'GET':
+    if request.method == 'POST':
         form = CreateMyTeamForm()
         form.fields['roster'].choices = team
         return render(request, 'teams/createMyTeam.html', {'form': form})
@@ -47,10 +47,16 @@ def get_create_my_team(request):
             roster = form.cleaned_data['roster']
             team = Team(name=name, treasury=treasury, roster_team_id=roster, coach=request.user, status='CREATED')
             team.save()
+            return redirect('my_teams')
         else:
             form = CreateMyTeamForm()
             form.fields['roster'].choices = team
             return render(request, 'teams/createMyTeam.html', {'form': form})
 
-        return redirect('my_teams')
+
+def dismiss_team(request, pk):
+    team = get_object_or_404(Team, id=pk)
+    team.status = 'DISMISS'
+    team.save()
+    return redirect('my_teams')
 

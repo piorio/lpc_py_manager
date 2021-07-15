@@ -5,11 +5,16 @@ from django.urls import reverse
 from roster.models import Race
 from django.contrib.auth.models import User
 
-# STATUS -> CREATED READY DISMISS
-
 
 # Create your models here.
+class TeamReadyManager(models.Manager):
+    def get_queryset(self):
+        return super(TeamReadyManager, self).get_queryset().filter(status='READY')
+
+
 class Team(models.Model):
+    objects = models.Manager()  # default manager
+    ready_team = TeamReadyManager()  # manager for only read team
     STATUS_CHOICES = (
         ('CREATED', 'CREATED'),
         ('READY', 'READY'),
@@ -28,7 +33,10 @@ class Team(models.Model):
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='team')
 
     def get_absolute_url(self):
-        return reverse('all_team_detail', args=[str(self.id)])
+        return reverse('teams:all_team_detail', args=[str(self.id)])
+
+    def get_dismiss_absolute_url(self):
+        return reverse('teams:dismiss_team', args=[str(self.id)])
 
     def __str__(self):
         return self.name

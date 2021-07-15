@@ -13,6 +13,7 @@
                 <th>Treasury</th>
                 <th>Status</th>
                 <th>Roster</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -27,6 +28,14 @@
                     <td>{{ obj.treasury }}</td>
                     <td>{{ obj.status }}</td>
                     <td>{{ obj.roster_team.name }}</td>
+                    <td>
+                        {% if obj.status == 'CREATED' %}
+                            <a href="#">PREPARE</a>
+                            <a href="{{ obj.get_dismiss_absolute_url }}">DISMISS</a>
+                        {% elif obj.status == 'READY' %}
+                            <a href="{{ obj.get_dismiss_absolute_url }}">DISMISS</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -35,6 +44,6 @@
 
     <br>
 
-    <a href="{% url 'create_my_team' %}" class="nav-link">Create new Team</a>
+    <a href="{% url 'teams:create_my_team' %}" class="nav-link">Create new Team</a>
 
 {% endblock %}
