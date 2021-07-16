@@ -38,5 +38,11 @@ class Team(models.Model):
     def get_dismiss_absolute_url(self):
         return reverse('teams:dismiss_team', args=[str(self.id)])
 
+    def get_prepare_absolute_url(self):
+        return reverse('teams:prepare_team', args=[str(self.id)])
+
+    def get_ready_absolute_url(self):
+        return reverse('teams:ready_team', args=[str(self.id)])
+
     def __str__(self):
         return self.name

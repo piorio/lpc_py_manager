@@ -5,6 +5,8 @@ from .views import (
     MyTeamsListView,
     get_create_my_team,
     dismiss_team,
+    prepare_team,
+    ready_team,
 )
 
 app_name = 'teams'
@@ -15,4 +17,6 @@ urlpatterns = [
     path('my_teams/', MyTeamsListView.as_view(), name='my_teams'),
     path('my_teams/create', get_create_my_team, name='create_my_team'),
     path('my_teams/dismiss/<int:pk>/', dismiss_team, name='dismiss_team'),
+    path('my_teams/preapre/<int:pk>/', prepare_team, name='prepare_team'),
+    path('my_teams/ready/<int:pk>/', ready_team, name='ready_team'),
 ]

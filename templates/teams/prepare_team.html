@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}All Team detail{% endblock %}
+
+{% block content %}
+
+    <h1>Prepare team</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <br>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href = '{{ team.get_ready_absolute_url }}' class="btn btn-primary">Ready the team</a>
+
+    </form>
+
+{% endblock %}
