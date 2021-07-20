@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.urls import reverse
 
-from roster.models import Race
+from roster.models import Race, RosterTeam
 from django.contrib.auth.models import User
 
 
@@ -29,7 +29,7 @@ class Team(models.Model):
     cheerleader = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(10)])
     apothecary = models.BooleanField(default=False)
     current_team_value = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    roster_team = models.ForeignKey(Race, on_delete=models.CASCADE)
+    roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='team')
 
     def get_absolute_url(self):

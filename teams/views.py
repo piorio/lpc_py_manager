@@ -2,8 +2,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
 from .models import Team
-from .forms import CreateMyTeamForm
+from .forms import CreateMyTeamForm, PrepareTeamForm
 from roster.models import RosterTeam
+from django.contrib import messages
+from .form_helpers import PrepareTeamValidator
 
 
 # Create your views here.
@@ -36,10 +38,6 @@ def get_create_my_team(request):
     roster_teams = RosterTeam.objects.all()
     team = tuple((t.id, t.name) for t in roster_teams)
     if request.method == 'POST':
-        form = CreateMyTeamForm()
-        form.fields['roster'].choices = team
-        return render(request, 'teams/createMyTeam.html', {'form': form})
-    else:
         form = CreateMyTeamForm(request.POST)
         form.fields['roster'].choices = team
         if form.is_valid():
@@ -53,6 +51,10 @@ def get_create_my_team(request):
             form = CreateMyTeamForm()
             form.fields['roster'].choices = team
             return render(request, 'teams/createMyTeam.html', {'form': form})
+    else:
+        form = CreateMyTeamForm()
+        form.fields['roster'].choices = team
+        return render(request, 'teams/createMyTeam.html', {'form': form})
 
 
 def dismiss_team(request, pk):
@@ -65,9 +67,26 @@ def dismiss_team(request, pk):
 def prepare_team(request, pk):
     team = get_object_or_404(Team, id=pk)
     if request.method == 'POST':
-        return render(request, 'teams/prepare_team.html', {'team': team})
+        form = PrepareTeamForm(request.POST)
+        if form.is_valid():
+            treasury = team.treasury
+            prepare_team_validator = PrepareTeamValidator(treasury, form.cleaned_data, team.roster_team)
+            (is_valid, treasury, message) = prepare_team_validator.validate_form()
+            if not is_valid:
+                messages.error(request, message)
+                return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
+
+            team.treasury = treasury
+            team.save()
+            return redirect('teams:my_teams')
+        else:
+            return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
     else:
-        return render(request, 'teams/prepare_team.html', {'team': team})
+        form = PrepareTeamForm(initial={
+            're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,
+            'apothecary': team.apothecary
+        })
+        return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
 
 
 def ready_team(request, pk):
