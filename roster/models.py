@@ -56,7 +56,7 @@ class RosterPlayer(models.Model):
     secondary_skills = models.ManyToManyField(Skill, related_name='secondary_skills', blank=True)
     skills = models.ManyToManyField(Skill, related_name='skills', blank=True)
     traits = models.ManyToManyField(Trait, blank=True)
-    roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
+    roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE, related_name='roster_players')
 
     def __str__(self):
         return self.position

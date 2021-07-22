@@ -19,10 +19,56 @@
 
         {% endfor %}
         <br>
-
         <button type="submit" class="btn btn-primary">Save</button>
         <a href = '{{ team.get_ready_absolute_url }}' class="btn btn-primary">Ready the team</a>
-
     </form>
+    <br>
+    <hr>
+    <h3> Players to by:</h3>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <th>POSITION</th>
+                <TH>COST</TH>
+                <TH>ACTION</TH>
+            </thead>
+            <tbody>
+                {% for roster_player in roster_players %}
+                    <tr>
+                        <td>{{ roster_player.position }}</td>
+                        <td>{{ roster_player.cost }}</td>
+                        <td><a href="{{ team.get_buy_player_absolute_url }}?roster_player={{ roster_player.id }}" class="btn btn-primary">BUY</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+    <br>
+    <h3> Bought players:</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <th>POSITION</th>
+                <TH>COST</TH>
+                <TH>ACTION</TH>
+            </thead>
+            <tbody>
+                {% for player in team.players.all %}
+                    <tr>
+                        <td>{{ player.position }}</td>
+                        <td>{{ player.cost }}</td>
+                        <td><a href="#" class="btn btn-primary">FIRE</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <hr>
+    <br>
 
 {% endblock %}

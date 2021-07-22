@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
-from .models import Team
+from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm, PrepareTeamForm
-from roster.models import RosterTeam
+from roster.models import RosterTeam, RosterPlayer
 from django.contrib import messages
 from .form_helpers import PrepareTeamValidator
 
@@ -66,6 +66,7 @@ def dismiss_team(request, pk):
 
 def prepare_team(request, pk):
     team = get_object_or_404(Team, id=pk)
+    roster_players = team.roster_team.roster_players.all()
     if request.method == 'POST':
         form = PrepareTeamForm(request.POST)
         if form.is_valid():
@@ -74,7 +75,8 @@ def prepare_team(request, pk):
             (is_valid, treasury, message) = prepare_team_validator.validate_form()
             if not is_valid:
                 messages.error(request, message)
-                return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
+                return render(request, 'teams/prepare_team.html', {'team': team, 'form': form,
+                                                                   'roster_players': roster_players})
 
             team.treasury = treasury
             team.save()
@@ -86,7 +88,8 @@ def prepare_team(request, pk):
             're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,
             'apothecary': team.apothecary
         })
-        return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
+        return render(request,
+                      'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
 
 
 def ready_team(request, pk):
@@ -94,3 +97,38 @@ def ready_team(request, pk):
     team.status = 'READY'
     team.save()
     return redirect('teams:my_teams')
+
+
+def buy_player(request, team_id):
+    roster_player_id = request.GET.get('roster_player', None)
+    print('Buy ' + str(roster_player_id) + ' for teamId ' + str(team_id))
+    team = get_object_or_404(Team, id=team_id)
+    roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
+
+    is_buy_valid = True
+
+    # Check if roster_player_id belongs to roster team
+
+    # check money spent
+    if is_buy_valid and roster_player_to_buy.cost > team.treasury:
+        is_buy_valid = False
+        messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
+
+    # add Team player -> Create session for rollback
+    if is_buy_valid:
+        player = TeamPlayer()
+        player.init_with_roster_player(roster_player_to_buy, team)
+        team.treasury = team.treasury - roster_player_to_buy.cost
+        team.save()
+        player.save()
+        messages.success(request, 'You bought ' + str(player.position))
+
+    form = PrepareTeamForm(initial={
+        're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,
+        'apothecary': team.apothecary
+    })
+
+    roster_players = team.roster_team.roster_players.all()
+
+    return render(request,
+                  'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
