@@ -14,6 +14,7 @@ class AllTeamListView(ListView):
     template_name = 'teams/all_teams.html'
     context_object_name = 'teams'
     paginate_by = 20
+    ordering = ['-name']
 
 
 class AllTeamDetail(DetailView):
@@ -122,6 +123,32 @@ def buy_player(request, team_id):
         team.save()
         player.save()
         messages.success(request, 'You bought ' + str(player.position))
+
+    form = PrepareTeamForm(initial={
+        're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,
+        'apothecary': team.apothecary
+    })
+
+    roster_players = team.roster_team.roster_players.all()
+
+    return render(request,
+                  'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+
+
+def fire_player(request, team_id):
+    player_id = request.GET.get('player', None)
+    print('Fire ' + str(player_id) + ' for teamId ' + str(team_id))
+    team = get_object_or_404(Team, id=team_id)
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    # Check if roster_player_id belongs to team
+
+    # Delete player and add again the cost
+    team.treasury = team.treasury + player.cost
+    player.delete()
+    team.save()
+
+    messages.success(request, 'You fire a ' + str(player.position))
 
     form = PrepareTeamForm(initial={
         're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,

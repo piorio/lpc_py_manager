@@ -47,6 +47,9 @@ class Team(models.Model):
     def get_buy_player_absolute_url(self):
         return reverse('teams:buy_player', args=[str(self.id)])
 
+    def get_fire_player_absolute_url(self):
+        return reverse('teams:fire_player', args=[str(self.id)])
+
     def __str__(self):
         return self.name
 

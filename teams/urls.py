@@ -8,6 +8,7 @@ from .views import (
     prepare_team,
     ready_team,
     buy_player,
+    fire_player
 )
 
 app_name = 'teams'
@@ -21,4 +22,5 @@ urlpatterns = [
     path('my_teams/preapre/<int:pk>/', prepare_team, name='prepare_team'),
     path('my_teams/ready/<int:pk>/', ready_team, name='ready_team'),
     path('my_teams/buy_player/<int:team_id>', buy_player, name='buy_player'),
+    path('my_teams/fire_player/<int:team_id>', fire_player, name='fire_player'),
 ]

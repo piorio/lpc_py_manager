@@ -60,7 +60,7 @@
                     <tr>
                         <td>{{ player.position }}</td>
                         <td>{{ player.cost }}</td>
-                        <td><a href="#" class="btn btn-primary">FIRE</a></td>
+                        <td><a href="{{ team.get_fire_player_absolute_url }}?player={{ player.id }}" class="btn btn-primary">FIRE</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
