@@ -39,5 +39,5 @@ class RosterPlayerAdmin(admin.ModelAdmin):
     list_display = ('position', 'roster_team', 'movement_allowance', 'agility', 'strength', 'armor_value', 'cost')
     list_filter = ('roster_team', 'cost')
     ordering = ('roster_team', 'position')
-    raw_id_fields = ('roster_team', 'skills', 'traits', 'primary_skills', 'secondary_skills')
+    raw_id_fields = ('roster_team', 'skills', 'traits')
     search_fields = ('position',)

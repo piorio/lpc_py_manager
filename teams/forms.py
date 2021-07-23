@@ -12,4 +12,4 @@ class PrepareTeamForm(forms.Form):
     assistant_coach = forms.IntegerField(min_value=0, max_value=6)
     cheerleader = forms.IntegerField(min_value=0, max_value=12)
     extra_dedicated_fan = forms.IntegerField(min_value=0, max_value=5)
-    apothecary = forms.BooleanField()
+    apothecary = forms.BooleanField(required=False)

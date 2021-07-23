@@ -79,6 +79,11 @@ def prepare_team(request, pk):
                 return render(request, 'teams/prepare_team.html', {'team': team, 'form': form,
                                                                    'roster_players': roster_players})
 
+            team.apothecary = form.cleaned_data['apothecary']
+            team.re_roll = form.cleaned_data['re_roll']
+            team.assistant_coach = form.cleaned_data['assistant_coach']
+            team.cheerleader = form.cleaned_data['cheerleader']
+
             team.treasury = treasury
             team.save()
             return redirect('teams:my_teams')
@@ -131,8 +136,9 @@ def buy_player(request, team_id):
 
     roster_players = team.roster_team.roster_players.all()
 
-    return render(request,
-                  'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+    #return render(request,
+    #              'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+    return redirect(team.get_prepare_absolute_url())
 
 
 def fire_player(request, team_id):
@@ -157,5 +163,12 @@ def fire_player(request, team_id):
 
     roster_players = team.roster_team.roster_players.all()
 
+    #return render(request,
+    #              'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+
+    return redirect(team.get_prepare_absolute_url())
+
+def my_team_detail(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     return render(request,
-                  'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+                  'teams/my_team_detail.html', {'team': team})

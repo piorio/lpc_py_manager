@@ -31,6 +31,7 @@ class Team(models.Model):
     current_team_value = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teams')
+    extra_dedicated_fan = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(6)])
 
     def get_absolute_url(self):
         return reverse('teams:all_team_detail', args=[str(self.id)])
@@ -50,11 +51,15 @@ class Team(models.Model):
     def get_fire_player_absolute_url(self):
         return reverse('teams:fire_player', args=[str(self.id)])
 
+    def get_my_team_detail_absolute_url(self):
+        return reverse('teams:my_team_detail', args=[str(self.id)])
+
     def __str__(self):
         return self.name
 
 
 class TeamPlayer(models.Model):
+    name = models.CharField(default='NAME', max_length=100)
     agility = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     cost = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
