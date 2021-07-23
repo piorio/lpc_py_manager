@@ -87,7 +87,7 @@ def prepare_team(request, pk):
 
             team.treasury = treasury
             team.save()
-            # return redirect('teams:my_teams')
+
             return redirect(team.get_prepare_absolute_url())
         else:
             return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
