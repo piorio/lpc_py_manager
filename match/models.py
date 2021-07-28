@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+
 from teams.models import Team
 from django.core.validators import MinValueValidator
 
@@ -10,3 +12,6 @@ class Match(models.Model):
     match_date = models.DateField()
     first_team_td = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     second_team_td = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    def get_absolute_url(self):
+        return reverse('match:close_match', args=[str(self.id)])

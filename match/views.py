@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from match.models import Match
@@ -33,3 +35,13 @@ class MyMatchesListView(LoginRequiredMixin, ListView):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super(MyMatchesListView, self).dispatch(request, args, kwargs)
+
+
+@login_required
+def close_match(request, match_id):
+    if not request.user.is_superuser:
+        return HttpResponse(status=403)  # HTTP 403 Forbidden
+    if request.method == 'POST':
+        pass
+    else:
+        return render(request, 'matches/close_match.html', {})
