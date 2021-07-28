@@ -9,8 +9,11 @@
     <title>{% block title %}LPC MANAGER{% endblock %}</title>
 
     <!-- CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
 
 
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -70,6 +73,12 @@
                     </li>
                     {% if user.is_authenticated %}
                         <hr>
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>TEAM SECTION</span>
+                            <a class="d-flex align-items-center text-muted" href="#">
+                                <span data-feather="plus-circle"></span>
+                            </a>
+                        </h6>
                         <li class="nav-item">
                             <a href="{% url 'teams:all_teams' %}" class="nav-link">
                                 <span data-feather="file"></span>
@@ -80,6 +89,25 @@
                             <a href="{% url 'teams:my_teams' %}" class="nav-link">
                                 <span data-feather="file"></span>
                                 My Teams
+                            </a>
+                        </li>
+                        <hr>
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>MATCH SECTION</span>
+                            <a class="d-flex align-items-center text-muted" href="#">
+                                <span data-feather="plus-circle"></span>
+                            </a>
+                        </h6>
+                        <li class="nav-item">
+                            <a href="{% url 'match:all_matches' %}" class="nav-link">
+                                <span data-feather="file"></span>
+                                All Matches
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'match:my_matches' %}" class="nav-link">
+                                <span data-feather="file"></span>
+                                My Matches
                             </a>
                         </li>
                         <hr>

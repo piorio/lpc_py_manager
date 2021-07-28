@@ -130,8 +130,11 @@ def prepare_team(request, pk):
 @login_required
 def ready_team(request, pk):
     team = get_object_or_404(Team, id=pk)
+    players_count = team.players.all().count()
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot ready a team not belongs to you')
+    elif players_count < 11 or players_count > 16:
+        messages.error(request, 'A team must have 11 to 16 players. You cannot ready a not complete team')
     else:
         team.status = 'READY'
         team.save()

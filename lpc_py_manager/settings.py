@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'roster.apps.LpcmanagerConfig',
     'accounts',
     'teams',
+    'match',
 ]
 
 MIDDLEWARE = [
