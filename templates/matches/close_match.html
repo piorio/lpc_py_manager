@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Close Match{% endblock %}
+
+{% block content %}
+    <h1>Match between <b>{{ match.first_team.name }}</b> and <b>{{ match.second_team.name }}</b></h1>
+    <br>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>Team</th>
+                <th>TD</th>
+                <th>BH</th>
+                <th>SI</th>
+                <th>KI</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ match.first_team.name }}</td>
+                    <td>{{ form.first_team_td }}</td>
+                    <td>{{ form.first_team_badly_hurt }}</td>
+                    <td>{{ form.first_team_serious_injury }}</td>
+                    <td>{{ form.first_team_kill }}</td>
+                </tr>
+                <tr>
+                    <td>{{ match.second_team.name }}</td>
+                    <td>{{ form.second_team_td }}</td>
+                    <td>{{ form.second_team_badly_hurt }}</td>
+                    <td>{{ form.second_team_serious_injury }}</td>
+                    <td>{{ form.second_team_kill }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+
+{% endblock %}
