@@ -18,7 +18,7 @@ class Team(models.Model):
     STATUS_CHOICES = (
         ('CREATED', 'CREATED'),
         ('READY', 'READY'),
-        ('DISMISS', 'DISMISS'),
+        ('RETIRED', 'RETIRED'),
     )
     name = models.CharField(max_length=100)
     value = models.IntegerField(default=0, validators=[MinValueValidator(0)])
