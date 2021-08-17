@@ -77,11 +77,11 @@ def get_create_my_team(request):
 def dismiss_team(request, pk):
     team = get_object_or_404(Team, id=pk)
     if team.coach.id != request.user.id:
-        messages.error(request, 'You cannot dismiss a team not belongs to you')
+        messages.error(request, 'You cannot retire a team not belongs to you')
     else:
-        team.status = 'DISMISS'
+        team.status = 'RETIRED'
         team.save()
-        messages.success(request, 'You dismiss ' + str(team))
+        messages.success(request, 'You retire ' + str(team))
     return redirect('teams:my_teams')
 
 

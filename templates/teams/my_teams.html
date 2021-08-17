@@ -31,9 +31,9 @@
                     <td>
                         {% if obj.status == 'CREATED' %}
                             <a href="{{ obj.get_prepare_absolute_url }}">PREPARE</a>
-                            <a href="{{ obj.get_dismiss_absolute_url }}">DISMISS</a>
+                            <a href="{{ obj.get_dismiss_absolute_url }}">RETIRE</a>
                         {% elif obj.status == 'READY' %}
-                            <a href="{{ obj.get_dismiss_absolute_url }}">DISMISS</a>
+                            <a href="{{ obj.get_dismiss_absolute_url }}">RETIRE</a>
                         {% endif %}
                     </td>
                 </tr>
