@@ -13,6 +13,7 @@
                 <th>Treasury</th>
                 <th>Coach</th>
                 <th>Roster</th>
+                <th>Status</th>
             </tr>
             </thead>
             <tbody>
@@ -27,6 +28,7 @@
                     <td>{{ obj.treasury }}</td>
                     <td>{{ obj.coach.username }}</td>
                     <td>{{ obj.roster_team.name }}</td>
+                    <td>{{ obj.status }}</td>
                 </tr>
             {% endfor %}
             </tbody>
