@@ -101,13 +101,25 @@
                         <li class="nav-item">
                             <a href="{% url 'match:all_matches' %}" class="nav-link">
                                 <span data-feather="file"></span>
-                                All Matches
+                                All Matches to play
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'match:all_matches_played' %}" class="nav-link">
+                                <span data-feather="file"></span>
+                                All Matches played
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'match:my_matches' %}" class="nav-link">
                                 <span data-feather="file"></span>
-                                My Matches
+                                My Matches to play
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'match:my_matches_played' %}" class="nav-link">
+                                <span data-feather="file"></span>
+                                My Matches played
                             </a>
                         </li>
                         <hr>

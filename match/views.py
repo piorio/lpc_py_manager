@@ -11,19 +11,35 @@ from django.contrib import messages
 
 
 # Create your views here.
-class AllMatchesListView(LoginRequiredMixin, ListView):
+class AllMatchesToPlayListView(LoginRequiredMixin, ListView):
     model = Match
     template_name = 'matches/all_matches.html'
     context_object_name = 'matches'
     paginate_by = 20
-    ordering = ['-match_date']
+
+    def get_queryset(self):
+        return Match.objects.filter(played=False).order_by('-match_date')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(AllMatchesListView, self).dispatch(request, args, kwargs)
+        return super(AllMatchesToPlayListView, self).dispatch(request, args, kwargs)
 
 
-class MyMatchesListView(LoginRequiredMixin, ListView):
+class AllMatchesPlayedListView(LoginRequiredMixin, ListView):
+    model = Match
+    template_name = 'matches/all_matches_played.html'
+    context_object_name = 'matches'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Match.objects.filter(played=True).order_by('-match_date')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(AllMatchesPlayedListView, self).dispatch(request, args, kwargs)
+
+
+class MyMatchesToPlayListView(LoginRequiredMixin, ListView):
     model = Match
     template_name = 'matches/my_matches.html'
     context_object_name = 'matches'
@@ -31,12 +47,28 @@ class MyMatchesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Match.objects.filter(
-            Q(first_team__coach=self.request.user) | Q(second_team__coach=self.request.user)
+            (Q(first_team__coach=self.request.user) | Q(second_team__coach=self.request.user)) & Q(played=False)
         ).order_by('-match_date')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(MyMatchesListView, self).dispatch(request, args, kwargs)
+        return super(MyMatchesToPlayListView, self).dispatch(request, args, kwargs)
+
+
+class MyMatchesPlayedListView(LoginRequiredMixin, ListView):
+    model = Match
+    template_name = 'matches/my_matches_played.html'
+    context_object_name = 'matches'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Match.objects.filter(
+            (Q(first_team__coach=self.request.user) | Q(second_team__coach=self.request.user)) & Q(played=True)
+        ).order_by('-match_date')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(MyMatchesPlayedListView, self).dispatch(request, args, kwargs)
 
 
 @login_required

@@ -20,6 +20,7 @@ class Match(models.Model):
     second_team_badly_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
     second_team_serious_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
     second_team_kill = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
+    played = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('match:close_match', args=[str(self.id)])

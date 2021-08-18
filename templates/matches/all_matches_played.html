@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}My Matches{% endblock %}
+{% block title %}All Matches{% endblock %}
 
 {% block content %}
 
@@ -11,6 +11,9 @@
                 <th>Team A</th>
                 <th>Team B</th>
                 <th>Date</th>
+                <th>Team A TD</th>
+                <th>Team B TD</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -19,6 +22,15 @@
                     <td>{{ obj.first_team }}</td>
                     <td>{{ obj.second_team }}</td>
                     <td>{{ obj.match_date }}</td>
+                    <td>{{ obj.first_team_td }}</td>
+                    <td>{{ obj.second_team_td }}</td>
+                    <td>
+                        {% if user.is_superuser %}
+                            <a href="{{ obj.get_absolute_url }}" class="btn btn-primary">CLOSE</a>
+                        {% else %}
+                            <b>NO ACTION</b>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
