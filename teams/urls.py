@@ -10,6 +10,16 @@ from .views import (
     buy_player,
     fire_player,
     my_team_detail,
+    buy_re_roll,
+    remove_re_roll,
+    buy_assistant_coach,
+    remove_assistant_coach,
+    buy_cheerleader,
+    remove_cheerleader,
+    buy_extra_fan,
+    remove_extra_fan,
+    buy_apothecary,
+    remove_apothecary,
 )
 
 app_name = 'teams'
@@ -25,4 +35,14 @@ urlpatterns = [
     path('my_teams/buy_player/<int:team_id>', buy_player, name='buy_player'),
     path('my_teams/fire_player/<int:team_id>', fire_player, name='fire_player'),
     path('my_teams/detail/<int:team_id>', my_team_detail, name='my_team_detail'),
+    path('my_teams/buy_re_roll/<int:team_id>', buy_re_roll, name='buy_re_roll'),
+    path('my_teams/remove_re_roll/<int:team_id>', remove_re_roll, name='remove_re_roll'),
+    path('my_teams/buy_assistant_coach/<int:team_id>', buy_assistant_coach, name='buy_assistant_coach'),
+    path('my_teams/remove_assistant_coach/<int:team_id>', remove_assistant_coach, name='remove_assistant_coach'),
+    path('my_teams/buy_cheerleader/<int:team_id>', buy_cheerleader, name='buy_cheerleader'),
+    path('my_teams/remove_cheerleader/<int:team_id>', remove_cheerleader, name='remove_cheerleader'),
+    path('my_teams/buy_extra_fan/<int:team_id>', buy_extra_fan, name='buy_extra_fan'),
+    path('my_teams/remove_extra_fan/<int:team_id>', remove_extra_fan, name='remove_extra_fan'),
+    path('my_teams/buy_apothecary/<int:team_id>', buy_apothecary, name='buy_apothecary'),
+    path('my_teams/remove_apothecary/<int:team_id>', remove_apothecary, name='remove_apothecary'),
 ]

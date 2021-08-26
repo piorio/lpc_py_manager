@@ -4,10 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Team, TeamPlayer
-from .forms import CreateMyTeamForm, PrepareTeamForm
+from .forms import CreateMyTeamForm
 from roster.models import RosterTeam, RosterPlayer
 from django.contrib import messages
-from .form_helpers import PrepareTeamValidator
 
 
 # Create your views here.
@@ -94,37 +93,8 @@ def prepare_team(request, pk):
         messages.error(request, 'You cannot prepare a team not belongs to you')
         return redirect('teams:my_teams')
 
-    if request.method == 'POST':
-        form = PrepareTeamForm(request.POST)
-        if form.is_valid():
-            treasury = team.treasury
-            prepare_team_validator = PrepareTeamValidator(treasury, form.cleaned_data, team.roster_team)
-            (is_valid, treasury, message) = prepare_team_validator.validate_form()
-            if not is_valid:
-                messages.error(request, message)
-                return render(request, 'teams/prepare_team.html', {'team': team, 'form': form,
-                                                                   'roster_players': roster_players})
-
-            team.apothecary = form.cleaned_data['apothecary']
-            team.re_roll = form.cleaned_data['re_roll']
-            team.assistant_coach = form.cleaned_data['assistant_coach']
-            team.cheerleader = form.cleaned_data['cheerleader']
-            team.extra_dedicated_fan = form.cleaned_data['extra_dedicated_fan']
-
-            team.treasury = treasury
-            team.save()
-
-            return redirect(team.get_prepare_absolute_url())
-        else:
-            return render(request, 'teams/prepare_team.html', {'team': team, 'form': form})
-    else:
-        form = PrepareTeamForm(initial={
-            're_roll': team.re_roll, 'cheerleader': team.cheerleader, 'assistant_coach': team.assistant_coach,
-            'apothecary': team.apothecary, 'extra_dedicated_fan': team.extra_dedicated_fan
-        })
-
-        return render(request,
-                      'teams/prepare_team.html', {'team': team, 'form': form, 'roster_players': roster_players})
+    return render(request,
+                  'teams/prepare_team.html', {'team': team, 'roster_players': roster_players})
 
 
 @login_required
@@ -212,3 +182,199 @@ def my_team_detail(request, team_id):
 
     return render(request,
                   'teams/my_team_detail.html', {'team': team})
+
+
+@login_required
+def buy_re_roll(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot buy a re roll for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.roster_team.re_roll_cost > team.treasury or team.re_roll > team.roster_team.re_roll_max:
+        messages.error(request,
+                       'You don\'t have money for another re roll or you reached the max number of re roll permitted')
+    else:
+        team.re_roll += 1
+        team.treasury -= team.roster_team.re_roll_cost
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def remove_re_roll(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot remove a re roll for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.re_roll <= 0:
+        messages.error(request, 'You don\'t have re roll to remove')
+    else:
+        team.re_roll -= 1
+        team.treasury += team.roster_team.re_roll_cost
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def buy_assistant_coach(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot buy an assistant coach for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent
+    if team.treasury - 10000 < 0 or team.assistant_coach > 5:
+        messages.error(request, 'You don\'t have money for another assistant coach')
+    else:
+        team.assistant_coach += 1
+        team.treasury -= 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def remove_assistant_coach(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot remove an assistant coach for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.assistant_coach <= 0:
+        messages.error(request, 'You don\'t have assistant coach to remove or too many assistant coach')
+    else:
+        team.assistant_coach -= 1
+        team.treasury += 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def buy_cheerleader(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot buy an cheerleader for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent
+    if team.treasury - 10000 < 0 or team.cheerleader > 11:
+        messages.error(request, 'You don\'t have money for another cheerleader or too many cheerleaders')
+    else:
+        team.cheerleader += 1
+        team.treasury -= 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def remove_cheerleader(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot remove a cheerleader for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.cheerleader <= 0:
+        messages.error(request, 'You don\'t have cheerleader to remove')
+    else:
+        team.cheerleader -= 1
+        team.treasury += 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def buy_extra_fan(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot buy an extra fan for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent
+    if team.treasury - 10000 < 0 or team.extra_dedicated_fan > 4:
+        messages.error(request, 'You don\'t have money for another extra fan or too many extra fan')
+    else:
+        team.extra_dedicated_fan += 1
+        team.treasury -= 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def remove_extra_fan(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot remove an extra fan for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.extra_dedicated_fan <= 0:
+        messages.error(request, 'You don\'t have extra fan to remove')
+    else:
+        team.extra_dedicated_fan -= 1
+        team.treasury += 10000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def buy_apothecary(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot buy an apothecary for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    if team.roster_team.apothecary is False:
+        messages.error(request, 'Your team cannot have an apothecary')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent
+    if team.treasury - 50000 < 0 or team.apothecary is True:
+        messages.error(request,
+                       'You don\'t have money for the apothecary or too many apothecary (You can buy only one)')
+    else:
+        team.apothecary = True
+        team.treasury -= 50000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
+
+
+@login_required
+def remove_apothecary(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if team.coach.id != request.user.id:
+        messages.error(request, 'You cannot remove an apothecary for a team not belongs to you')
+        return redirect(team.get_prepare_absolute_url())
+
+    # check money spent and max number
+    if team.apothecary is False:
+        messages.error(request, 'You don\'t have apothecary to remove')
+    else:
+        team.apothecary = False
+        team.treasury += 50000
+        team.save()
+
+    return redirect(team.get_prepare_absolute_url())
