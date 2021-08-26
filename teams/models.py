@@ -54,6 +54,36 @@ class Team(models.Model):
     def get_my_team_detail_absolute_url(self):
         return reverse('teams:my_team_detail', args=[str(self.id)])
 
+    def get_buy_re_roll_absolute_url(self):
+        return reverse('teams:buy_re_roll', args=[str(self.id)])
+
+    def get_remove_re_roll_absolute_url(self):
+        return reverse('teams:remove_re_roll', args=[str(self.id)])
+
+    def get_buy_assistant_coach_absolute_url(self):
+        return reverse('teams:buy_assistant_coach', args=[str(self.id)])
+
+    def get_remove_assistant_coach_absolute_url(self):
+        return reverse('teams:remove_assistant_coach', args=[str(self.id)])
+
+    def get_buy_cheerleader_absolute_url(self):
+        return reverse('teams:buy_cheerleader', args=[str(self.id)])
+
+    def get_remove_cheerleader_absolute_url(self):
+        return reverse('teams:remove_cheerleader', args=[str(self.id)])
+
+    def get_buy_extra_fan_absolute_url(self):
+        return reverse('teams:buy_extra_fan', args=[str(self.id)])
+
+    def get_remove_extra_fan_absolute_url(self):
+        return reverse('teams:remove_extra_fan', args=[str(self.id)])
+
+    def get_buy_apothecary_absolute_url(self):
+        return reverse('teams:buy_apothecary', args=[str(self.id)])
+
+    def get_remove_apothecary_absolute_url(self):
+        return reverse('teams:remove_apothecary', args=[str(self.id)])
+
     def __str__(self):
         return self.name
 
