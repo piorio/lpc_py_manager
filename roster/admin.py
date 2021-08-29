@@ -32,6 +32,7 @@ class RosterTeamAdmin(admin.ModelAdmin):
     raw_id_fields = ('race',)
     ordering = ('name',)
     search_fields = ('name',)
+    autocomplete_fields = ('race',)
 
 
 @admin.register(RosterPlayer)
@@ -41,3 +42,4 @@ class RosterPlayerAdmin(admin.ModelAdmin):
     ordering = ('roster_team', 'position')
     raw_id_fields = ('roster_team', 'skills', 'traits')
     search_fields = ('position',)
+    autocomplete_fields = ('roster_team', 'skills', 'traits', )

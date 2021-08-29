@@ -5,9 +5,82 @@
 {% block title %}Close Match{% endblock %}
 
 {% block content %}
-    <h1>Match between <b>{{ match.first_team.name }}</b> and <b>{{ match.second_team.name }}</b></h1>
+    <h1><b>{{ match.first_team.name }}</b> VS <b>{{ match.second_team.name }}</b></h1>
     <br>
+    <hr>
+    <H2>PRE - MATCH</H2>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <th>TEAM</th>
+            <th>DEDICATED FAN</th>
+            <th>FAN</th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ match.first_team.name }}</td>
+                <td>{{ match.first_team.extra_dedicated_fan }}</td>
+                <td><input type="number"></td> <!-- 1 to 3 -->
+            </tr>
+            <tr>
+                <td>{{ match.second_team.name }}</td>
+                <td>{{ match.second_team.extra_dedicated_fan }}</td>
+                <td><input type="number"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
+    <BR>
+    <HR>
+    <H2>MATCH</H2>
+    <b>{{ match.first_team.name }}</b>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <th>PLAYER</th>
+            <th>TD</th>
+            <th>BH</th>
+            </thead>
+            <tbody>
+            {% for player in first_team_players %}
+                <tr>
+                    <td>{{ player.name }}</td>
+                    <td><input type="number"></td>
+                    <td><input type="number"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <b>{{ match.second_team.name }}</b>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <th>PLAYER</th>
+            <th>TD</th>
+            <th>BH</th>
+            </thead>
+            <tbody>
+            {% for player in second_team_players %}
+                <tr>
+                    <td>{{ player.name }}</td>
+                    <td><input type="number"></td>
+                    <td><input type="number"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <BR>
+    <HR>
+    <H2>POST - MATCH</H2>
+    FUFFA
+
+    <!--
     <form method="post" novalidate>
         {% csrf_token %}
         <div class="table-responsive">
@@ -40,5 +113,6 @@
 
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
+    -->
 
 {% endblock %}
