@@ -34,7 +34,7 @@ class RosterTeam(models.Model):
     name = models.CharField(max_length=50)
     re_roll_cost = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
     re_roll_max = models.IntegerField(default=0, validators=[MaxValueValidator(16), MinValueValidator(0)])
-    special_rules = models.CharField(max_length=50, null=True, blank=True, default=None)
+    special_rules = models.CharField(max_length=255, null=True, blank=True, default=None)
     tier = models.IntegerField(default=0, validators=[MaxValueValidator(5), MinValueValidator(0)])
     race = models.ForeignKey(Race, on_delete=models.CASCADE)
 

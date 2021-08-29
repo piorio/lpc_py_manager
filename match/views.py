@@ -121,6 +121,7 @@ def close_match(request, match_id):
                 'second_team_serious_injury': match.second_team_serious_injury,
                 'second_team_kill': match.second_team_kill
             })
+            first_team_players = match.first_team.players
             return render(request, 'matches/close_match.html', {'match': match, 'form': match_form})
     else:
         match_form = CloseMatchForm(initial={
@@ -130,4 +131,6 @@ def close_match(request, match_id):
             'first_team_kill': match.first_team_kill, 'second_team_badly_hurt': match.second_team_badly_hurt,
             'second_team_serious_injury': match.second_team_serious_injury, 'second_team_kill': match.second_team_kill
         })
-        return render(request, 'matches/close_match.html', {'match': match, 'form': match_form})
+        first_team_players = match.first_team.players.all()
+        second_team_players = match.second_team.players.all()
+        return render(request, 'matches/close_match.html', {'match': match, 'form': match_form, 'first_team_players': first_team_players, 'second_team_players': second_team_players})
