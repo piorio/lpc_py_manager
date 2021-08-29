@@ -47,7 +47,6 @@ class RosterPlayer(models.Model):
     armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     cost = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
     max_quantity = models.IntegerField(default=0, validators=[MaxValueValidator(16), MinValueValidator(0)])
-    min_quantity = models.IntegerField(default=0, validators=[MaxValueValidator(16), MinValueValidator(0)])
     movement_allowance = models.IntegerField(default=0, validators=[MaxValueValidator(20), MinValueValidator(0)])
     passing = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     position = models.CharField(max_length=50)
