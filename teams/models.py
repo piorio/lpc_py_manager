@@ -32,6 +32,7 @@ class Team(models.Model):
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teams')
     extra_dedicated_fan = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    big_guy_numbers = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     def get_absolute_url(self):
         return reverse('teams:all_team_detail', args=[str(self.id)])
@@ -102,6 +103,7 @@ class TeamPlayer(models.Model):
     traits = models.ManyToManyField(Trait, blank=True)
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players')
+    big_guy = models.BooleanField(default=False)
 
     def init_with_roster_player(self, roster_player, team):
         self.agility = roster_player.agility
@@ -115,6 +117,8 @@ class TeamPlayer(models.Model):
         # Skills and traits
         self.roster_team = roster_player.roster_team
         self.team = team
+        # Big Guy
+        self.big_guy = roster_player.big_guy
 
     def __str__(self):
         return self.position

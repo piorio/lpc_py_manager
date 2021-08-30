@@ -38,6 +38,8 @@ class RosterTeam(models.Model):
     tier = models.IntegerField(default=0, validators=[MaxValueValidator(5), MinValueValidator(0)])
     race = models.ForeignKey(Race, on_delete=models.CASCADE)
 
+    big_guy_max = models.IntegerField(default=0, validators=[MaxValueValidator(5), MinValueValidator(0)])
+
     def __str__(self):
         return self.name
 
@@ -51,15 +53,14 @@ class RosterPlayer(models.Model):
     passing = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     position = models.CharField(max_length=50)
     strength = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
-    # primary_skills = models.ManyToManyField(Skill, related_name='primary_skills', blank=True)
-    # secondary_skills = models.ManyToManyField(Skill, related_name='secondary_skills', blank=True)
-
     primary_skills = models.CharField(default=None, max_length=5)
     secondary_skills = models.CharField(default=None, max_length=5)
 
     skills = models.ManyToManyField(Skill, related_name='skills', blank=True)
     traits = models.ManyToManyField(Trait, blank=True)
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE, related_name='roster_players')
+
+    big_guy = models.BooleanField(default=False)
 
     def __str__(self):
         return self.position
