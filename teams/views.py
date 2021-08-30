@@ -129,6 +129,7 @@ def buy_player(request, team_id):
         messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
         return redirect('teams:my_teams')
 
+    # Check max team players
     if team.number_of_players > 15:
         is_buy_valid = False
         messages.error(request, 'You can\'t buy more than 16 players')
@@ -143,6 +144,14 @@ def buy_player(request, team_id):
         if team.big_guy_numbers >= team.roster_team.big_guy_max:
             is_buy_valid = False
             messages.error(request, 'You cant\'t have more big guy')
+
+    # Check max position quantity
+    if is_buy_valid:
+        number_of_roster_player_hired = team.players.filter(roster_player=roster_player_to_buy.id).count()
+        if number_of_roster_player_hired >= roster_player_to_buy.max_quantity:
+            is_buy_valid = False
+            messages.error(request, 'You cant\'t buy ' + roster_player_to_buy.position + '! Max quantity is ' +
+                           str(roster_player_to_buy.max_quantity))
 
     # add Team player -> Create session for rollback
     if is_buy_valid:
