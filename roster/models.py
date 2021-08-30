@@ -38,7 +38,7 @@ class RosterTeam(models.Model):
     tier = models.IntegerField(default=0, validators=[MaxValueValidator(5), MinValueValidator(0)])
     race = models.ForeignKey(Race, on_delete=models.CASCADE)
 
-    big_guy_max = models.IntegerField(default=0, validators=[MaxValueValidator(5), MinValueValidator(0)])
+    big_guy_max = models.IntegerField(default=0, validators=[MaxValueValidator(16), MinValueValidator(0)])
 
     def __str__(self):
         return self.name
@@ -46,7 +46,7 @@ class RosterTeam(models.Model):
 
 class RosterPlayer(models.Model):
     agility = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
-    armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
+    armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(20), MinValueValidator(0)])
     cost = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
     max_quantity = models.IntegerField(default=0, validators=[MaxValueValidator(16), MinValueValidator(0)])
     movement_allowance = models.IntegerField(default=0, validators=[MaxValueValidator(20), MinValueValidator(0)])
