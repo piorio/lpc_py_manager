@@ -163,6 +163,7 @@ def buy_player(request, team_id):
         team.number_of_players += 1
         team.save()
         player.save()
+        player.set_initial_skills_and_traits(roster_player_to_buy)
         messages.success(request, 'You bought ' + str(player.position))
 
     return redirect(team.get_prepare_absolute_url())

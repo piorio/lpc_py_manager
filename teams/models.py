@@ -116,13 +116,17 @@ class TeamPlayer(models.Model):
         self.passing = roster_player.passing
         self.position = roster_player.position
         self.strength = roster_player.strength
-        # Skills and traits
         # Roster
         self.roster_team = roster_player.roster_team
         self.team = team
         self.roster_player = roster_player
         # Big Guy
         self.big_guy = roster_player.big_guy
+
+    def set_initial_skills_and_traits(self, roster_player):
+        # Skills and traits
+        self.base_skills.add(*roster_player.skills.all())
+        self.traits.add(*roster_player.traits.all())
 
     def __str__(self):
         return self.position
