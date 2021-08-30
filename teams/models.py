@@ -105,6 +105,7 @@ class TeamPlayer(models.Model):
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players')
     big_guy = models.BooleanField(default=False)
+    roster_player = models.ForeignKey(RosterPlayer, on_delete=models.CASCADE, blank=True, default=None)
 
     def init_with_roster_player(self, roster_player, team):
         self.agility = roster_player.agility
@@ -116,8 +117,10 @@ class TeamPlayer(models.Model):
         self.position = roster_player.position
         self.strength = roster_player.strength
         # Skills and traits
+        # Roster
         self.roster_team = roster_player.roster_team
         self.team = team
+        self.roster_player = roster_player
         # Big Guy
         self.big_guy = roster_player.big_guy
 
