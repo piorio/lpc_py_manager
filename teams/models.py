@@ -32,7 +32,8 @@ class Team(models.Model):
     roster_team = models.ForeignKey(RosterTeam, on_delete=models.CASCADE)
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teams')
     extra_dedicated_fan = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
-    big_guy_numbers = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    big_guy_numbers = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(16)])
+    number_of_players = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(16)])
 
     def get_absolute_url(self):
         return reverse('teams:all_team_detail', args=[str(self.id)])

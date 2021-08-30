@@ -129,13 +129,17 @@ def buy_player(request, team_id):
         messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
         return redirect('teams:my_teams')
 
+    if team.number_of_players > 15:
+        is_buy_valid = False
+        messages.error(request, 'You can\'t buy more than 16 players')
+
     # check money spent
     if is_buy_valid and roster_player_to_buy.cost > team.treasury:
         is_buy_valid = False
         messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
 
     # Check big guy: a roster team must have a max number of big guy
-    if roster_player_to_buy.big_guy:
+    if is_buy_valid and roster_player_to_buy.big_guy:
         if team.big_guy_numbers >= team.roster_team.big_guy_max:
             is_buy_valid = False
             messages.error(request, 'You cant\'t have more big guy')
@@ -147,6 +151,7 @@ def buy_player(request, team_id):
         team.treasury = team.treasury - roster_player_to_buy.cost
         if roster_player_to_buy.big_guy:
             team.big_guy_numbers += 1
+        team.number_of_players += 1
         team.save()
         player.save()
         messages.success(request, 'You bought ' + str(player.position))
@@ -175,6 +180,7 @@ def fire_player(request, team_id):
     team.treasury = team.treasury + player.cost
     if player.big_guy:
         team.big_guy_numbers -= 1
+    team.number_of_players -= 1
     player.delete()
     team.save()
 
