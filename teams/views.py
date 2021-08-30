@@ -134,11 +134,19 @@ def buy_player(request, team_id):
         is_buy_valid = False
         messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
 
+    # Check big guy: a roster team must have a max number of big guy
+    if roster_player_to_buy.big_guy:
+        if team.big_guy_numbers >= team.roster_team.big_guy_max:
+            is_buy_valid = False
+            messages.error(request, 'You cant\'t have more big guy')
+
     # add Team player -> Create session for rollback
     if is_buy_valid:
         player = TeamPlayer()
         player.init_with_roster_player(roster_player_to_buy, team)
         team.treasury = team.treasury - roster_player_to_buy.cost
+        if roster_player_to_buy.big_guy:
+            team.big_guy_numbers += 1
         team.save()
         player.save()
         messages.success(request, 'You bought ' + str(player.position))
@@ -165,6 +173,8 @@ def fire_player(request, team_id):
 
     # Delete player and add again the cost
     team.treasury = team.treasury + player.cost
+    if player.big_guy:
+        team.big_guy_numbers -= 1
     player.delete()
     team.save()
 
