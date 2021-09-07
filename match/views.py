@@ -105,7 +105,7 @@ def close_match(request, match_id):
 
         match.first_team.save()
         match.second_team.save()
-        # match.played = True
+        match.played = True
         match.save()
 
         return redirect('match:all_matches')
