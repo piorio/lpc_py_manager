@@ -6,8 +6,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from match.models import Match
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CloseMatchForm
 from django.contrib import messages
+from .match_util import CloseMatchDataReader
 
 
 # Create your views here.
@@ -79,58 +79,38 @@ def close_match(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
     if request.method == 'POST':
-        match_form = CloseMatchForm(request.POST)
-        if match_form.is_valid():
-            match.first_team_td = match_form.cleaned_data['first_team_td']
-            match.second_team_td = match_form.cleaned_data['second_team_td']
-            match.first_team_badly_hurt = match_form.cleaned_data['first_team_badly_hurt']
-            match.second_team_badly_hurt = match_form.cleaned_data['second_team_badly_hurt']
-            match.first_team_serious_injury = match_form.cleaned_data['first_team_serious_injury']
-            match.second_team_serious_injury = match_form.cleaned_data['second_team_serious_injury']
-            match.first_team_kill = match_form.cleaned_data['first_team_kill']
-            match.second_team_kill = match_form.cleaned_data['second_team_kill']
+        data = request.POST
+        print(data)
+        first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match)
+        second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match)
 
-            first_team_cas = 0
-            second_team_cas = 0
+        first_team_data.prepare()
+        second_team_data.prepare()
 
-            if match.first_team_badly_hurt is not None:
-                first_team_cas += match.first_team_badly_hurt
-            if match.first_team_serious_injury is not None:
-                first_team_cas += match.first_team_serious_injury
-            if match.first_team_kill is not None:
-                first_team_cas += match.first_team_kill
-            match.first_team_cas = first_team_cas
+        total_fan = first_team_data.get_fan_factor() + second_team_data.get_fan_factor()
+        match.first_team.treasury += ((total_fan / 2) + first_team_data.get_number_of_td()) * 10000
+        match.second_team.treasury += ((total_fan / 2) + second_team_data.get_number_of_td()) * 10000
 
-            if match.second_team_badly_hurt is not None:
-                second_team_cas += match.second_team_badly_hurt
-            if match.second_team_serious_injury is not None:
-                second_team_cas += match.second_team_serious_injury
-            if match.second_team_kill is not None:
-                second_team_cas += match.second_team_kill
-            match.second_team_cas = second_team_cas
+        first_team_fan_update = data["first_team_update_fan"]
+        if first_team_fan_update:
+            match.first_team.extra_dedicated_fan += int(first_team_fan_update)
+            if match.first_team.extra_dedicated_fan < 0:
+                match.first_team.extra_dedicated_fan = 0
 
-            match.save()
-            return redirect('match:all_matches')
-        else:
-            messages.error(request, 'Close error ' + str(match_form.errors))
-            match_form = CloseMatchForm(initial={
-                'first_team_td': match.first_team_td, 'second_team_td': match.second_team_td,
-                'first_team_badly_hurt': match.first_team_badly_hurt,
-                'first_team_serious_injury': match.second_team_serious_injury,
-                'first_team_kill': match.first_team_kill, 'second_team_badly_hurt': match.second_team_badly_hurt,
-                'second_team_serious_injury': match.second_team_serious_injury,
-                'second_team_kill': match.second_team_kill
-            })
-            first_team_players = match.first_team.players
-            return render(request, 'matches/close_match.html', {'match': match, 'form': match_form})
+        second_team_fan_update = data["second_team_update_fan"]
+        if second_team_fan_update:
+            match.second_team.extra_dedicated_fan += int(second_team_fan_update)
+            if match.second_team.extra_dedicated_fan < 0:
+                match.second_team.extra_dedicated_fan = 0
+
+        match.first_team.save()
+        match.second_team.save()
+        # match.played = True
+        match.save()
+
+        return redirect('match:all_matches')
     else:
-        match_form = CloseMatchForm(initial={
-            'first_team_td': match.first_team_td, 'second_team_td': match.second_team_td,
-            'first_team_badly_hurt': match.first_team_badly_hurt,
-            'first_team_serious_injury': match.first_team_serious_injury,
-            'first_team_kill': match.first_team_kill, 'second_team_badly_hurt': match.second_team_badly_hurt,
-            'second_team_serious_injury': match.second_team_serious_injury, 'second_team_kill': match.second_team_kill
-        })
         first_team_players = match.first_team.players.all()
         second_team_players = match.second_team.players.all()
-        return render(request, 'matches/close_match.html', {'match': match, 'form': match_form, 'first_team_players': first_team_players, 'second_team_players': second_team_players})
+        return render(request, 'matches/close_match.html', {'match': match, 'first_team_players': first_team_players,
+                                                            'second_team_players': second_team_players})

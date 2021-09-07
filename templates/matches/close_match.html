@@ -8,111 +8,192 @@
     <h1><b>{{ match.first_team.name }}</b> VS <b>{{ match.second_team.name }}</b></h1>
     <br>
     <hr>
-    <H2>PRE - MATCH</H2>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>TEAM</th>
-            <th>DEDICATED FAN</th>
-            <th>FAN</th>
-            </thead>
-            <tbody>
-            <tr>
-                <td>{{ match.first_team.name }}</td>
-                <td>{{ match.first_team.extra_dedicated_fan }}</td>
-                <td><input type="number"></td> <!-- 1 to 3 -->
-            </tr>
-            <tr>
-                <td>{{ match.second_team.name }}</td>
-                <td>{{ match.second_team.extra_dedicated_fan }}</td>
-                <td><input type="number"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <BR>
-    <HR>
-    <H2>MATCH</H2>
-    <b>{{ match.first_team.name }}</b>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>PLAYER</th>
-            <th>TD</th>
-            <th>BH</th>
-            </thead>
-            <tbody>
-            {% for player in first_team_players %}
-                <tr>
-                    <td>{{ player.name }}</td>
-                    <td><input type="number"></td>
-                    <td><input type="number"></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <br>
-    <b>{{ match.second_team.name }}</b>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>PLAYER</th>
-            <th>TD</th>
-            <th>BH</th>
-            </thead>
-            <tbody>
-            {% for player in second_team_players %}
-                <tr>
-                    <td>{{ player.name }}</td>
-                    <td><input type="number"></td>
-                    <td><input type="number"></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <BR>
-    <HR>
-    <H2>POST - MATCH</H2>
-    FUFFA
-
-    <!--
     <form method="post" novalidate>
         {% csrf_token %}
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
+
+        <H2>PRE - MATCH</H2>
+        <div class="table-responsive-sm">
+            <table class="table">
                 <thead>
-                <th>Team</th>
-                <th>TD</th>
-                <th>BH</th>
-                <th>SI</th>
-                <th>KI</th>
+                <th>TEAM</th>
+                <th>DEDICATED FAN</th>
+                <th>FAN</th>
                 </thead>
                 <tbody>
                 <tr>
                     <td>{{ match.first_team.name }}</td>
-                    <td>{{ form.first_team_td }}</td>
-                    <td>{{ form.first_team_badly_hurt }}</td>
-                    <td>{{ form.first_team_serious_injury }}</td>
-                    <td>{{ form.first_team_kill }}</td>
+                    <td>{{ match.first_team.extra_dedicated_fan }}</td>
+                    <td><input type="number" id="first_team_extra_fan" name="first_team_extra_fan" style="width: 10%"/></td> <!-- 1 to 3 -->
                 </tr>
                 <tr>
                     <td>{{ match.second_team.name }}</td>
-                    <td>{{ form.second_team_td }}</td>
-                    <td>{{ form.second_team_badly_hurt }}</td>
-                    <td>{{ form.second_team_serious_injury }}</td>
-                    <td>{{ form.second_team_kill }}</td>
+                    <td>{{ match.second_team.extra_dedicated_fan }}</td>
+                    <td><input type="number" id="second_team_extra_fan" name="second_team_extra_fan" style="width: 10%"/></td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <button type="submit" class="btn btn-primary">Save</button>
+        <BR>
+        <HR>
+        <H2>MATCH</H2>
+        <b>{{ match.first_team.name }}</b>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>PLAYER</th>
+                <th>TD</th>
+                <th>BH</th>
+                <th>SI</th>
+                <th>KI</th>
+                <th>INTERCEPT</th>
+                <th>DEFLECTION</th>
+                <th>COMPLETE</th>
+                <th>CASUALTY</th>
+                <th>Lasting Injury</th>
+                </thead>
+                <tbody>
+                {% for player in first_team_players %}
+                    <tr>
+                        <td>{{ player.name }}</td>
+                        <td><input type="number" id="{{ match.first_team.id }}_td_{{ player.id }}" name="{{ match.first_team.id }}_td_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_bh_{{ player.id }}" name="{{ match.first_team.id }}_bh_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_si_{{ player.id }}" name="{{ match.first_team.id }}_si_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_ki_{{ player.id }}" name="{{ match.first_team.id }}_ki_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_int_{{ player.id }}" name="{{ match.first_team.id }}_int_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_def_{{ player.id }}" name="{{ match.first_team.id }}_def_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.first_team.id }}_comp_{{ player.id }}" name="{{ match.first_team.id }}_comp_{{ player.id }}"/></td>
+                        <td>
+                            <select id="{{ match.first_team.id }}_cas_{{ player.id }}" name="{{ match.first_team.id }}_cas_{{ player.id }}">
+                                <option value="NA" selected>--</option>
+                                <option value="BH">Badly Hurt</option>
+                                <option value="SH">Seriously Hurt</option>
+                                <option value="SI">Seriously Injury</option>
+                                <option value="LI">Lasting Injury</option>
+                                <option value="DE">DEAD</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="{{ match.first_team.id }}_last_{{ player.id }}" name="{{ match.first_team.id }}_lasti_{{ player.id }}">
+                                <option value="NA" selected>--</option>
+                                <option value="JI">Head Injury</option>
+                                <option value="SK">Smashed Knee</option>
+                                <option value="BA">Broken Arm</option>
+                                <option value="NI">Neck Injury</option>
+                                <option value="DS">Dislocated Shoulder</option>
+                            </select>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <br>
+        <b>{{ match.second_team.name }}</b>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>PLAYER</th>
+                <th>TD</th>
+                <th>BH</th>
+                <th>SI</th>
+                <th>KI</th>
+                <th>INTERCEPT</th>
+                <th>DEFLECTION</th>
+                <th>COMPLETE</th>
+                <th>CASUALTY</th>
+                <th>Lasting Injury</th>
+                </thead>
+                <tbody>
+                {% for player in second_team_players %}
+                    <tr>
+                        <td>{{ player.name }}</td>
+                        <td><input type="number" id="{{ match.second_team.id }}_td_{{ player.id }}" name="{{ match.second_team.id }}_td_{{ player.id }}"/></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_bh_{{ player.id }}" name="{{ match.second_team.id }}_bh_{{ player.id }}"></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_si_{{ player.id }}" name="{{ match.second_team.id }}_si_{{ player.id }}"></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_ki_{{ player.id }}" name="{{ match.second_team.id }}_ki_{{ player.id }}"></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_int_{{ player.id }}" name="{{ match.second_team.id }}_int_{{ player.id }}"></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_def_{{ player.id }}" name="{{ match.second_team.id }}_def_{{ player.id }}"></td>
+                        <td><input type="number" id="{{ match.second_team.id }}_comp_{{ player.id }}" name="{{ match.second_team.id }}_comp_{{ player.id }}"></td>
+                        <td>
+                            <select id="{{ match.second_team.id }}_cas_{{ player.id }}" name="{{ match.second_team.id }}_cas_{{ player.id }}">
+                                <option value="NA" selected>--</option>
+                                <option value="BH">Badly Hurt</option>
+                                <option value="SH">Seriously Hurt</option>
+                                <option value="SI">Seriously Injury</option>
+                                <option value="LI">Lasting Injury</option>
+                                <option value="DE">DEAD</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="{{ match.second_team.id }}_last_{{ player.id }}" name="{{ match.second_team.id }}_lasti_{{ player.id }}">
+                                <option value="NA" selected>--</option>
+                                <option value="JI">Head Injury</option>
+                                <option value="SK">Smashed Knee</option>
+                                <option value="BA">Broken Arm</option>
+                                <option value="NI">Neck Injury</option>
+                                <option value="DS">Dislocated Shoulder</option>
+                            </select>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <BR>
+        <HR>
+        <H2>POST - MATCH</H2>
+        <br>
+
+        <label for="first_team_mvp">MVP: </label>
+        <select name="first_team_mvp" id="first_team_mvp">
+            {% for player in first_team_players  %}
+                <option value="{{ player.id }}">{{ player.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="second_team_mvp">MVP: </label>
+        <select name="second_team_mvp" id="second_team_mvp">
+            {% for player in second_team_players  %}
+                <option value="{{ player.id }}">{{ player.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <div class="table-responsive-sm">
+            <table class="table">
+                <thead>
+                <th>TEAM</th>
+                <th>UPDATE DEDICATE FAN</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ match.first_team.name }}</td>
+                    <td>
+                        <select name="first_team_update_fan" id="first_team_update_fan">
+                            <option value="0" selected>0</option>
+                            <option value="1">+1</option>
+                            <option value="-1">-1</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ match.second_team.name }}</td>
+                    <td>
+                        <select name="second_team_update_fan" id="second_team_update_fan">
+                            <option value="0" selected>0</option>
+                            <option value="1">+1</option>
+                            <option value="-1">-1</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <input type="submit" class="btn btn-primary" />
     </form>
-    -->
 
 {% endblock %}

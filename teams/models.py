@@ -107,6 +107,19 @@ class TeamPlayer(models.Model):
     big_guy = models.BooleanField(default=False)
     roster_player = models.ForeignKey(RosterPlayer, on_delete=models.CASCADE, blank=True, default=None)
 
+    touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    badly_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    serious_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    kill = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    spp = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    intercept = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    deflection = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    complete = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    niggling_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    missing_next_game = models.BooleanField(default=False)
+    dead = models.BooleanField(default=False)
+
     def init_with_roster_player(self, roster_player, team):
         self.agility = roster_player.agility
         self.armor_value = roster_player.armor_value
