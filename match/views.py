@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from match.models import Match
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
+from teams.team_helper import update_team_value
 from .match_util import CloseMatchDataReader
 
 
@@ -102,6 +102,12 @@ def close_match(request, match_id):
             match.second_team.extra_dedicated_fan += int(second_team_fan_update)
             if match.second_team.extra_dedicated_fan < 0:
                 match.second_team.extra_dedicated_fan = 0
+
+        match.first_team.value = update_team_value(match.first_team, True)
+        match.first_team.current_team_value = update_team_value(match.first_team)
+
+        match.second_team.value = update_team_value(match.second_team, True)
+        match.second_team.current_team_value = update_team_value(match.second_team)
 
         match.first_team.save()
         match.second_team.save()

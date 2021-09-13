@@ -89,6 +89,39 @@ class Team(models.Model):
     def get_remove_apothecary_absolute_url(self):
         return reverse('teams:remove_apothecary', args=[str(self.id)])
 
+    def get_manage_player_absolute_url(self):
+        return reverse('teams:manage_player', args=[str(self.id)])
+
+    def get_manage_fire_player_absolute_url(self):
+        return reverse('teams:manage_fire_player', args=[str(self.id)])
+
+    def get_manage_buy_re_roll_absolute_url(self):
+        return reverse('teams:manage_buy_re_roll', args=[str(self.id)])
+
+    def get_manage_remove_re_roll_absolute_url(self):
+        return reverse('teams:manage_remove_re_roll', args=[str(self.id)])
+
+    def get_manage_buy_assistant_coach_absolute_url(self):
+        return reverse('teams:manage_buy_assistant_coach', args=[str(self.id)])
+
+    def get_manage_remove_assistant_coach_absolute_url(self):
+        return reverse('teams:manage_remove_assistant_coach', args=[str(self.id)])
+
+    def get_manage_buy_cheerleader_absolute_url(self):
+        return reverse('teams:manage_buy_cheerleader', args=[str(self.id)])
+
+    def get_manage_remove_cheerleader_absolute_url(self):
+        return reverse('teams:manage_remove_cheerleader', args=[str(self.id)])
+
+    def get_manage_buy_apothecary_absolute_url(self):
+        return reverse('teams:manage_buy_apothecary', args=[str(self.id)])
+
+    def get_manage_remove_apothecary_absolute_url(self):
+        return reverse('teams:manage_remove_apothecary', args=[str(self.id)])
+
+    def get_manage_buy_player_absolute_url(self):
+        return reverse('teams:manage_buy_player', args=[str(self.id)])
+
     def __str__(self):
         return self.name
 
@@ -122,6 +155,9 @@ class TeamPlayer(models.Model):
     niggling_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     missing_next_game = models.BooleanField(default=False)
     dead = models.BooleanField(default=False)
+    fired = models.BooleanField(default=False)
+
+    player_number = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def init_with_roster_player(self, roster_player, team):
         self.agility = roster_player.agility
