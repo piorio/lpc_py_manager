@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Player details{% endblock %}
+
+{% block content %}
+
+    <h1>#{{ player.player_number }} {{ player.name }}</h1>
+    <br>
+    <hr>
+    <h3>Statistics</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <th>POSITION</th>
+            <TH>MA</TH>
+            <TH>ST</TH>
+            <TH>AG</TH>
+            <TH>PA</TH>
+            <TH>AV</TH>
+            <TH>SKILLS & TRAITS</TH>
+            <TH>Current Value</TH>
+            <TH>STATUS</TH>
+            <TH></TH>
+            </thead>
+            <tbody>
+            <td>{{ player.position }}</td>
+            <td>{{ player.movement_allowance }}</td>
+            <td>{{ player.strength }}</td>
+            <td>{{ player.agility }}</td>
+            <td>{{ player.passing }}</td>
+            <td>{{ player.armor_value }}</td>
+            <td>
+                {% for skill in player.base_skills.all %}
+                    {{ skill.name }},
+                {% endfor %}
+                {% for trait in player.traits.all %}
+                    {{ trait.name }},
+                {% endfor %}
+            </td>
+            <td>{{ player.value }}</td>
+            <td>
+                {% if player.dead %}
+                    DEAD!!
+                {% elif player.missing_next_game %}
+                    MNG
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <hr>
+    <h1>Action</h1>
+    <br>
+    <ul>
+        <form method="post" action="{% url 'teams:change_player_name_number' %}">
+        {% csrf_token %}
+        <input type="hidden" name="playerId" id="playerId" value="{{ player.id }}" />
+        <input type="hidden" name="teamId" id="teamId" value="{{ player.team_id }}" />
+            <li>
+                Change number -
+                <select name="new_number" id="new_number">
+                    <option value="--" selected>--</option>
+                    {% for i in range %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </li>
+            <br>
+            <li>
+                Change name -
+                <input type="text" name="new_name" id="new_name"/>
+                -
+                <input type="submit" class="btn btn-primary">
+            </li>
+        </form>
+    </ul>
+
+{% endblock %}

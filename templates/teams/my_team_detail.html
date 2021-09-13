@@ -6,10 +6,156 @@
 
     <h1>Team {{ team.name }}</h1>
     <br>
+
+    <h3>Details</h3>
+    <br>
+    <ul>
+        <li><b>Treasury</b>: {{ team.treasury }}</li>
+        <li><b>Value</b>: {{ team.value }}</li>
+        <li><b>Current Value</b>: {{ team.current_team_value }}</li>
+        <li><b>Cheerleaders</b>: {{ team.cheerleader }}</li>
+        <li><b>Re Roll</b>: {{ team.re_roll }}</li>
+        <li><b>Assistant Coach</b>: {{ team.assistant_coach }}</li>
+        <li><b>Apothecary</b>: {{ team.apothecary }}</li>
+        <li><b>Dedicated fan</b>: 1 + {{ team.extra_dedicated_fan }}</li>
+    </ul>
+    <br>
+    <hr>
+
     <h3>Players list</h3>
     <div class="table-responsive">
         <table class="table table-striped table-sm">
             <thead>
+            <th>NUMBER</th>
+            <th>NAME</th>
+            <th>POSITION</th>
+            <TH>MA</TH>
+            <TH>ST</TH>
+            <TH>AG</TH>
+            <TH>PA</TH>
+            <TH>AV</TH>
+            <TH>SKILLS & TRAITS</TH>
+            <TH>Current Value</TH>
+            <TH>ACTION</TH>
+            </thead>
+            <tbody>
+            {% for player in team.players.all %}
+                {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
+                    <tr>
+                        <td>{{ player.player_number }}</td>
+                        <td>{{ player.name }}</td>
+                        <td>{{ player.position }}</td>
+                        <td>{{ player.movement_allowance }}</td>
+                        <td>{{ player.strength }}</td>
+                        <td>{{ player.agility }}</td>
+                        <td>{{ player.passing }}</td>
+                        <td>{{ player.armor_value }}</td>
+                        <td>
+                            {% for skill in player.base_skills.all %}
+                                {{ skill.name }},
+                            {% endfor %}
+                            {% for trait in player.traits.all %}
+                                {{ trait.name }},
+                            {% endfor %}
+                        </td>
+                        <td>{{ player.value }}</td>
+                        <td>
+                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
+                               class="btn btn-primary">MANAGE</a>
+                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                               class="btn btn-primary">FIRE</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <hr>
+
+    <h3> Extra to by:</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <th>Extra</th>
+            <TH>COST</TH>
+            <TH>BOUGHT</TH>
+            <TH>ACTION</TH>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Re Roll</td>
+                <td>{{ team.roster_team.re_roll_cost }}</td>
+                <td>{{ team.re_roll }}</td>
+                <td>
+                    <a href="{{ team.get_manage_buy_re_roll_absolute_url }}" class="btn btn-primary">ADD</a>
+                    <a href="{{ team.get_manage_remove_re_roll_absolute_url }}" class="btn btn-primary">REMOVE</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Assistant coach</td>
+                <td>10000</td>
+                <td>{{ team.assistant_coach }}</td>
+                <td>
+                    <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}" class="btn btn-primary">ADD</a>
+                    <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
+                       class="btn btn-primary">REMOVE</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Cheerleader</td>
+                <td>10000</td>
+                <td>{{ team.cheerleader }}</td>
+                <td>
+                    <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}" class="btn btn-primary">ADD</a>
+                    <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}" class="btn btn-primary">REMOVE</a>
+                </td>
+            </tr>
+            {% if team.roster_team.apothecary == True %}
+                <tr>
+                    <td>Apothecary</td>
+                    <td>50000</td>
+                    <td>{{ team.apothecary }}</td>
+                    <td>
+                        <a href="{{ team.get_manage_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
+                        <a href="{{ team.get_manage_remove_apothecary_absolute_url }}" class="btn btn-primary">FIRE</a>
+                    </td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+        <br>
+        <hr>
+
+        <h3> Players to by:</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>POSITION</th>
+                <TH>COST</TH>
+                <TH>ACTION</TH>
+                </thead>
+                <tbody>
+                {% for roster_player in roster_players %}
+                    <tr>
+                        <td>{{ roster_player.position }}</td>
+                        <td>{{ roster_player.cost }}</td>
+                        <td><a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
+                               class="btn btn-primary">BUY</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <hr>
+
+        <h3>Not available Players list</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>NUMBER</th>
                 <th>NAME</th>
                 <th>POSITION</th>
                 <TH>MA</TH>
@@ -17,42 +163,80 @@
                 <TH>AG</TH>
                 <TH>PA</TH>
                 <TH>AV</TH>
-                <TH>SKILLS</TH>
+                <TH>SKILLS & TRAITS</TH>
                 <TH>Current Value</TH>
                 <TH>ACTION</TH>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 {% for player in team.players.all %}
-                    <tr>
-                        <td>NAME</td>
-                        <td>{{ player.position }}</td>
-                        <td>{{ player.movement_allowance }}</td>
-                        <td>{{ player.strength }}</td>
-                        <td>{{ player.agility }}</td>
-                        <td>{{ player.passing }}</td>
-                        <td>{{ player.armor_value }}</td>
-                        <td>SKILLS</td>
-                        <td>{{ player.value }}</td>
-                        <td>
-                            <a href="#" class="btn btn-primary">MANAGE</a>
-                            <a href="#" class="btn btn-primary">FIRE</a>
-                        </td>
-                    </tr>
+                    {% if player.missing_next_game == True %}
+                        <tr>
+                            <td>{{ player.player_number }}</td>
+                            <td>{{ player.name }}</td>
+                            <td>{{ player.position }}</td>
+                            <td>{{ player.movement_allowance }}</td>
+                            <td>{{ player.strength }}</td>
+                            <td>{{ player.agility }}</td>
+                            <td>{{ player.passing }}</td>
+                            <td>{{ player.armor_value }}</td>
+                            <td>
+                                {% for skill in player.base_skills.all %}
+                                    {{ skill.name }},
+                                {% endfor %}
+                                {% for trait in player.traits.all %}
+                                    {{ trait.name }},
+                                {% endfor %}
+                            </td>
+                            <td>{{ player.value }}</td>
+                            <td>
+                                <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
+                                   class="btn btn-primary">MANAGE</a>
+                                <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                                   class="btn btn-primary">FIRE</a>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <hr>
+
+        <h3>Dead or Fired Players list</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                <th>NUMBER</th>
+                <th>NAME</th>
+                <th>POSITION</th>
+                <TH>MA</TH>
+                <TH>ST</TH>
+                <TH>AG</TH>
+                <TH>PA</TH>
+                <TH>AV</TH>
+                <TH>Value</TH>
+                </thead>
+                <tbody>
+                {% for player in team.players.all %}
+                    {% if player.dead == True or player.fired == True %}
+                        <tr>
+                            <td>{{ player.player_number }}</td>
+                            <td>{{ player.name }}</td>
+                            <td>{{ player.position }}</td>
+                            <td>{{ player.movement_allowance }}</td>
+                            <td>{{ player.strength }}</td>
+                            <td>{{ player.agility }}</td>
+                            <td>{{ player.passing }}</td>
+                            <td>{{ player.armor_value }}</td>
+                            <td>{{ player.value }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
     </div>
-    <br>
-    <hr>
-    <br>
-    <h3>Team details</h3>
-    <ul>
-        <li><b>Treasury</b>: {{ team.treasury }}</li>
-        <li><b>Value</b>: {{ team.value }}</li>
-        <li><b>Cheerleaders</b>: {{ team.cheerleader }}</li>
-        <li><b>Re Roll</b>: {{ team.re_roll }}</li>
-        <li><b>Assistant Coach</b>: {{ team.assistant_coach }}</li>
-        <li><b>Apothecary</b>: {{ team.apothecary }}</li>
-    </ul>
 
 {% endblock %}
