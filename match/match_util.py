@@ -1,5 +1,6 @@
 from .casualty_util import PlayerCasualtyFactory
 
+
 class CloseMatchDataReader:
     def __init__(self, data, team, selected_team, match):
         self.select_team = {'FIRST': 'first_team_extra_fan', 'SECOND': 'second_team_extra_fan'}
@@ -184,4 +185,8 @@ class CloseMatchDataReader:
             engine.apply_to_player(player)
 
 
-
+def reset_missing_next_game(team):
+    for player in team.players.all():
+        if player.missing_next_game:
+            player.missing_next_game = False
+            player.save()

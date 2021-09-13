@@ -7,7 +7,7 @@ from django.views.generic import ListView
 from match.models import Match
 from django.shortcuts import render, redirect, get_object_or_404
 from teams.team_helper import update_team_value
-from .match_util import CloseMatchDataReader
+from .match_util import CloseMatchDataReader, reset_missing_next_game
 
 
 # Create your views here.
@@ -81,6 +81,10 @@ def close_match(request, match_id):
     if request.method == 'POST':
         data = request.POST
         print(data)
+
+        reset_missing_next_game(match.first_team)
+        reset_missing_next_game(match.second_team)
+
         first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match)
         second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match)
 
