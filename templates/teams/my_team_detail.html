@@ -36,6 +36,7 @@
             <TH>AV</TH>
             <TH>SKILLS & TRAITS</TH>
             <TH>Current Value</TH>
+            <TH>SPP</TH>
             <TH>ACTION</TH>
             </thead>
             <tbody>
@@ -59,6 +60,7 @@
                             {% endfor %}
                         </td>
                         <td>{{ player.value }}</td>
+                        <td>{{ player.spp }}</td>
                         <td>
                             <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
                                class="btn btn-primary">MANAGE</a>
