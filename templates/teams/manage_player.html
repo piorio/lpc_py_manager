@@ -19,6 +19,7 @@
             <TH>AV</TH>
             <TH>SKILLS & TRAITS</TH>
             <TH>Current Value</TH>
+            <TH>SPP</TH>
             <TH>STATUS</TH>
             <TH></TH>
             </thead>
@@ -38,6 +39,7 @@
                 {% endfor %}
             </td>
             <td>{{ player.value }}</td>
+            <td>{{ player.spp }}</td>
             <td>
                 {% if player.dead %}
                     DEAD!!
