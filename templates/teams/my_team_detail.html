@@ -16,7 +16,14 @@
         <li><b>Cheerleaders</b>: {{ team.cheerleader }}</li>
         <li><b>Re Roll</b>: {{ team.re_roll }}</li>
         <li><b>Assistant Coach</b>: {{ team.assistant_coach }}</li>
-        <li><b>Apothecary</b>: {{ team.apothecary }}</li>
+        <li>
+            <b>Apothecary</b>:
+            {% if team.apothecary %}
+            YES
+            {% else %}
+            NO
+            {% endif %}
+        </li>
         <li><b>Dedicated fan</b>: {{ dedicated_fan }}</li>
     </ul>
     <br>
@@ -118,7 +125,13 @@
                 <tr>
                     <td>Apothecary</td>
                     <td>50000</td>
-                    <td>{{ team.apothecary }}</td>
+                    <td>
+                        {% if team.apothecary %}
+                            YES
+                        {% else %}
+                            NO
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{{ team.get_manage_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
                         <a href="{{ team.get_manage_remove_apothecary_absolute_url }}" class="btn btn-primary">FIRE</a>

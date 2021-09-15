@@ -56,14 +56,20 @@
             </tr>
             {% if team.roster_team.apothecary == True %}
                 <tr>
-                <td>Apothecary</td>
-                <td>50000</td>
-                <td>{{ team.apothecary }}</td>
-                <td>
-                    <a href="{{ team.get_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
-                    <a href="{{ team.get_remove_apothecary_absolute_url }}" class="btn btn-primary">FIRE</a>
-                </td>
-            </tr>
+                    <td>Apothecary</td>
+                    <td>50000</td>
+                    <td>
+                        {% if team.apothecary %}
+                            YES
+                        {% else %}
+                            NO
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ team.get_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
+                        <a href="{{ team.get_remove_apothecary_absolute_url }}" class="btn btn-primary">FIRE</a>
+                    </td>
+                </tr>
             {% endif %}
             </tbody>
         </table>
