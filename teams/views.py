@@ -205,14 +205,16 @@ def fire_player(request, team_id):
 @login_required
 def my_team_detail(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    roster_players = team.roster_team.roster_players.all()
 
     if team.coach.id != request.user.id:
         messages.error(request, 'Team did not belongs to you')
         return redirect('teams:my_teams')
 
+    roster_players = team.roster_team.roster_players.all()
+    dedicated_fan = team.extra_dedicated_fan + 1
     return render(request,
-                  'teams/my_team_detail.html', {'team': team, 'roster_players': roster_players})
+                  'teams/my_team_detail.html', {'team': team, 'roster_players': roster_players,
+                                                'dedicated_fan': dedicated_fan})
 
 
 @login_required
