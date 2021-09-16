@@ -27,9 +27,15 @@
             <td>{{ player.position }}</td>
             <td>{{ player.movement_allowance }}</td>
             <td>{{ player.strength }}</td>
-            <td>{{ player.agility }}</td>
-            <td>{{ player.passing }}</td>
-            <td>{{ player.armor_value }}</td>
+            <td>{{ player.agility }}+</td>
+            <td>
+                {% if player.passing != 0 %}
+                    {{ player.passing }}+
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>{{ player.armor_value }}+</td>
             <td>
                 {% for skill in player.base_skills.all %}
                     {{ skill.name }},
