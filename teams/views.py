@@ -32,6 +32,13 @@ class AllTeamDetail(DetailView):
     def dispatch(self, request, *args, **kwargs):
         return super(AllTeamDetail, self).dispatch(request, args, kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super(AllTeamDetail, self).get_context_data(**kwargs)
+        team = self.model.objects.first()
+        dedicated_fan = getattr(team, 'extra_dedicated_fan')
+        context['dedicated_fan'] = dedicated_fan + 1
+        return context
+
 
 class MyTeamsListView(LoginRequiredMixin, ListView):
     model = Team
