@@ -8,6 +8,7 @@ from .forms import CreateMyTeamForm
 from roster.models import RosterTeam, RosterPlayer
 from django.contrib import messages
 from .team_helper import update_team_value
+from django.db.models import Q
 
 
 # Create your views here.
@@ -48,12 +49,28 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Team.objects.filter(
-            coach=self.request.user
+            (Q(coach=self.request.user) & ~Q(status='RETIRED'))
         ).order_by('name')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super(MyTeamsListView, self).dispatch(request, args, kwargs)
+
+
+class MyRetiredTeamsListView(LoginRequiredMixin, ListView):
+    model = Team
+    template_name = 'teams/my_teams.html'
+    context_object_name = 'teams'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Team.objects.filter(
+            (Q(coach=self.request.user) & Q(status='RETIRED'))
+        ).order_by('name')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(MyRetiredTeamsListView, self).dispatch(request, args, kwargs)
 
 
 @login_required
