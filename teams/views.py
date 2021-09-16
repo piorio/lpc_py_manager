@@ -438,7 +438,8 @@ def manage_player(request, team_id):
 
     player = get_object_or_404(TeamPlayer, id=player_id)
     return render(request,
-                  'teams/manage_player.html', {'player': player, 'range': range(1, 101)})
+                  'teams/manage_player.html', {'player': player, 'range': range(1, 101),
+                                               'team_detail': team.get_my_team_detail_absolute_url()})
 
 
 @login_required
