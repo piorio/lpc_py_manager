@@ -21,6 +21,7 @@ class CloseMatchDataReader:
         return self.number_of_td
 
     def prepare(self):
+        print("Match util prepare DATA FORM " + str(self.data))
         if self.selected_team not in self.select_team:
             return
 
@@ -36,7 +37,9 @@ class CloseMatchDataReader:
         team_serious_injury = 0
         team_kill = 0
 
+        print("Match util prepare players " + str(self.players))
         for player in self.players:
+            print("Match util prepare -> Prepare player " + str(player))
             total_spp = 0
             total_cas = 0
 
@@ -79,9 +82,11 @@ class CloseMatchDataReader:
             player.spp += total_spp
             team_cas += total_cas
 
+            print("Match util prepare -> Prepare player before MVP " + str(player))
             if self.is_mvp(player):
                 player.spp += 4
 
+            print("Match util prepare -> Prepare player before CAS " + str(player))
             self.apply_cas(player)
 
             player.save()
@@ -180,6 +185,7 @@ class CloseMatchDataReader:
 
     def apply_cas(self, player):
         factory = PlayerCasualtyFactory()
+        print("Match util prepare -> CAS Factory " + str(factory) + " - player " + str(player))
         engine = factory.get_casualty_engine(self.data, self.team_id, player.id)
         if engine is not None:
             engine.apply_to_player(player)
