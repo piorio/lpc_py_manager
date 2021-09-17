@@ -17,18 +17,34 @@
                 <thead>
                 <th>TEAM</th>
                 <th>DEDICATED FAN</th>
-                <th>FAN</th>
+                <th>D3 FAN</th>
                 </thead>
                 <tbody>
                 <tr>
                     <td>{{ match.first_team.name }}</td>
-                    <td>{{ match.first_team.extra_dedicated_fan }}</td>
-                    <td><input type="number" id="first_team_extra_fan" name="first_team_extra_fan" style="width: 10%"/></td> <!-- 1 to 3 -->
+                    <td>{{ first_team_dedicated_fan }}</td>
+                    <td>
+                        <!-- <input type="number" id="first_team_extra_fan" name="first_team_extra_fan" style="width: 10%"/> -->
+                        <select name="first_team_extra_fan" id="first_team_extra_fan">
+                            <option value="0" selected>0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </td> <!-- 1 to 3 -->
                 </tr>
                 <tr>
                     <td>{{ match.second_team.name }}</td>
-                    <td>{{ match.second_team.extra_dedicated_fan }}</td>
-                    <td><input type="number" id="second_team_extra_fan" name="second_team_extra_fan" style="width: 10%"/></td>
+                    <td>{{ second_team_dedicated_fan }}</td>
+                    <td>
+                        <!-- <input type="number" id="second_team_extra_fan" name="second_team_extra_fan" style="width: 10%"/> -->
+                        <select name="second_team_extra_fan" id="second_team_extra_fan">
+                            <option value="0" selected>0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -66,21 +82,21 @@
                         <td>
                             <select id="{{ match.first_team.id }}_cas_{{ player.id }}" name="{{ match.first_team.id }}_cas_{{ player.id }}">
                                 <option value="NA" selected>--</option>
-                                <option value="BH">Badly Hurt</option>
-                                <option value="SH">Seriously Hurt</option>
-                                <option value="SI">Seriously Injury</option>
-                                <option value="LI">Lasting Injury</option>
-                                <option value="DE">DEAD</option>
+                                <option value="BH">Badly Hurt (1-6)</option>
+                                <option value="SH">Seriously Hurt (7-9)</option>
+                                <option value="SI">Seriously Injury (10-12)</option>
+                                <option value="LI">Lasting Injury (13-14)</option>
+                                <option value="DE">DEAD (15-16)</option>
                             </select>
                         </td>
                         <td>
                             <select id="{{ match.first_team.id }}_last_{{ player.id }}" name="{{ match.first_team.id }}_lasti_{{ player.id }}">
                                 <option value="NA" selected>--</option>
-                                <option value="JI">Head Injury</option>
-                                <option value="SK">Smashed Knee</option>
-                                <option value="BA">Broken Arm</option>
-                                <option value="NI">Neck Injury</option>
-                                <option value="DS">Dislocated Shoulder</option>
+                                <option value="JI">Head Injury -1 AV (1-2)</option>
+                                <option value="SK">Smashed Knee -1 MA (3)</option>
+                                <option value="BA">Broken Arm -1 PA (4)</option>
+                                <option value="NI">Neck Injury -1 AG (5)</option>
+                                <option value="DS">Dislocated Shoulder -1 ST (6)</option>
                             </select>
                         </td>
                     </tr>
@@ -119,21 +135,21 @@
                         <td>
                             <select id="{{ match.second_team.id }}_cas_{{ player.id }}" name="{{ match.second_team.id }}_cas_{{ player.id }}">
                                 <option value="NA" selected>--</option>
-                                <option value="BH">Badly Hurt</option>
-                                <option value="SH">Seriously Hurt</option>
-                                <option value="SI">Seriously Injury</option>
-                                <option value="LI">Lasting Injury</option>
-                                <option value="DE">DEAD</option>
+                                <option value="BH">Badly Hurt (1-6)</option>
+                                <option value="SH">Seriously Hurt (7-9)</option>
+                                <option value="SI">Seriously Injury (10-12)</option>
+                                <option value="LI">Lasting Injury (13-14)</option>
+                                <option value="DE">DEAD (15-16)</option>
                             </select>
                         </td>
                         <td>
                             <select id="{{ match.second_team.id }}_last_{{ player.id }}" name="{{ match.second_team.id }}_lasti_{{ player.id }}">
                                 <option value="NA" selected>--</option>
-                                <option value="JI">Head Injury</option>
-                                <option value="SK">Smashed Knee</option>
-                                <option value="BA">Broken Arm</option>
-                                <option value="NI">Neck Injury</option>
-                                <option value="DS">Dislocated Shoulder</option>
+                                <option value="JI">Head Injury -1 AV (1-2)</option>
+                                <option value="SK">Smashed Knee -1 MA (3)</option>
+                                <option value="BA">Broken Arm -1 PA (4)</option>
+                                <option value="NI">Neck Injury -1 AG (5)</option>
+                                <option value="DS">Dislocated Shoulder -1 ST (6)</option>
                             </select>
                         </td>
                     </tr>
@@ -147,14 +163,14 @@
         <H2>POST - MATCH</H2>
         <br>
 
-        <label for="first_team_mvp">MVP: </label>
+        <label for="first_team_mvp">{{ match.first_team.name }} MVP: </label>
         <select name="first_team_mvp" id="first_team_mvp">
             {% for player in first_team_players  %}
                 <option value="{{ player.id }}">{{ player.name }}</option>
             {% endfor %}
         </select>
         <br>
-        <label for="second_team_mvp">MVP: </label>
+        <label for="second_team_mvp">{{ match.second_team.name }} MVP: </label>
         <select name="second_team_mvp" id="second_team_mvp">
             {% for player in second_team_players  %}
                 <option value="{{ player.id }}">{{ player.name }}</option>
