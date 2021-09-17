@@ -122,5 +122,9 @@ def close_match(request, match_id):
     else:
         first_team_players = match.first_team.players.all()
         second_team_players = match.second_team.players.all()
+        first_team_dedicated_fan = match.first_team.extra_dedicated_fan + 1
+        second_team_dedicated_fan = match.second_team.extra_dedicated_fan + 1
         return render(request, 'matches/close_match.html', {'match': match, 'first_team_players': first_team_players,
-                                                            'second_team_players': second_team_players})
+                                                            'second_team_players': second_team_players,
+                                                            'first_team_dedicated_fan': first_team_dedicated_fan,
+                                                            'second_team_dedicated_fan': second_team_dedicated_fan})
