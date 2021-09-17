@@ -7,6 +7,9 @@ class BadlyHurt:
     def set_last_injury(self, last_injury):
         pass
 
+    def __str__(self):
+        return "BadlyHurt"
+
 
 class SeriouslyHurt:
     def apply_to_player(self, player):
@@ -14,6 +17,9 @@ class SeriouslyHurt:
 
     def set_last_injury(self, last_injury):
         pass
+
+    def __str__(self):
+        return "SeriouslyHurt"
 
 
 class SeriouslyInjury:
@@ -23,6 +29,9 @@ class SeriouslyInjury:
 
     def set_last_injury(self, last_injury):
         pass
+
+    def __str__(self):
+        return "SeriouslyInjury"
 
 
 class LastingInjury:
@@ -45,9 +54,11 @@ class LastingInjury:
         elif self.injury_type == 'DS':
             player.strength -= 1
 
-
     def set_last_injury(self, last_injury):
         self.injury_type = last_injury
+
+    def __str__(self):
+        return "LastingInjury"
 
 
 class Dead:
@@ -56,6 +67,9 @@ class Dead:
 
     def set_last_injury(self, last_injury):
         pass
+
+    def __str__(self):
+        return "DEAD!!!"
 
 
 class PlayerCasualtyFactory:
@@ -66,6 +80,8 @@ class PlayerCasualtyFactory:
         data_cas_string = str(team_id) + '_cas_' + str(player_id)
         data_last_injury_string = str(team_id) + '_lasti_' + str(player_id)
         cas_type = data[data_cas_string]
+        print("CAS UTIL. data_cas_string => " + data_cas_string + " data_last_injury_string => "
+              + data_last_injury_string + " cas_type => " + cas_type)
         if cas_type:
             engine = PlayerCasualtyFactory.instance_to_return[cas_type]
             injury_type = data[data_last_injury_string]

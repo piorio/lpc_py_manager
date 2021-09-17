@@ -24,6 +24,23 @@ class AllTeamListView(ListView):
         return super(AllTeamListView, self).dispatch(request, args, kwargs)
 
 
+class AllReadyTeamListView(ListView):
+    model = Team
+    template_name = 'teams/all_teams.html'
+    context_object_name = 'teams'
+    paginate_by = 20
+    ordering = ['-name']
+
+    def get_queryset(self):
+        return Team.objects.filter(
+            Q(status='READY')
+        ).order_by('name')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(AllReadyTeamListView, self).dispatch(request, args, kwargs)
+
+
 class AllTeamDetail(DetailView):
     model = Team
     template_name = 'teams/all_team_detail.html'

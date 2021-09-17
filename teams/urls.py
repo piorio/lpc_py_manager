@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     AllTeamListView,
+    AllReadyTeamListView,
     AllTeamDetail,
     MyTeamsListView,
     MyRetiredTeamsListView,
@@ -39,6 +40,7 @@ app_name = 'teams'
 
 urlpatterns = [
     path('', AllTeamListView.as_view(), name='all_teams'),
+    path('all_ready_teams/', AllReadyTeamListView.as_view(), name='all_ready_teams'),
     path('<int:pk>/', AllTeamDetail.as_view(), name='all_team_detail'),
     path('my_teams/', MyTeamsListView.as_view(), name='my_teams'),
     path('my_retired_teams/', MyRetiredTeamsListView.as_view(), name='my_retired_teams'),
