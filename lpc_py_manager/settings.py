@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'crispy_forms',
+    'widget_tweaks',
     'roster.apps.LpcmanagerConfig',
     'accounts',
     'teams',

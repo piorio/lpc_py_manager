@@ -34,11 +34,13 @@ from .views import (
     manage_buy_apothecary,
     manage_remove_apothecary,
     manage_buy_player,
+    index_test,
 )
 
 app_name = 'teams'
 
 urlpatterns = [
+    path('index/', index_test, name='index_test'),
     path('', AllTeamListView.as_view(), name='all_teams'),
     path('all_ready_teams/', AllReadyTeamListView.as_view(), name='all_ready_teams'),
     path('<int:pk>/', AllTeamDetail.as_view(), name='all_team_detail'),

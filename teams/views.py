@@ -780,3 +780,7 @@ def manage_buy_player(request, team_id):
         messages.success(request, 'You bought ' + str(player.position))
 
     return redirect(team.get_my_team_detail_absolute_url())
+
+
+def index_test(request):
+    return render(request, 'index.html')
