@@ -73,7 +73,7 @@ class Dead:
 
 
 class PlayerCasualtyFactory:
-    instance_to_return = {'BH': BadlyHurt(), 'SH': SeriouslyHurt(), 'SI': SeriouslyInjury,
+    instance_to_return = {'BH': BadlyHurt(), 'SH': SeriouslyHurt(), 'SI': SeriouslyInjury(),
                           'LI': LastingInjury(), 'DE': Dead(), 'NA': None}
 
     def get_casualty_engine(self, data, team_id, player_id):
