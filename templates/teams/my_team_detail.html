@@ -98,12 +98,18 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Cheerleaders
+                                Cheerleaders bought
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.cheerleader }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <br>
+                            <hr>
+                            <h6>Single cheerleader cost 10000</h6>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}"
+                                   class="btn btn-primary">ADD</a>
+                                <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}" class="btn btn-primary">REMOVE</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,12 +123,17 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Re Roll
+                                Re Roll bought
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.re_roll }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <br>
+                            <hr>
+                            <h6>Single re roll cost {{ team.roster_team.re_roll_cost }}</h6>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{{ team.get_manage_buy_re_roll_absolute_url }}" class="btn btn-primary">ADD</a>
+                                <a href="{{ team.get_manage_remove_re_roll_absolute_url }}" class="btn btn-primary">REMOVE</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,12 +147,19 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Assistant Coach
+                                Assistant Coach bought
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.assistant_coach }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <br>
+                            <hr>
+                            <h6>Single Assistant coach cost 10000</h6>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}"
+                                   class="btn btn-primary">ADD</a>
+                                <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
+                                   class="btn btn-primary">REMOVE</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -155,18 +173,30 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Apothecary
+                                Apothecary bought
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {% if team.apothecary %}
-                                    YES
-                                {% else %}
-                                    NO
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            {% if team.roster_team.apothecary == True %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {% if team.apothecary %}
+                                        YES
+                                    {% else %}
+                                        NO
+                                    {% endif %}
+                                </div>
+                                <br>
+                                <hr>
+                                <h6>Single Apothecary cost 50000</h6>
+                                <br>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{{ team.get_manage_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
+                                    <a href="{{ team.get_manage_remove_apothecary_absolute_url }}"
+                                       class="btn btn-primary">REMOVE</a>
+                                </div>
+                            {% else %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    Your team cannot have an apothecary
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -178,6 +208,7 @@
     <hr>
     <br>
 
+    <!-- THIRD ROW: Players list -->
     <div class="row">
         <div class="col-xl-12 col-md-6 mb-4">
             <div class="card shadow mb-4">
@@ -253,114 +284,57 @@
     <br>
 
     <div class="row">
-        <!-- Extra to buy card -->
-        <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Extra To Buy
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <table class="table table-bordered" id="dataTable">
-                                    <thead>
-                                    <th>Extra</th>
-                                    <TH>COST</TH>
-                                    <TH>BOUGHT</TH>
-                                    <TH>ACTION</TH>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>Re Roll</td>
-                                        <td>{{ team.roster_team.re_roll_cost }}</td>
-                                        <td>{{ team.re_roll }}</td>
-                                        <td>
-                                            <a href="{{ team.get_manage_buy_re_roll_absolute_url }}"
-                                               class="btn btn-primary">ADD</a>
-                                            <a href="{{ team.get_manage_remove_re_roll_absolute_url }}"
-                                               class="btn btn-primary">REMOVE</a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Assistant coach</td>
-                                        <td>10000</td>
-                                        <td>{{ team.assistant_coach }}</td>
-                                        <td>
-                                            <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}"
-                                               class="btn btn-primary">ADD</a>
-                                            <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
-                                               class="btn btn-primary">REMOVE</a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Cheerleader</td>
-                                        <td>10000</td>
-                                        <td>{{ team.cheerleader }}</td>
-                                        <td>
-                                            <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}"
-                                               class="btn btn-primary">ADD</a>
-                                            <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}"
-                                               class="btn btn-primary">REMOVE</a>
-                                        </td>
-                                    </tr>
-                                    {% if team.roster_team.apothecary == True %}
-                                        <tr>
-                                            <td>Apothecary</td>
-                                            <td>50000</td>
-                                            <td>
-                                                {% if team.apothecary %}
-                                                    YES
-                                                {% else %}
-                                                    NO
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{{ team.get_manage_buy_apothecary_absolute_url }}"
-                                                   class="btn btn-primary">BUY</a>
-                                                <a href="{{ team.get_manage_remove_apothecary_absolute_url }}"
-                                                   class="btn btn-primary">REMOVE</a>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Players To Buy</h3>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Players to buy
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <table class="table table-bordered" id="dataTable">
-                                    <thead>
-                                    <th>POSITION</th>
-                                    <TH>COST</TH>
-                                    <TH>ACTION</TH>
-                                    </thead>
-                                    <tbody>
-                                    {% for roster_player in roster_players %}
-                                        <tr>
-                                            <td>{{ roster_player.position }}</td>
-                                            <td>{{ roster_player.cost }}</td>
-                                            <td>
-                                                <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
-                                                   class="btn btn-primary">BUY</a></td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>ACTION</TH>
+                            </thead>
+                            <tbody>
+                            {% for roster_player in roster_players %}
+                                <tr>
+                                    <td>{{ roster_player.position }}</td>
+                                    <td>{{ roster_player.movement_allowance }}</td>
+                                    <td>{{ roster_player.strength }}</td>
+                                    <td>{{ roster_player.agility }}+</td>
+                                    <td>
+                                        {% if roster_player.passing != 0 %}
+                                            {{ roster_player.passing }}+
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ roster_player.armor_value }}+</td>
+                                    <td>
+                                        {% for skill in roster_player.skills.all %}
+                                            {{ skill.name }},
+                                        {% endfor %}
+                                        {% for trait in roster_player.traits.all %}
+                                            {{ trait.name }},
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ roster_player.cost }}</td>
+                                    <td>
+                                        <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
+                                           class="btn btn-primary">BUY</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
