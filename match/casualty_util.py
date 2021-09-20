@@ -1,7 +1,8 @@
 # teamid_cas_playerId -> BH
 class BadlyHurt:
-    def apply_to_player(self, player):
+    def apply_to_player(self, player, match_played):
         # Nothing just logging in the future
+        match_played.badly_hart = 1
         pass
 
     def set_last_injury(self, last_injury):
@@ -12,8 +13,10 @@ class BadlyHurt:
 
 
 class SeriouslyHurt:
-    def apply_to_player(self, player):
+    def apply_to_player(self, player, match_played):
         player.missing_next_game = True
+        match_played.seriously_injury = 1
+        match_played.seriously_hurt = 1
 
     def set_last_injury(self, last_injury):
         pass
@@ -23,9 +26,10 @@ class SeriouslyHurt:
 
 
 class SeriouslyInjury:
-    def apply_to_player(self, player):
+    def apply_to_player(self, player, match_played):
         player.missing_next_game = True
         player.niggling_injury += 1
+        match_played.seriously_injury = 1
 
     def set_last_injury(self, last_injury):
         pass
@@ -38,21 +42,27 @@ class LastingInjury:
     def __init__(self):
         self.injury_type = None
 
-    def apply_to_player(self, player):
+    def apply_to_player(self, player, match_played):
         if self.injury_type is None:
             raise Exception('Last Injury without which type')
+        match_played.last_injury = 1
 
         player.missing_next_game = True
         if self.injury_type == 'JI':
             player.armor_value -= 1
+            match_played.received_cas = 'Head Injury'
         elif self.injury_type == 'SK':
             player.movement_allowance -= 1
+            match_played.received_cas = 'Smashed Knee'
         elif self.injury_type == 'BA':
             player.passing -= 1
+            match_played.received_cas = 'Broken Arm'
         elif self.injury_type == 'NI':
             player.agility -= 1
+            match_played.received_cas = 'Neck Injury'
         elif self.injury_type == 'DS':
             player.strength -= 1
+            match_played.received_cas = 'Dislocated Shoulder'
 
     def set_last_injury(self, last_injury):
         self.injury_type = last_injury
@@ -62,8 +72,9 @@ class LastingInjury:
 
 
 class Dead:
-    def apply_to_player(self, player):
+    def apply_to_player(self, player, match_played):
         player.dead = True
+        match_played.died = True
 
     def set_last_injury(self, last_injury):
         pass

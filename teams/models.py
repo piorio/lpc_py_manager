@@ -35,6 +35,12 @@ class Team(models.Model):
     big_guy_numbers = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(16)])
     number_of_players = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(16)])
 
+    win = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    loss = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    tie = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
     def get_absolute_url(self):
         return reverse('teams:all_team_detail', args=[str(self.id)])
 

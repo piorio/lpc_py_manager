@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 
-from teams.models import Team
+from teams.models import Team, TeamPlayer
 from django.core.validators import MinValueValidator
 
 
@@ -30,3 +30,22 @@ class Match(models.Model):
 
     def get_absolute_url(self):
         return reverse('match:close_match', args=[str(self.id)])
+
+
+class TeamPlayerMatchRecord(models.Model):
+    player = models.ForeignKey(TeamPlayer, on_delete=models.CASCADE, related_name='matches_player_record')
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='matches_match_record')
+    ssp = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    died = models.BooleanField(default=False)
+    touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    badly_hart = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    seriously_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    seriously_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    kill = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    deflection = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    complete = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    received_cas = models.CharField(default='', max_length=100)
+    last_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    intercept = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    deflection = models.IntegerField(default=0, validators=[MinValueValidator(0)])

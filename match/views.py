@@ -113,6 +113,18 @@ def close_match(request, match_id):
         match.second_team.value = update_team_value(match.second_team, True)
         match.second_team.current_team_value = update_team_value(match.second_team)
 
+        first_team_td = first_team_data.get_number_of_td()
+        second_team_td = second_team_data.get_number_of_td()
+        if first_team_td > second_team_td:
+            match.first_team.win += 1
+            match.second_team.loss += 1
+        elif first_team_td < second_team_td:
+            match.first_team.loss += 1
+            match.second_team.win += 1
+        elif first_team_td == second_team_td:
+            match.first_team.tie += 1
+            match.second_team.tie += 1
+
         match.first_team.save()
         match.second_team.save()
         match.played = True
