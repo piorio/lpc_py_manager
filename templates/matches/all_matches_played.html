@@ -4,30 +4,38 @@
 
 {% block content %}
 
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <tr>
-                <th>Team A</th>
-                <th>Team B</th>
-                <th>Date</th>
-                <th>Team A TD</th>
-                <th>Team B TD</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for obj in matches %}
-                <tr>
-                    <td>{{ obj.first_team }}</td>
-                    <td>{{ obj.second_team }}</td>
-                    <td>{{ obj.match_date }}</td>
-                    <td>{{ obj.first_team_td }}</td>
-                    <td>{{ obj.second_team_td }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">All matches played</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>Team A</th>
+                        <th>Team B</th>
+                        <th>Date</th>
+                        <th>Team A TD</th>
+                        <th>Team B TD</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in matches %}
+                        <tr>
+                            <td>{{ obj.first_team }}</td>
+                            <td>{{ obj.second_team }}</td>
+                            <td>{{ obj.match_date }}</td>
+                            <td>{{ obj.first_team_td }}</td>
+                            <td>{{ obj.second_team_td }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <br>
-    {% include "pagination.html" with page=page_obj %}
+
+    <!-- {% include "pagination.html" with page=page_obj %} -->
 {% endblock %}
