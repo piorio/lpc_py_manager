@@ -181,4 +181,4 @@ class TeamPlayer(models.Model):
         self.traits.add(*roster_player.traits.all())
 
     def __str__(self):
-        return self.position
+        return self.name + " - (" + self.position + ")"
