@@ -1,4 +1,5 @@
 from .casualty_util import PlayerCasualtyFactory
+from .models import TeamPlayerMatchRecord
 
 
 class CloseMatchDataReader:
@@ -43,53 +44,68 @@ class CloseMatchDataReader:
             total_spp = 0
             total_cas = 0
 
+            match_played = TeamPlayerMatchRecord()
+            match_played.match = self.match
+            match_played.player = player
+
             touchdown, touchdown_spp = self.get_td(player)
             total_spp += touchdown_spp
             player.touchdown += touchdown
             team_touchdown += touchdown
+            match_played.touchdown = touchdown
 
             badly_hurt, badly_hurt_spp = self.get_bh(player)
             total_spp += badly_hurt_spp
             total_cas += badly_hurt
             player.badly_hurt += badly_hurt
             team_badly_hurt += badly_hurt
+            match_played.badly_hart = badly_hurt
 
             serious_injury, serious_injury_spp = self.get_si(player)
             total_spp += serious_injury_spp
             total_cas += serious_injury
             player.serious_injury += serious_injury
             team_serious_injury += serious_injury
+            match_played.seriously_injury = serious_injury
 
             kill, kill_spp = self.get_ki(player)
             total_spp += kill_spp
             total_cas += kill
             player.kill += kill
             team_kill += kill
+            match_played.kill = kill
 
             intercept, intercept_spp = self.get_intercept(player)
             total_spp += intercept_spp
             player.intercept += intercept
+            match_played.intercept = intercept
 
             deflection, deflection_spp = self.get_deflection(player)
             total_spp += deflection_spp
             player.deflection += deflection
+            match_played.deflection = deflection
 
             complete, complete_spp = self.get_complete(player)
             total_spp += complete_spp
             player.complete += complete
 
+            if self.is_mvp(player):
+                total_spp += 4
+
             player.total_cas += total_cas
             player.spp += total_spp
             team_cas += total_cas
 
-            print("Match util prepare -> Prepare player before MVP " + str(player))
-            if self.is_mvp(player):
-                player.spp += 4
-
             print("Match util prepare -> Prepare player before CAS " + str(player))
-            self.apply_cas(player)
+            self.apply_cas(player, match_played)
 
             player.save()
+
+            # Save match and played match...must be in other place
+            match_played.ssp = total_spp
+            match_played.total_cas = total_cas
+            # INJURY RECEIVED????
+            match_played.save()
 
         self.fan_factor = match_extra_fan + self.team.extra_dedicated_fan
         if self.selected_team == 'FIRST':
@@ -100,6 +116,8 @@ class CloseMatchDataReader:
             self.match.first_team_serious_injury = team_serious_injury
             self.match.first_team_extra_fan = match_extra_fan
             self.match.first_team_fan_factor = self.fan_factor
+            self.match.first_team.total_touchdown = team_touchdown
+            self.match.first_team.total_cas = team_cas
 
         elif self.selected_team == 'SECOND':
             self.match.second_team_td = team_touchdown
@@ -109,6 +127,8 @@ class CloseMatchDataReader:
             self.match.second_team_serious_injury = team_serious_injury
             self.match.second_team_extra_fan = match_extra_fan
             self.match.second_team_fan_factor = self.fan_factor
+            self.match.second_team.total_touchdown = team_touchdown
+            self.match.second_team.total_cas = team_cas
 
         self.number_of_td = team_touchdown
         self.match.save()
@@ -183,12 +203,12 @@ class CloseMatchDataReader:
         else:
             return False
 
-    def apply_cas(self, player):
+    def apply_cas(self, player, match_played):
         factory = PlayerCasualtyFactory()
         print("Match util prepare -> CAS Factory " + str(factory) + " - player " + str(player))
         engine = factory.get_casualty_engine(self.data, self.team_id, player.id)
         if engine is not None:
-            engine.apply_to_player(player)
+            engine.apply_to_player(player, match_played)
 
 
 def reset_missing_next_game(team):
