@@ -9,267 +9,479 @@
 
     <h3>Details</h3>
     <br>
-    <ul>
-        <li><b>Treasury</b>: {{ team.treasury }}</li>
-        <li><b>Value</b>: {{ team.value }}</li>
-        <li><b>Current Value</b>: {{ team.current_team_value }}</li>
-        <li><b>Cheerleaders</b>: {{ team.cheerleader }}</li>
-        <li><b>Re Roll</b>: {{ team.re_roll }}</li>
-        <li><b>Assistant Coach</b>: {{ team.assistant_coach }}</li>
-        <li>
-            <b>Apothecary</b>:
-            {% if team.apothecary %}
-                YES
-            {% else %}
-                NO
-            {% endif %}
-        </li>
-        <li><b>Dedicated fan</b>: {{ dedicated_fan }}</li>
-    </ul>
+
+    <!-- FIRST ROW -->
+    <div class="row">
+        <!-- Treasury Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Treasury
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.treasury }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Value Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Value
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.value }} TV</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Value Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Current Value
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.current_team_value }} TV</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Value Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Dedicated Fan
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dedicated_fan }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  SECOND ROW -->
+    <div class="row">
+        <!-- Cheerleader Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Cheerleaders
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.cheerleader }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Re roll Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Re Roll
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.re_roll }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assistant coach Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Assistant Coach
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team.assistant_coach }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Apothecary Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Apothecary
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if team.apothecary %}
+                                    YES
+                                {% else %}
+                                    NO
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <br>
     <hr>
+    <br>
 
-    <h3>Players list</h3>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>NUMBER</th>
-            <th>NAME</th>
-            <th>POSITION</th>
-            <TH>MA</TH>
-            <TH>ST</TH>
-            <TH>AG</TH>
-            <TH>PA</TH>
-            <TH>AV</TH>
-            <TH>SKILLS & TRAITS</TH>
-            <TH>Current Value</TH>
-            <TH>SPP</TH>
-            <TH>ACTION</TH>
-            </thead>
-            <tbody>
-            {% for player in team.players.all %}
-                {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
-                    <tr>
-                        <td>{{ player.player_number }}</td>
-                        <td>{{ player.name }}</td>
-                        <td>{{ player.position }}</td>
-                        <td>{{ player.movement_allowance }}</td>
-                        <td>{{ player.strength }}</td>
-                        <td>{{ player.agility }}+</td>
-                        <td>
-                            {% if player.passing != 0 %}
-                                {{ player.passing }}+
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>{{ player.armor_value }}+</td>
-                        <td>
-                            {% for skill in player.base_skills.all %}
-                                {{ skill.name }},
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Players List</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>NUMBER</th>
+                            <th>NAME</th>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>ACTION</TH>
+                            </thead>
+                            <tbody>
+                            {% for player in team.players.all %}
+                                {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
+                                    <tr>
+                                        <td>{{ player.player_number }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}">
+                                                {{ player.name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ player.position }}</td>
+                                        <td>{{ player.movement_allowance }}</td>
+                                        <td>{{ player.strength }}</td>
+                                        <td>{{ player.agility }}+</td>
+                                        <td>
+                                            {% if player.passing != 0 %}
+                                                {{ player.passing }}+
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ player.armor_value }}+</td>
+                                        <td>
+                                            {% for skill in player.base_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
+                                            {% for trait in player.traits.all %}
+                                                {{ trait.name }},
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ player.value }}</td>
+                                        <td>{{ player.spp }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                                               class="btn btn-primary">FIRE</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
-                            {% for trait in player.traits.all %}
-                                {{ trait.name }},
-                            {% endfor %}
-                        </td>
-                        <td>{{ player.value }}</td>
-                        <td>{{ player.spp }}</td>
-                        <td>
-                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
-                               class="btn btn-primary">MANAGE</a>
-                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
-                               class="btn btn-primary">FIRE</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
     <br>
     <hr>
+    <br>
 
-    <h3> Extra to buy:</h3>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>Extra</th>
-            <TH>COST</TH>
-            <TH>BOUGHT</TH>
-            <TH>ACTION</TH>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Re Roll</td>
-                <td>{{ team.roster_team.re_roll_cost }}</td>
-                <td>{{ team.re_roll }}</td>
-                <td>
-                    <a href="{{ team.get_manage_buy_re_roll_absolute_url }}" class="btn btn-primary">ADD</a>
-                    <a href="{{ team.get_manage_remove_re_roll_absolute_url }}" class="btn btn-primary">REMOVE</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Assistant coach</td>
-                <td>10000</td>
-                <td>{{ team.assistant_coach }}</td>
-                <td>
-                    <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}" class="btn btn-primary">ADD</a>
-                    <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
-                       class="btn btn-primary">REMOVE</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Cheerleader</td>
-                <td>10000</td>
-                <td>{{ team.cheerleader }}</td>
-                <td>
-                    <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}" class="btn btn-primary">ADD</a>
-                    <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}" class="btn btn-primary">REMOVE</a>
-                </td>
-            </tr>
-            {% if team.roster_team.apothecary == True %}
-                <tr>
-                    <td>Apothecary</td>
-                    <td>50000</td>
-                    <td>
-                        {% if team.apothecary %}
-                            YES
-                        {% else %}
-                            NO
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ team.get_manage_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
-                        <a href="{{ team.get_manage_remove_apothecary_absolute_url }}" class="btn btn-primary">FIRE</a>
-                    </td>
-                </tr>
-            {% endif %}
-            </tbody>
-        </table>
-        <br>
-        <hr>
-
-        <h3> Players to buy:</h3>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                <th>POSITION</th>
-                <TH>COST</TH>
-                <TH>ACTION</TH>
-                </thead>
-                <tbody>
-                {% for roster_player in roster_players %}
-                    <tr>
-                        <td>{{ roster_player.position }}</td>
-                        <td>{{ roster_player.cost }}</td>
-                        <td><a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
-                               class="btn btn-primary">BUY</a></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <br>
-        <hr>
-
-        <h3>Not available Players list</h3>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                <th>NUMBER</th>
-                <th>NAME</th>
-                <th>POSITION</th>
-                <TH>MA</TH>
-                <TH>ST</TH>
-                <TH>AG</TH>
-                <TH>PA</TH>
-                <TH>AV</TH>
-                <TH>SKILLS & TRAITS</TH>
-                <TH>Current Value</TH>
-                <TH>ACTION</TH>
-                </thead>
-                <tbody>
-                {% for player in team.players.all %}
-                    {% if player.missing_next_game == True %}
-                        <tr>
-                            <td>{{ player.player_number }}</td>
-                            <td>{{ player.name }}</td>
-                            <td>{{ player.position }}</td>
-                            <td>{{ player.movement_allowance }}</td>
-                            <td>{{ player.strength }}</td>
-                            <td>{{ player.agility }}+</td>
-                            <td>
-                                {% if player.passing != 0 %}
-                                    {{ player.passing }}+
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>{{ player.armor_value }}+</td>
-                            <td>
-                                {% for skill in player.base_skills.all %}
-                                    {{ skill.name }},
-                                {% endfor %}
-                                {% for trait in player.traits.all %}
-                                    {{ trait.name }},
-                                {% endfor %}
-                            </td>
-                            <td>{{ player.value }}</td>
-                            <td>
-                                <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
-                                   class="btn btn-primary">MANAGE</a>
-                                <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
-                                   class="btn btn-primary">FIRE</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <br>
-        <hr>
-
-        <h3>Dead or Fired Players list</h3>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                <th>NUMBER</th>
-                <th>NAME</th>
-                <th>POSITION</th>
-                <TH>MA</TH>
-                <TH>ST</TH>
-                <TH>AG</TH>
-                <TH>PA</TH>
-                <TH>AV</TH>
-                <TH>Value</TH>
-                </thead>
-                <tbody>
-                {% for player in team.players.all %}
-                    {% if player.dead == True or player.fired == True %}
-                        <tr>
-                            <td>{{ player.player_number }}</td>
-                            <td>{{ player.name }}</td>
-                            <td>{{ player.position }}</td>
-                            <td>{{ player.movement_allowance }}</td>
-                            <td>{{ player.strength }}</td>
-                            <td>{{ player.agility }}+</td>
-                            <td>
-                                {% if player.passing != 0 %}
-                                    {{ player.passing }}+
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>{{ player.armor_value }}+</td>
-                            <td>{{ player.value }}</td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <!-- Extra to buy card -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Extra To Buy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <table class="table table-bordered" id="dataTable">
+                                    <thead>
+                                    <th>Extra</th>
+                                    <TH>COST</TH>
+                                    <TH>BOUGHT</TH>
+                                    <TH>ACTION</TH>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>Re Roll</td>
+                                        <td>{{ team.roster_team.re_roll_cost }}</td>
+                                        <td>{{ team.re_roll }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_buy_re_roll_absolute_url }}"
+                                               class="btn btn-primary">ADD</a>
+                                            <a href="{{ team.get_manage_remove_re_roll_absolute_url }}"
+                                               class="btn btn-primary">REMOVE</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Assistant coach</td>
+                                        <td>10000</td>
+                                        <td>{{ team.assistant_coach }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}"
+                                               class="btn btn-primary">ADD</a>
+                                            <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
+                                               class="btn btn-primary">REMOVE</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cheerleader</td>
+                                        <td>10000</td>
+                                        <td>{{ team.cheerleader }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}"
+                                               class="btn btn-primary">ADD</a>
+                                            <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}"
+                                               class="btn btn-primary">REMOVE</a>
+                                        </td>
+                                    </tr>
+                                    {% if team.roster_team.apothecary == True %}
+                                        <tr>
+                                            <td>Apothecary</td>
+                                            <td>50000</td>
+                                            <td>
+                                                {% if team.apothecary %}
+                                                    YES
+                                                {% else %}
+                                                    NO
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ team.get_manage_buy_apothecary_absolute_url }}"
+                                                   class="btn btn-primary">BUY</a>
+                                                <a href="{{ team.get_manage_remove_apothecary_absolute_url }}"
+                                                   class="btn btn-primary">REMOVE</a>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Players to buy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <table class="table table-bordered" id="dataTable">
+                                    <thead>
+                                    <th>POSITION</th>
+                                    <TH>COST</TH>
+                                    <TH>ACTION</TH>
+                                    </thead>
+                                    <tbody>
+                                    {% for roster_player in roster_players %}
+                                        <tr>
+                                            <td>{{ roster_player.position }}</td>
+                                            <td>{{ roster_player.cost }}</td>
+                                            <td>
+                                                <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
+                                                   class="btn btn-primary">BUY</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Not available Players list</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>NUMBER</th>
+                            <th>NAME</th>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>ACTION</TH>
+                            </thead>
+                            <tbody>
+                            {% for player in team.players.all %}
+                                {% if player.missing_next_game == True %}
+                                    <tr>
+                                        <td>{{ player.player_number }}</td>
+                                        <td>{{ player.name }}</td>
+                                        <td>{{ player.position }}</td>
+                                        <td>{{ player.movement_allowance }}</td>
+                                        <td>{{ player.strength }}</td>
+                                        <td>{{ player.agility }}+</td>
+                                        <td>
+                                            {% if player.passing != 0 %}
+                                                {{ player.passing }}+
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ player.armor_value }}+</td>
+                                        <td>
+                                            {% for skill in player.base_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
+                                            {% for trait in player.traits.all %}
+                                                {{ trait.name }},
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ player.value }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
+                                               class="btn btn-primary">MANAGE</a>
+                                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                                               class="btn btn-primary">FIRE</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">DEAD!!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>NUMBER</th>
+                            <th>NAME</th>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>Value</TH>
+                            </thead>
+                            <tbody>
+                            {% for player in team.players.all %}
+                                {% if player.dead == True or player.fired == True %}
+                                    <tr>
+                                        <td>{{ player.player_number }}</td>
+                                        <td>{{ player.name }}</td>
+                                        <td>{{ player.position }}</td>
+                                        <td>{{ player.movement_allowance }}</td>
+                                        <td>{{ player.strength }}</td>
+                                        <td>{{ player.agility }}+</td>
+                                        <td>
+                                            {% if player.passing != 0 %}
+                                                {{ player.passing }}+
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ player.armor_value }}+</td>
+                                        <td>{{ player.value }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 {% endblock %}
