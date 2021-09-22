@@ -52,7 +52,7 @@ class AllTeamDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AllTeamDetail, self).get_context_data(**kwargs)
-        team = self.model.objects.first()
+        team = context['team']
         dedicated_fan = getattr(team, 'extra_dedicated_fan')
         context['dedicated_fan'] = dedicated_fan + 1
         return context
