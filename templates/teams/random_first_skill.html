@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Levelup Player{% endblock %}
+
+{% block content %}
+
+    <h1>Level up <b>{{ player.name }}</b></h1>
+    <br>
+    <hr>
+
+    <!-- PLayer summary row -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Player Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>Level</TH>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ player.position }}</td>
+                                <td>{{ player.movement_allowance }}</td>
+                                <td>{{ player.strength }}</td>
+                                <td>{{ player.agility }}</td>
+                                <td>
+                                    {% if player.passing != 0 %}
+                                        {{ player.passing }}+
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ player.armor_value }}</td>
+                                <td>
+                                    {% for skill in player.base_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                    {% for trait in player.traits.all %}
+                                        {{ trait.name }},
+                                    {% endfor %}
+                                </td>
+                                <td>{{ player.value }}</td>
+                                <td>{{ player.spp }}</td>
+                                <td>{{ player.level }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills row -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">SKILLS</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% for key, value in all_first_skills.items %}
+                            <b>{{ key }}</b>
+                            {% for skill in value %}
+                                {{ skill }}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

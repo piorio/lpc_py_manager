@@ -5,10 +5,11 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm
-from roster.models import RosterTeam, RosterPlayer
+from roster.models import RosterTeam, RosterPlayer, Skill
 from django.contrib import messages
 from .team_helper import update_team_value
 from django.db.models import Q
+from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills, get_all_skills
 
 
 # Create your views here.
@@ -52,7 +53,7 @@ class AllTeamDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AllTeamDetail, self).get_context_data(**kwargs)
-        team = self.model.objects.first()
+        team = context['team']
         dedicated_fan = getattr(team, 'extra_dedicated_fan')
         context['dedicated_fan'] = dedicated_fan + 1
         return context
@@ -780,6 +781,37 @@ def manage_buy_player(request, team_id):
         messages.success(request, 'You bought ' + str(player.position))
 
     return redirect(team.get_my_team_detail_absolute_url())
+
+
+@login_required
+def player_level_up(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_all_levels(player)
+    return render(request, 'teams/levelup.html', {'player': player, 'level_cost': level_cost})
+
+
+@login_required
+def random_first_skill(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_by_level(player)
+    if player.spp < level_cost:
+        messages.error(request, 'You cannot level up a this player: too few SPP')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    all_first_skills = get_first_skills(player)
+    all_first_skills = get_all_skills()
+
+    return render(request, 'teams/random_first_skill.html', {'player': player, 'all_first_skills': all_first_skills})
 
 
 def index_test(request):

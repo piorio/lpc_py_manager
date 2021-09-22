@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load custom_tags %}
+
 {% block title %}All Team detail{% endblock %}
 
 {% block content %}
@@ -267,6 +269,7 @@
                                         <td>
                                             <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
                                                class="btn btn-primary">FIRE</a>
+                                            {{ player | add_level_up_action }}
                                         </td>
                                     </tr>
                                 {% endif %}
