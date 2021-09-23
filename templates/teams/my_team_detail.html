@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load custom_tags %}
+
 {% block title %}All Team detail{% endblock %}
 
 {% block content %}
@@ -261,12 +263,16 @@
                                             {% for trait in player.traits.all %}
                                                 {{ trait.name }},
                                             {% endfor %}
+                                            {% for skill in player.extra_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
                                         <td>{{ player.spp }}</td>
                                         <td>
                                             <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
                                                class="btn btn-primary">FIRE</a>
+                                            {{ player | add_level_up_action }}
                                         </td>
                                     </tr>
                                 {% endif %}

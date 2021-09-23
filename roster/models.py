@@ -16,6 +16,7 @@ class Skill(models.Model):
     category = models.CharField(max_length=50)
     description = models.TextField(max_length=255, null=True, blank=True, default=None)
     name = models.CharField(max_length=50)
+    random_identifier = models.CharField(max_length=50, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name

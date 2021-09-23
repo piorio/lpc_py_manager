@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Levelup Player{% endblock %}
+
+{% block content %}
+
+    <h1>Level up <b>{{ player.name }}</b></h1>
+    <br>
+    <hr>
+
+    <!-- PLayer summary row -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Player Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>Level</TH>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ player.position }}</td>
+                                <td>{{ player.movement_allowance }}</td>
+                                <td>{{ player.strength }}</td>
+                                <td>{{ player.agility }}</td>
+                                <td>
+                                    {% if player.passing != 0 %}
+                                        {{ player.passing }}+
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ player.armor_value }}</td>
+                                <td>
+                                    {% for skill in player.base_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                    {% for trait in player.traits.all %}
+                                        {{ trait.name }},
+                                    {% endfor %}
+                                    {% for skill in player.extra_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                </td>
+                                <td>{{ player.value }}</td>
+                                <td>{{ player.spp }}</td>
+                                <td>{{ player.level }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-12 col-md-9">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">SKILLS</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="p-5">
+                                In this form you have to select the category of the secondary random skill.
+                                <BR>
+                                <BR>
+                                Than insert the value of the first dice.
+                                <BR>
+                                <bR>
+                                Finally insert the value of the last dice.
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <form method="post" action="{{ player.get_random_second_skill_levelup_absolute_url }}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <select type="text" class="form-control form-control-user" name="category"
+                                                autofocus
+                                                autocapitalize="none" required id="id_category">
+                                            {% for category in combo_box %}
+                                                {{ category }}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" class="form-control form-control-user"
+                                               name="first_dice" autofocus autocapitalize="none"
+                                               min="1" max="6" required id="id_first_dice">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" class="form-control form-control-user"
+                                               name="second_dice" autofocus autocapitalize="none"
+                                               min="1" max="6" required id="id_second_dice">
+                                    </div>
+                                    <input type="submit" value="SEND CHOICE" class="btn btn-primary">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

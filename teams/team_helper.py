@@ -17,3 +17,18 @@ def update_team_value(team, team_value=False):
         value += (team.re_roll * team.roster_team.re_roll_cost)
 
     return value
+
+
+def player_has_changed_level(player):
+    if player.level == 'EXPERIENCED' and player.spp <= 3:
+        return True
+    elif player.level == 'VETERAN' and player.spp <= 4:
+        return True
+    elif player.level == 'EMERGING STAR' and player.spp <= 6:
+        return True
+    elif player.level == 'STAR' and player.spp <= 8:
+        return True
+    elif player.level == 'SUPER STAR' and player.spp <= 10:
+        return True
+    elif player.level == 'LEGEND' and player.spp <= 15:
+        return True

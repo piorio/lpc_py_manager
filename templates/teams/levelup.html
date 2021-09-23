@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}Levelup Player{% endblock %}
+
+{% block content %}
+
+    <h1>Level up <b>{{ player.name }}</b></h1>
+    <br>
+    <hr>
+    <!-- PLayer summary row -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Player Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>Level</TH>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ player.position }}</td>
+                                <td>{{ player.movement_allowance }}</td>
+                                <td>{{ player.strength }}</td>
+                                <td>{{ player.agility }}</td>
+                                <td>
+                                    {% if player.passing != 0 %}
+                                        {{ player.passing }}+
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ player.armor_value }}</td>
+                                <td>
+                                    {% for skill in player.base_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                    {% for trait in player.traits.all %}
+                                        {{ trait.name }},
+                                    {% endfor %}
+                                    {% for skill in player.extra_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                </td>
+                                <td>{{ player.value }}</td>
+                                <td>{{ player.spp }}</td>
+                                <td>{{ player.level }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade possibility -->
+    <div class="row">
+        <!-- Random Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Oh no!!!
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Your not ready to level up?
+                            </div>
+                            <br>
+                            <Br>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{{ player.team.get_my_team_detail_absolute_url }}"
+                                   class="btn btn-primary">GO BACK</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Random Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Randomly Select a Primary Skill
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                You can spend {{ level_cost.0 }} to obtain a random skill
+                            </div>
+                            <br>
+                            <Br>
+                            <br>
+                            {% if player.spp >= level_cost.0 %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{{ player.get_random_first_skill_levelup_absolute_url }}"
+                                       class="btn btn-primary">GET THIS LEVELUP</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- First skill Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Select a Primary Skill
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Spend {{ level_cost.1 }} to choose a primary skill
+                            </div>
+                            <br>
+                            {% if player.spp >= level_cost.1 %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{{ player.get_choose_first_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Random second skill Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Select a random on secondary skill
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Spend {{ level_cost.1 }} to choose a randomly Secondary Skill
+                            </div>
+                            <br>
+                            {% if player.spp >= level_cost.1 %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{{ player.get_random_second_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Skill Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Select a Secondary Skill
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                You can spend {{ level_cost.2 }} to choose a secondary Skill
+                            </div>
+                            <br>
+                            <Br>
+                            <br>
+                            {% if player.spp >= level_cost.2 %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{{ player.get_choose_secondary_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Improve char Card -->
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Randomly characteristic improvement
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                You can spend {{ level_cost.3 }} to randomly improve a characteristic
+                            </div>
+                            <br>
+                            <Br>
+                            {% if player.spp >= level_cost.3 %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="#" class="btn btn-primary">GET THIS LEVELUP</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

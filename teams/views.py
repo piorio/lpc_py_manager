@@ -4,11 +4,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Team, TeamPlayer
-from .forms import CreateMyTeamForm
-from roster.models import RosterTeam, RosterPlayer
+from .forms import CreateMyTeamForm, RandomSkill
+from roster.models import RosterTeam, RosterPlayer, Skill
 from django.contrib import messages
 from .team_helper import update_team_value
 from django.db.models import Q
+from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
+    get_new_level, get_second_skills_category, get_first_skills_dict, get_first_skills_select_option, \
+    get_second_skills_select_option
 
 
 # Create your views here.
@@ -780,6 +783,189 @@ def manage_buy_player(request, team_id):
         messages.success(request, 'You bought ' + str(player.position))
 
     return redirect(team.get_my_team_detail_absolute_url())
+
+
+@login_required
+def player_level_up(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_all_levels(player)
+    return render(request, 'teams/levelup.html', {'player': player, 'level_cost': level_cost})
+
+
+@login_required
+def random_first_skill(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_by_level(player, 0)
+    if player.spp < level_cost:
+        messages.error(request, 'You cannot level up a this player: too few SPP')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    if request.method == "POST":
+        form = RandomSkill(request.POST)
+        if form.is_valid():
+            category = form.cleaned_data['category']
+            first_dice = form.cleaned_data['first_dice']
+            second_dice = form.cleaned_data['second_dice']
+
+            if first_dice <= 3:
+                first_dice = 1
+            if first_dice >= 4:
+                first_dice = 4
+
+            search_string = category + str(first_dice) + str(second_dice)
+            print("Random first skill for player " + str(player))
+            print("Search String -> " + str(search_string))
+            skill = Skill.objects.filter(random_identifier=search_string).get()
+            print("Add this extra skill " + str(skill))
+            player.extra_skills.add(skill)
+            player.level = get_new_level(player)
+            player.value += 10000
+            player.spp -= level_cost
+            player.save()
+            player.team.value = update_team_value(player.team, True)
+            player.team.current_team_value = update_team_value(player.team)
+            player.team.save()
+            return redirect(player.team.get_my_team_detail_absolute_url())
+        else:
+            err = form.errors
+            messages.error(request, 'Some error ' + err)
+            print(err)
+        return
+    else:
+        form = RandomSkill()
+        combo_box = get_first_skills_category(player)
+
+    return render(request, 'teams/random_first_skill.html', {'player': player, 'form': form, 'combo_box': combo_box})
+
+
+@login_required
+def random_second_skill(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_by_level(player, 1)
+    if player.spp < level_cost:
+        messages.error(request, 'You cannot level up a this player: too few SPP')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    if request.method == "POST":
+        form = RandomSkill(request.POST)
+        if form.is_valid():
+            category = form.cleaned_data['category']
+            first_dice = form.cleaned_data['first_dice']
+            second_dice = form.cleaned_data['second_dice']
+
+            if first_dice <= 3:
+                first_dice = 1
+            if first_dice >= 4:
+                first_dice = 4
+
+            search_string = category + str(first_dice) + str(second_dice)
+            print("Random secondary skill for player " + str(player))
+            print("Search String -> " + str(search_string))
+            skill = Skill.objects.filter(random_identifier=search_string).get()
+            print("Add this extra skill " + str(skill))
+            player.extra_skills.add(skill)
+            player.level = get_new_level(player)
+            player.value += 20000
+            player.spp -= level_cost
+            player.save()
+            player.team.value = update_team_value(player.team, True)
+            player.team.current_team_value = update_team_value(player.team)
+            player.team.save()
+            return redirect(player.team.get_my_team_detail_absolute_url())
+        else:
+            err = form.errors
+            messages.error(request, 'Some error ' + err)
+            print(err)
+        return
+    else:
+        form = RandomSkill()
+        combo_box = get_second_skills_category(player)
+
+    return render(request, 'teams/random_second_skill.html', {'player': player, 'form': form, 'combo_box': combo_box})
+
+
+@login_required
+def select_first_skill(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_by_level(player, 1)
+    if player.spp < level_cost:
+        messages.error(request, 'You cannot level up a this player: too few SPP')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    if request.method == "POST":
+        # TODO: Check if the skill could be chosen: input validation
+        skill_id = request.POST['skill']
+        skill = Skill.objects.filter(id=skill_id).get()
+        if skill is not None:
+            print("Add this extra skill " + str(skill))
+            player.extra_skills.add(skill)
+            player.level = get_new_level(player)
+            player.value += 20000
+            player.spp -= level_cost
+            player.save()
+            player.team.value = update_team_value(player.team, True)
+            player.team.current_team_value = update_team_value(player.team)
+            player.team.save()
+        else:
+            messages.error(request, "Skill with id " + skill_id + " not found!!!")
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    first_skills = get_first_skills_select_option(player)
+    return render(request, 'teams/select_first_skill.html', {'player': player, 'first_skills': first_skills})
+
+@login_required
+def select_second_skill(request, player_id):
+    player = get_object_or_404(TeamPlayer, id=player_id)
+
+    if player.team.coach.id != request.user.id:
+        messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    level_cost = get_levelup_cost_by_level(player, 2)
+    if player.spp < level_cost:
+        messages.error(request, 'You cannot level up a this player: too few SPP')
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    if request.method == "POST":
+        # TODO: Check if the skill could be chosen: input validation
+        skill_id = request.POST['skill']
+        skill = Skill.objects.filter(id=skill_id).get()
+        if skill is not None:
+            print("Add this extra skill " + str(skill))
+            player.extra_skills.add(skill)
+            player.level = get_new_level(player)
+            player.value += 40000
+            player.spp -= level_cost
+            player.save()
+            player.team.value = update_team_value(player.team, True)
+            player.team.current_team_value = update_team_value(player.team)
+            player.team.save()
+        else:
+            messages.error(request, "Skill with id " + skill_id + " not found!!!")
+        return redirect(player.team.get_my_team_detail_absolute_url())
+
+    second_skills = get_second_skills_select_option(player)
+    return render(request, 'teams/select_second_skill.html', {'player': player, 'second_skills': second_skills})
 
 
 def index_test(request):

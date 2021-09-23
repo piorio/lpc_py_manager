@@ -149,6 +149,8 @@ class TeamPlayer(models.Model):
     big_guy = models.BooleanField(default=False)
     roster_player = models.ForeignKey(RosterPlayer, on_delete=models.CASCADE, blank=True, default=None)
 
+    extra_skills = models.ManyToManyField(Skill, related_name='extra_skills', blank=True)
+
     touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     badly_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)])
@@ -162,6 +164,17 @@ class TeamPlayer(models.Model):
     missing_next_game = models.BooleanField(default=False)
     dead = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)
+
+    LEVEL_CHOICES = (
+        ('NONE', 'NONE'),
+        ('EXPERIENCED', 'EXPERIENCED'),
+        ('VETERAN', 'VETERAN'),
+        ('EMERGING STAR', 'EMERGING STAR'),
+        ('STAR', 'STAR'),
+        ('SUPER STAR', 'SUPER STAR'),
+        ('LEGEND', 'LEGEND'),
+    )
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='NONE')
 
     player_number = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
@@ -188,3 +201,15 @@ class TeamPlayer(models.Model):
 
     def __str__(self):
         return self.name + " - (" + self.position + ")"
+
+    def get_random_first_skill_levelup_absolute_url(self):
+        return reverse('teams:random_first_skill', args=[str(self.id)])
+
+    def get_random_second_skill_levelup_absolute_url(self):
+        return reverse('teams:random_second_skill', args=[str(self.id)])
+
+    def get_choose_first_skill_levelup_absolute_url(self):
+        return reverse('teams:select_first_skill', args=[str(self.id)])
+
+    def get_choose_secondary_skill_levelup_absolute_url(self):
+        return reverse('teams:select_second_skill', args=[str(self.id)])
