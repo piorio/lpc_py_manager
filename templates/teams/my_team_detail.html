@@ -263,6 +263,9 @@
                                             {% for trait in player.traits.all %}
                                                 {{ trait.name }},
                                             {% endfor %}
+                                            {% for skill in player.extra_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
                                         <td>{{ player.spp }}</td>
