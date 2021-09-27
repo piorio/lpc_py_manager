@@ -4,3 +4,9 @@ $(document).ready(function() {
     "lengthMenu": [[16, 25, 50, -1], [16, 25, 50, "All"]]
   });
 });
+
+$(document).ready(function() {
+  $('#dataTable2').DataTable({
+    "lengthMenu": [[16, 25, 50, -1], [16, 25, 50, "All"]]
+  });
+});

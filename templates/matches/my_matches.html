@@ -15,7 +15,8 @@
                     <tr>
                         <th>Team A</th>
                         <th>Team B</th>
-                        <th>Date</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -23,7 +24,8 @@
                         <tr>
                             <td>{{ obj.first_team }}</td>
                             <td>{{ obj.second_team }}</td>
-                            <td>{{ obj.match_date }}</td>
+                            <td>{{ obj.match_date_from }}</td>
+                            <td>{{ obj.match_date_to }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

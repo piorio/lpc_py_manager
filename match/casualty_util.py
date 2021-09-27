@@ -49,19 +49,22 @@ class LastingInjury:
 
         player.missing_next_game = True
         if self.injury_type == 'JI':
-            player.armor_value -= 1
+            player.armor_value += 1
             match_played.received_cas = 'Head Injury'
         elif self.injury_type == 'SK':
-            player.movement_allowance -= 1
+            if player.movement_allowance > 0:
+                player.movement_allowance -= 1
             match_played.received_cas = 'Smashed Knee'
         elif self.injury_type == 'BA':
-            player.passing -= 1
+            if player.passing != 0:
+                player.passing += 1
             match_played.received_cas = 'Broken Arm'
         elif self.injury_type == 'NI':
-            player.agility -= 1
+            player.agility += 1
             match_played.received_cas = 'Neck Injury'
         elif self.injury_type == 'DS':
-            player.strength -= 1
+            if player.strength > 0:
+                player.strength -= 1
             match_played.received_cas = 'Dislocated Shoulder'
 
     def set_last_injury(self, last_injury):

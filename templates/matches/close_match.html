@@ -8,208 +8,434 @@
     <h1><b>{{ match.first_team.name }}</b> VS <b>{{ match.second_team.name }}</b></h1>
     <br>
     <hr>
+    <BR>
+
     <form method="post" novalidate>
         {% csrf_token %}
+        <!-- Pre match row -->
+        <div class="row">
+            <div class="col-xl-12 col-md-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">Pre match</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                <th>TEAM</th>
+                                <th>DEDICATED FAN</th>
+                                <th>D3 FAN</th>
+                                <th>EXTRA TD</th>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ match.first_team.name }}</td>
+                                    <td>{{ first_team_dedicated_fan }}</td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="first_team_extra_fan" id="first_team_extra_fan"
+                                                    class="form-control form-control-user">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                            </select>
+                                        </div>
+                                    </td> <!-- 1 to 3 -->
+                                    <td>
+                                        <div class="form-group">
+                                            <div class="d-flex flex-row justify-content-center">
+                                                <input type="checkbox" name="first_team_conceded"
+                                                       id="first_team_conceded"
+                                                       class="custom-control-input"/>
 
-        <H2>PRE - MATCH</H2>
-        <div class="table-responsive-sm">
-            <table class="table">
-                <thead>
-                <th>TEAM</th>
-                <th>DEDICATED FAN</th>
-                <th>D3 FAN</th>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{{ match.first_team.name }}</td>
-                    <td>{{ first_team_dedicated_fan }}</td>
-                    <td>
-                        <!-- <input type="number" id="first_team_extra_fan" name="first_team_extra_fan" style="width: 10%"/> -->
-                        <select name="first_team_extra_fan" id="first_team_extra_fan">
-                            <option value="0" selected>0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                        </select>
-                    </td> <!-- 1 to 3 -->
-                </tr>
-                <tr>
-                    <td>{{ match.second_team.name }}</td>
-                    <td>{{ second_team_dedicated_fan }}</td>
-                    <td>
-                        <!-- <input type="number" id="second_team_extra_fan" name="second_team_extra_fan" style="width: 10%"/> -->
-                        <select name="second_team_extra_fan" id="second_team_extra_fan">
-                            <option value="0" selected>0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                        </select>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                                                <label for="first_team_conceded"
+                                                       class="custom-control-label">CONCEDED</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>{{ match.second_team.name }}</td>
+                                    <td>{{ second_team_dedicated_fan }}</td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="second_team_extra_fan" id="second_team_extra_fan"
+                                                    class="form-control form-control-user">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <div class="d-flex flex-row justify-content-center">
+                                                <input type="checkbox" name="second_team_conceded"
+                                                       id="second_team_conceded"
+                                                       class="custom-control-input"/>
+
+                                                <label for="second_team_conceded"
+                                                       class="custom-control-label">CONCEDED</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <hr>
+
+        <!-- match row first team -->
+        <div class="row">
+            <div class="col-xl-12 col-md-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">Match data for {{ match.first_team.name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable">
+                                <thead>
+                                <th>PLAYER</th>
+                                <th>TD</th>
+                                <th>BH</th>
+                                <th>SI</th>
+                                <th>KI</th>
+                                <th>INTERCEPT</th>
+                                <th>DEFLECTION</th>
+                                <th>COMPLETE</th>
+                                <th>CASUALTY</th>
+                                <th>Lasting Injury</th>
+                                </thead>
+                                <tbody>
+                                {% for player in first_team_players %}
+                                    <tr>
+                                        <td>{{ player.name }}</td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_td_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_td_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_bh_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_bh_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_si_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_si_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_ki_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_ki_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_int_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_int_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_def_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_def_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_comp_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_comp_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <select id="{{ match.first_team.id }}_cas_{{ player.id }}"
+                                                        name="{{ match.first_team.id }}_cas_{{ player.id }}"
+                                                        class="form-control form-control-user">
+                                                    <option value="NA" selected>--</option>
+                                                    <option value="BH">Badly Hurt (1-6)</option>
+                                                    <option value="SH">Seriously Hurt (7-9)</option>
+                                                    <option value="SI">Seriously Injury (10-12)</option>
+                                                    <option value="LI">Lasting Injury (13-14)</option>
+                                                    <option value="DE">DEAD (15-16)</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <select id="{{ match.first_team.id }}_last_{{ player.id }}"
+                                                        name="{{ match.first_team.id }}_lasti_{{ player.id }}"
+                                                        class="form-control form-control-user">
+                                                    <option value="NA" selected>--</option>
+                                                    <option value="JI">Head Injury -1 AV (1-2)</option>
+                                                    <option value="SK">Smashed Knee -1 MA (3)</option>
+                                                    <option value="BA">Broken Arm -1 PA (4)</option>
+                                                    <option value="NI">Neck Injury -1 AG (5)</option>
+                                                    <option value="DS">Dislocated Shoulder -1 ST (6)</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <BR>
+        <!-- match row first team -->
+        <div class="row">
+            <div class="col-xl-12 col-md-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">Match data for {{ match.second_team.name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable2">
+                                <thead>
+                                <th>PLAYER</th>
+                                <th>TD</th>
+                                <th>BH</th>
+                                <th>SI</th>
+                                <th>KI</th>
+                                <th>INTERCEPT</th>
+                                <th>DEFLECTION</th>
+                                <th>COMPLETE</th>
+                                <th>CASUALTY</th>
+                                <th>Lasting Injury</th>
+                                </thead>
+                                <tbody>
+                                {% for player in second_team_players %}
+                                    <tr>
+                                        <td>{{ player.name }}</td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_td_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_td_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_bh_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_bh_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_si_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_si_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_ki_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_ki_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_int_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_int_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_def_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_def_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number"
+                                                       id="{{ match.second_team.id }}_comp_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_comp_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <select id="{{ match.second_team.id }}_cas_{{ player.id }}"
+                                                        name="{{ match.second_team.id }}_cas_{{ player.id }}"
+                                                        class="form-control form-control-user">
+                                                    <option value="NA" selected>--</option>
+                                                    <option value="BH">Badly Hurt (1-6)</option>
+                                                    <option value="SH">Seriously Hurt (7-9)</option>
+                                                    <option value="SI">Seriously Injury (10-12)</option>
+                                                    <option value="LI">Lasting Injury (13-14)</option>
+                                                    <option value="DE">DEAD (15-16)</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <select id="{{ match.second_team.id }}_last_{{ player.id }}"
+                                                        name="{{ match.second_team.id }}_lasti_{{ player.id }}"
+                                                        class="form-control form-control-user">
+                                                    <option value="NA" selected>--</option>
+                                                    <option value="JI">Head Injury -1 AV (1-2)</option>
+                                                    <option value="SK">Smashed Knee -1 MA (3)</option>
+                                                    <option value="BA">Broken Arm -1 PA (4)</option>
+                                                    <option value="NI">Neck Injury -1 AG (5)</option>
+                                                    <option value="DS">Dislocated Shoulder -1 ST (6)</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
         <HR>
-        <H2>MATCH</H2>
-        <b>{{ match.first_team.name }}</b>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                <th>PLAYER</th>
-                <th>TD</th>
-                <th>BH</th>
-                <th>SI</th>
-                <th>KI</th>
-                <th>INTERCEPT</th>
-                <th>DEFLECTION</th>
-                <th>COMPLETE</th>
-                <th>CASUALTY</th>
-                <th>Lasting Injury</th>
-                </thead>
-                <tbody>
-                {% for player in first_team_players %}
-                    <tr>
-                        <td>{{ player.name }}</td>
-                        <td><input type="number" id="{{ match.first_team.id }}_td_{{ player.id }}" name="{{ match.first_team.id }}_td_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_bh_{{ player.id }}" name="{{ match.first_team.id }}_bh_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_si_{{ player.id }}" name="{{ match.first_team.id }}_si_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_ki_{{ player.id }}" name="{{ match.first_team.id }}_ki_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_int_{{ player.id }}" name="{{ match.first_team.id }}_int_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_def_{{ player.id }}" name="{{ match.first_team.id }}_def_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.first_team.id }}_comp_{{ player.id }}" name="{{ match.first_team.id }}_comp_{{ player.id }}"/></td>
-                        <td>
-                            <select id="{{ match.first_team.id }}_cas_{{ player.id }}" name="{{ match.first_team.id }}_cas_{{ player.id }}">
-                                <option value="NA" selected>--</option>
-                                <option value="BH">Badly Hurt (1-6)</option>
-                                <option value="SH">Seriously Hurt (7-9)</option>
-                                <option value="SI">Seriously Injury (10-12)</option>
-                                <option value="LI">Lasting Injury (13-14)</option>
-                                <option value="DE">DEAD (15-16)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select id="{{ match.first_team.id }}_last_{{ player.id }}" name="{{ match.first_team.id }}_lasti_{{ player.id }}">
-                                <option value="NA" selected>--</option>
-                                <option value="JI">Head Injury -1 AV (1-2)</option>
-                                <option value="SK">Smashed Knee -1 MA (3)</option>
-                                <option value="BA">Broken Arm -1 PA (4)</option>
-                                <option value="NI">Neck Injury -1 AG (5)</option>
-                                <option value="DS">Dislocated Shoulder -1 ST (6)</option>
-                            </select>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- POST match row -->
+        <div class="row">
+            <div class="col-xl-12 col-md-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">Post match</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                <th>TEAM</th>
+                                <TH>GOLD PIECES</TH>
+                                <th>UPDATE DEDICATE FAN</th>
+                                <th>FIRST MVP</th>
+                                <th>SECOND MVP</th>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ match.first_team.name }}</td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input type="number" id="first_team_gold"
+                                                   name="first_team_gold"
+                                                   class="form-control form-control-user">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="first_team_update_fan" id="first_team_update_fan"
+                                                    class="form-control form-control-user">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">+1</option>
+                                                <option value="-1">-1</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="first_team_mvp" id="first_team_mvp"
+                                                    class="form-control form-control-user">
+                                                <option value="--">--</option>
+                                                {% for player in first_team_players %}
+                                                    <option value="{{ player.id }}">{{ player.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="first_team_mvp_2" id="first_team_mvp_2"
+                                                    class="form-control form-control-user">
+                                                <option value="--">--</option>
+                                                {% for player in first_team_players %}
+                                                    <option value="{{ player.id }}">{{ player.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ match.second_team.name }}</td>
+                                    <TD>
+                                        <div class="form-group">
+                                            <input type="number" id="second_team_gold"
+                                                   name="second_team_gold"
+                                                   class="form-control form-control-user">
+                                        </div>
+                                    </TD>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="second_team_update_fan" id="second_team_update_fan"
+                                                    class="form-control form-control-user">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">+1</option>
+                                                <option value="-1">-1</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="second_team_mvp" id="second_team_mvp"
+                                                    class="form-control form-control-user">
+                                                <option value="--">--</option>
+                                                {% for player in second_team_players %}
+                                                    <option value="{{ player.id }}">{{ player.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <select name="second_team_mvp_2" id="second_team_mvp_2"
+                                                    class="form-control form-control-user">
+                                                <option value="--">--</option>
+                                                {% for player in second_team_players %}
+                                                    <option value="{{ player.id }}">{{ player.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <br>
-        <b>{{ match.second_team.name }}</b>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                <th>PLAYER</th>
-                <th>TD</th>
-                <th>BH</th>
-                <th>SI</th>
-                <th>KI</th>
-                <th>INTERCEPT</th>
-                <th>DEFLECTION</th>
-                <th>COMPLETE</th>
-                <th>CASUALTY</th>
-                <th>Lasting Injury</th>
-                </thead>
-                <tbody>
-                {% for player in second_team_players %}
-                    <tr>
-                        <td>{{ player.name }}</td>
-                        <td><input type="number" id="{{ match.second_team.id }}_td_{{ player.id }}" name="{{ match.second_team.id }}_td_{{ player.id }}"/></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_bh_{{ player.id }}" name="{{ match.second_team.id }}_bh_{{ player.id }}"></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_si_{{ player.id }}" name="{{ match.second_team.id }}_si_{{ player.id }}"></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_ki_{{ player.id }}" name="{{ match.second_team.id }}_ki_{{ player.id }}"></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_int_{{ player.id }}" name="{{ match.second_team.id }}_int_{{ player.id }}"></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_def_{{ player.id }}" name="{{ match.second_team.id }}_def_{{ player.id }}"></td>
-                        <td><input type="number" id="{{ match.second_team.id }}_comp_{{ player.id }}" name="{{ match.second_team.id }}_comp_{{ player.id }}"></td>
-                        <td>
-                            <select id="{{ match.second_team.id }}_cas_{{ player.id }}" name="{{ match.second_team.id }}_cas_{{ player.id }}">
-                                <option value="NA" selected>--</option>
-                                <option value="BH">Badly Hurt (1-6)</option>
-                                <option value="SH">Seriously Hurt (7-9)</option>
-                                <option value="SI">Seriously Injury (10-12)</option>
-                                <option value="LI">Lasting Injury (13-14)</option>
-                                <option value="DE">DEAD (15-16)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select id="{{ match.second_team.id }}_last_{{ player.id }}" name="{{ match.second_team.id }}_lasti_{{ player.id }}">
-                                <option value="NA" selected>--</option>
-                                <option value="JI">Head Injury -1 AV (1-2)</option>
-                                <option value="SK">Smashed Knee -1 MA (3)</option>
-                                <option value="BA">Broken Arm -1 PA (4)</option>
-                                <option value="NI">Neck Injury -1 AG (5)</option>
-                                <option value="DS">Dislocated Shoulder -1 ST (6)</option>
-                            </select>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <br>
-        <BR>
-        <HR>
-        <H2>POST - MATCH</H2>
-        <br>
+        <input type="submit" class="btn btn-primary"/>
 
-        <label for="first_team_mvp">{{ match.first_team.name }} MVP: </label>
-        <select name="first_team_mvp" id="first_team_mvp">
-            {% for player in first_team_players  %}
-                <option value="{{ player.id }}">{{ player.name }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="second_team_mvp">{{ match.second_team.name }} MVP: </label>
-        <select name="second_team_mvp" id="second_team_mvp">
-            {% for player in second_team_players  %}
-                <option value="{{ player.id }}">{{ player.name }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <div class="table-responsive-sm">
-            <table class="table">
-                <thead>
-                <th>TEAM</th>
-                <th>UPDATE DEDICATE FAN</th>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{{ match.first_team.name }}</td>
-                    <td>
-                        <select name="first_team_update_fan" id="first_team_update_fan">
-                            <option value="0" selected>0</option>
-                            <option value="1">+1</option>
-                            <option value="-1">-1</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>{{ match.second_team.name }}</td>
-                    <td>
-                        <select name="second_team_update_fan" id="second_team_update_fan">
-                            <option value="0" selected>0</option>
-                            <option value="1">+1</option>
-                            <option value="-1">-1</option>
-                        </select>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-
-        <input type="submit" class="btn btn-primary" />
     </form>
 
 {% endblock %}
