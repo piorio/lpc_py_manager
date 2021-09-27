@@ -15,7 +15,8 @@
                     <tr>
                         <th>Team A</th>
                         <th>Team B</th>
-                        <th>Date</th>
+                        <th>From Date</th>
+                        <th>to Date</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -24,7 +25,8 @@
                         <tr>
                             <td>{{ obj.first_team }}</td>
                             <td>{{ obj.second_team }}</td>
-                            <td>{{ obj.match_date }}</td>
+                            <td>{{ obj.match_date_from }}</td>
+                            <td>{{ obj.match_date_to }}</td>
                             <td>
                                 {% if user.is_superuser %}
                                     <a href="{{ obj.get_absolute_url }}" class="btn btn-primary">CLOSE</a>

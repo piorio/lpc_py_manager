@@ -3,7 +3,7 @@ from .models import TeamPlayerMatchRecord
 
 
 class CloseMatchDataReader:
-    def __init__(self, data, team, selected_team, match):
+    def __init__(self, data, team, selected_team, match, conceded_team):
         self.select_team = {'FIRST': 'first_team_extra_fan', 'SECOND': 'second_team_extra_fan'}
         self.mvp_team = {'FIRST': 'first_team_mvp', 'SECOND': 'second_team_mvp'}
         self.selected_team = selected_team
@@ -14,6 +14,7 @@ class CloseMatchDataReader:
         self.match = match
         self.fan_factor = 0
         self.number_of_td = 0
+        self.conceded_team = conceded_team
 
     def get_fan_factor(self):
         return self.fan_factor
@@ -91,6 +92,10 @@ class CloseMatchDataReader:
 
             if self.is_mvp(player):
                 total_spp += 4
+
+            if self.conceded_team is not None and self.conceded_team != self.select_team:
+                if self.is_second_mvp(player):
+                    total_spp += 4
 
             player.total_cas += total_cas
             player.spp += total_spp
@@ -174,7 +179,8 @@ class CloseMatchDataReader:
         player_int = self.data[players_int + str(player.id)]
         if player_int:
             player_int_int = int(player_int)
-            return player_int_int, player_int_int * 2
+            # Intercept value one because we didn't transform a deflection into a intercept, but "save" separately
+            return player_int_int, player_int_int * 1
         else:
             return 0, 0
 
@@ -198,7 +204,15 @@ class CloseMatchDataReader:
 
     def is_mvp(self, player):
         player_mvp = self.data[self.mvp_team[self.selected_team]]
-        if int(player_mvp) == player.id:
+        if player_mvp != '--' and int(player_mvp) == player.id:
+            return True
+        else:
+            return False
+
+    def is_second_mvp(self, player):
+        data_key = self.mvp_team[self.selected_team] + "_"
+        player_mvp = self.data[data_key]
+        if player_mvp != '--' and int(player_mvp) == player.id:
             return True
         else:
             return False
@@ -216,3 +230,27 @@ def reset_missing_next_game(team):
         if player.missing_next_game:
             player.missing_next_game = False
             player.save()
+
+
+def is_conceded(data):
+    first_team_conceded = False
+    second_team_conceded = False
+    team_conceded = None
+
+    if 'first_team_conceded' in data and data['first_team_conceded'] == 'on':
+        first_team_conceded = True
+        team_conceded = 'FIRST'
+
+    if 'second_team_conceded' in data and data['first_team_conceded'] == 'on':
+        second_team_conceded = True
+        team_conceded = 'SECOND'
+
+    if first_team_conceded and second_team_conceded:
+        return False, True, "Only one team can conceded"
+
+    return_flag = first_team_conceded or second_team_conceded
+    if not return_flag:
+        team_conceded = False
+
+    return return_flag, False, team_conceded
+

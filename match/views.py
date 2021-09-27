@@ -7,7 +7,8 @@ from django.views.generic import ListView
 from match.models import Match
 from django.shortcuts import render, redirect, get_object_or_404
 from teams.team_helper import update_team_value
-from .match_util import CloseMatchDataReader, reset_missing_next_game
+from .match_util import CloseMatchDataReader, reset_missing_next_game, is_conceded
+from django.contrib import messages
 
 
 # Create your views here.
@@ -18,7 +19,7 @@ class AllMatchesToPlayListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Match.objects.filter(played=False).order_by('-match_date')
+        return Match.objects.filter(played=False).order_by('-match_date_from')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -32,7 +33,7 @@ class AllMatchesPlayedListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Match.objects.filter(played=True).order_by('-match_date')
+        return Match.objects.filter(played=True).order_by('-match_date_from')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -48,7 +49,7 @@ class MyMatchesToPlayListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Match.objects.filter(
             (Q(first_team__coach=self.request.user) | Q(second_team__coach=self.request.user)) & Q(played=False)
-        ).order_by('-match_date')
+        ).order_by('-match_date_from')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -64,7 +65,7 @@ class MyMatchesPlayedListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Match.objects.filter(
             (Q(first_team__coach=self.request.user) | Q(second_team__coach=self.request.user)) & Q(played=True)
-        ).order_by('-match_date')
+        ).order_by('-match_date_from')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -82,11 +83,26 @@ def close_match(request, match_id):
         data = request.POST
         print(data)
 
+        # FIRST CHECK IF THERE IS CONCEDED
+        conceded, conceded_error, conceded_data = is_conceded(data)
+        if conceded_error:
+            messages.error(request, conceded_data)
+            first_team_players = match.first_team.players.all()
+            second_team_players = match.second_team.players.all()
+            first_team_dedicated_fan = match.first_team.extra_dedicated_fan + 1
+            second_team_dedicated_fan = match.second_team.extra_dedicated_fan + 1
+            return render(request, 'matches/close_match.html',
+                          {'match': match, 'first_team_players': first_team_players,
+                           'second_team_players': second_team_players,
+                           'first_team_dedicated_fan': first_team_dedicated_fan,
+                           'second_team_dedicated_fan': second_team_dedicated_fan})
+
+        # Conceded check is OK. Reset next missing game
         reset_missing_next_game(match.first_team)
         reset_missing_next_game(match.second_team)
 
-        first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match)
-        second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match)
+        first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match, conceded_data)
+        second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match, conceded_data)
 
         first_team_data.prepare()
         second_team_data.prepare()
@@ -113,6 +129,19 @@ def close_match(request, match_id):
         match.second_team.value = update_team_value(match.second_team, True)
         match.second_team.current_team_value = update_team_value(match.second_team)
 
+        first_team_extra_td = data["first_team_extra_td"]
+        second_team_extra_td = data["second_team_extra_td"]
+
+        if first_team_extra_td:
+            first_team_extra_td_int = int(first_team_extra_td)
+            match.first_team_td += first_team_extra_td_int
+            match.first_team.total_touchdown += first_team_extra_td_int
+
+        if second_team_extra_td:
+            second_team_extra_td_int = int(second_team_extra_td)
+            match.second_team_td += second_team_extra_td_int
+            match.second_team.total_touchdown += second_team_extra_td_int
+
         first_team_td = first_team_data.get_number_of_td()
         second_team_td = second_team_data.get_number_of_td()
         if first_team_td > second_team_td:
@@ -124,6 +153,19 @@ def close_match(request, match_id):
         elif first_team_td == second_team_td:
             match.first_team.tie += 1
             match.second_team.tie += 1
+
+        first_team_gold = data['first_team_gold']
+        second_team_gold = data['second_team_gold']
+
+        if first_team_gold:
+            first_team_gold_int = int(first_team_gold)
+            match.first_team_gold = first_team_gold_int
+            match.first_team.treasury += first_team_gold_int
+
+        if second_team_gold:
+            second_team_gold_int = int(second_team_gold)
+            match.second_team_gold = second_team_gold_int
+            match.second_team.treasury += second_team_gold_int
 
         match.first_team.save()
         match.second_team.save()
