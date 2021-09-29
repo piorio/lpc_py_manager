@@ -61,7 +61,7 @@ class AllTeamDetail(DetailView):
         team = context['team']
         dedicated_fan = getattr(team, 'extra_dedicated_fan')
 
-        logger.debug('All team details for team ' + str(team) + ' - Dedicated fan => ' + dedicated_fan)
+        logger.debug('All team details for team ' + str(team) + ' - Dedicated fan => ' + str(dedicated_fan))
 
         context['dedicated_fan'] = dedicated_fan + 1
         return context
