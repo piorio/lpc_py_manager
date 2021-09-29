@@ -161,6 +161,7 @@ class TeamPlayer(models.Model):
     deflection = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     complete = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     niggling_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_mvp = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     missing_next_game = models.BooleanField(default=False)
     dead = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)

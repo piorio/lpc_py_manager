@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
@@ -10,8 +11,10 @@ from django.contrib import messages
 from .team_helper import update_team_value
 from django.db.models import Q
 from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
-    get_new_level, get_second_skills_category, get_first_skills_dict, get_first_skills_select_option, \
-    get_second_skills_select_option
+    get_new_level, get_second_skills_category, get_first_skills_select_option, get_second_skills_select_option
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -57,6 +60,9 @@ class AllTeamDetail(DetailView):
         context = super(AllTeamDetail, self).get_context_data(**kwargs)
         team = context['team']
         dedicated_fan = getattr(team, 'extra_dedicated_fan')
+
+        logger.debug('All team details for team ' + str(team) + ' - Dedicated fan => ' + dedicated_fan)
+
         context['dedicated_fan'] = dedicated_fan + 1
         return context
 
@@ -95,47 +101,62 @@ class MyRetiredTeamsListView(LoginRequiredMixin, ListView):
 
 @login_required
 def get_create_my_team(request):
+    logger.debug('User ' + str(request.user) + ' made a create team request with method ' + request.method)
+
     roster_teams = RosterTeam.objects.all()
     team = tuple((t.id, t.name) for t in roster_teams)
     if request.method == 'POST':
         form = CreateMyTeamForm(request.POST)
         form.fields['roster'].choices = team
+
+        logger.debug('Create team POST. Roster choice ' + str(team))
+        logger.debug('Create team POST. Data sent ' + str(request.POST))
+
         if form.is_valid():
             name = form.cleaned_data['name']
             treasury = form.cleaned_data['treasury']
             roster = form.cleaned_data['roster']
-            team = Team(name=name, treasury=treasury, roster_team_id=roster, coach=request.user, status='CREATED')
-            team.save()
+            created_team = Team(name=name, treasury=treasury, roster_team_id=roster, coach=request.user,
+                                status='CREATED')
+            logger.debug('Create team POST. Form valid. Create team ' + str(created_team))
+            created_team.save()
             return redirect('teams:my_teams')
         else:
             form = CreateMyTeamForm()
             form.fields['roster'].choices = team
+            logger.warning('Create team POST. Form invalid ' + str(form.errors))
             return render(request, 'teams/createMyTeam.html', {'form': form})
     else:
         form = CreateMyTeamForm()
         form.fields['roster'].choices = team
+        logger.debug('Create team GET. Return form with this roster choice ' + str(team))
         return render(request, 'teams/createMyTeam.html', {'form': form})
 
 
 @login_required
 def dismiss_team(request, pk):
     team = get_object_or_404(Team, id=pk)
+    logger.debug('User ' + str(request.user) + ' try to dismiss team ' + str(team))
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot retire a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to dismiss not owned team ' + str(team))
     else:
         team.status = 'RETIRED'
         team.save()
         messages.success(request, 'You retire ' + str(team))
+        logger.debug('User ' + str(request.user) + ' dismiss successfully team ' + str(team))
     return redirect('teams:my_teams')
 
 
 @login_required
 def prepare_team(request, pk):
     team = get_object_or_404(Team, id=pk)
+    logger.debug('User ' + str(request.user) + ' try to prepare team ' + str(team))
     roster_players = team.roster_team.roster_players.all()
 
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot prepare a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to prepare not owned team ' + str(team))
         return redirect('teams:my_teams')
 
     return render(request,
@@ -146,16 +167,23 @@ def prepare_team(request, pk):
 def ready_team(request, pk):
     team = get_object_or_404(Team, id=pk)
     players_count = team.players.all().count()
+    logger.debug('User ' + str(request.user) + ' try to ready team ' + str(team) + '. Players count '
+                 + str(players_count))
+
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot ready a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to ready a not owned team ' + str(team))
     elif players_count < 11 or players_count > 16:
         messages.error(request, 'A team must have 11 to 16 players. You cannot ready a not complete team')
+        logger.warning('User ' + str(request.user) + ' try to ready team ' + str(team)
+                       + ' with invalid player count ' + players_count)
     else:
         team_value = update_team_value(team)
         team.value = team_value
         team.current_team_value = team_value
         team.status = 'READY'
         team.save()
+        logger.warning('User ' + str(request.user) + ' ready team ' + str(team))
     return redirect('teams:my_teams')
 
 
@@ -165,8 +193,13 @@ def buy_player(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
 
+    logger.debug('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                 + str(team))
+
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but the team not belong to the user')
         return redirect(team.get_prepare_absolute_url())
 
     is_buy_valid = True
@@ -175,23 +208,33 @@ def buy_player(request, team_id):
     roster_players_id = list(team.roster_team.roster_players.values_list('id', flat=True))
     if int(roster_player_id) not in roster_players_id:
         messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
+        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but the player not belong to the roster')
         return redirect('teams:my_teams')
 
     # Check max team players
     if team.number_of_players > 15:
         is_buy_valid = False
         messages.error(request, 'You can\'t buy more than 16 players')
+        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but can\'t buy more than 16 players. Players ' + str(team.number_of_players))
 
     # check money spent
     if is_buy_valid and roster_player_to_buy.cost > team.treasury:
         is_buy_valid = False
         messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
+        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but can\'t have money. Treasury ' + str(team.treasury)
+                       + ' player cost ' + str(roster_player_to_buy.cost))
 
     # Check big guy: a roster team must have a max number of big guy
     if is_buy_valid and roster_player_to_buy.big_guy:
         if team.big_guy_numbers >= team.roster_team.big_guy_max:
             is_buy_valid = False
             messages.error(request, 'You cant\'t have more big guy')
+            logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                           + str(team) + ' but can\'t have more big guy. Big Guy ' + str(team.big_guy_numbers)
+                           + ' permitted big guy ' + str(team.roster_team.big_guy_max))
 
     # Check max position quantity
     if is_buy_valid:
@@ -200,8 +243,11 @@ def buy_player(request, team_id):
             is_buy_valid = False
             messages.error(request, 'You cant\'t buy ' + roster_player_to_buy.position + '! Max quantity is ' +
                            str(roster_player_to_buy.max_quantity))
+            logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
+                           + str(team) + ' but can\'t have player for this position. Positional Hired '
+                           + str(number_of_roster_player_hired)
+                           + ' permitted player max quantity ' + str(roster_player_to_buy.max_quantity))
 
-    # add Team player -> Create session for rollback
     if is_buy_valid:
         player = TeamPlayer()
         player.init_with_roster_player(roster_player_to_buy, team)
@@ -209,10 +255,20 @@ def buy_player(request, team_id):
         if roster_player_to_buy.big_guy:
             team.big_guy_numbers += 1
         team.number_of_players += 1
-        team.save()
-        player.save()
-        player.set_initial_skills_and_traits(roster_player_to_buy)
+
+        try:
+            with transaction.atomic():
+                team.save()
+                player.save()
+                player.set_initial_skills_and_traits(roster_player_to_buy)
+        except Exception as e:
+            logger.error('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) +
+                         ' Exception ' + str(e))
+            messages.error(request, 'Internal error during buy Player')
+            return redirect(team.get_prepare_absolute_url())
+
         messages.success(request, 'You bought ' + str(player.position))
+        logger.debug('User ' + str(request.user) + ' bought ' + str(player) + ' for team ' + str(team))
 
     return redirect(team.get_prepare_absolute_url())
 
@@ -220,18 +276,24 @@ def buy_player(request, team_id):
 @login_required
 def fire_player(request, team_id):
     player_id = request.GET.get('player', None)
-    print('Fire ' + str(player_id) + ' for teamId ' + str(team_id))
     team = get_object_or_404(Team, id=team_id)
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' try to fire ' + str(player) + ' for team '
+                 + str(team))
+
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' for not owned team '
+                       + str(team))
         return redirect('teams:my_teams')
 
     # Check if player_id belongs to team
     team_players_id = list(team.players.values_list('id', flat=True))
     if int(player_id) not in team_players_id:
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
+        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' but not play for team '
+                       + str(team))
         return redirect('teams:my_teams')
 
     # Delete player and add again the cost
@@ -239,10 +301,18 @@ def fire_player(request, team_id):
     if player.big_guy:
         team.big_guy_numbers -= 1
     team.number_of_players -= 1
-    player.delete()
-    team.save()
+    try:
+        with transaction.atomic():
+            player.delete()
+            team.save()
+    except Exception as e:
+        logger.error('User ' + str(request.user) + ' try to fire ' + str(player) +
+                     ' Exception ' + str(e))
+        messages.error(request, 'Internal error during buy Player')
+        return redirect('teams:my_teams')
 
     messages.success(request, 'You fire a ' + str(player.position))
+    logger.debug('User ' + str(request.user) + ' fired ' + str(player) + ' for team ' + str(team))
     return redirect(team.get_prepare_absolute_url())
 
 
@@ -518,18 +588,24 @@ def change_player_name_number(request):
 @login_required
 def manage_fire_player(request, team_id):
     player_id = request.GET.get('player', None)
-    print('Fire ' + str(player_id) + ' for teamId ' + str(team_id))
     team = get_object_or_404(Team, id=team_id)
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' try to fire ' + str(player) + ' for team '
+                 + str(team))
+
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' for not owned team '
+                       + str(team))
         return redirect('teams:my_teams')
 
     # Check if player_id belongs to team
     team_players_id = list(team.players.values_list('id', flat=True))
     if int(player_id) not in team_players_id:
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
+        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' but not play for team '
+                       + str(team))
         return redirect('teams:my_teams')
 
     # Delete player and add again the cost
@@ -539,17 +615,22 @@ def manage_fire_player(request, team_id):
     team.number_of_players -= 1
     player.fired = True
     player.missing_next_game = False
-    player.save()
 
-    team.value = update_team_value(team, True)
-    team.current_team_value = update_team_value(team)
-    team.save()
+    try:
+        with transaction.atomic():
+            player.save()
+            team.value = update_team_value(team, True)
+            team.current_team_value = update_team_value(team)
+            team.save()
+    except Exception as e:
+        logger.error('User ' + str(request.user) + ' try to fire ' + str(player) +
+                     ' Exception ' + str(e))
+        messages.error(request, 'Internal error during fire Player')
+        return redirect('teams:my_teams')
 
     messages.success(request, 'You fire a ' + str(player.position))
     return redirect(team.get_my_team_detail_absolute_url())
 
-
-####
 
 @login_required
 def manage_buy_re_roll(request, team_id):
@@ -731,8 +812,14 @@ def manage_buy_player(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
 
+    logger.debug('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                 + str(team))
+
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
+        logger.warning(
+            'User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for not owned team '
+            + str(team))
         return redirect(team.get_my_team_detail_absolute_url())
 
     is_buy_valid = True
@@ -741,23 +828,33 @@ def manage_buy_player(request, team_id):
     roster_players_id = list(team.roster_team.roster_players.values_list('id', flat=True))
     if int(roster_player_id) not in roster_players_id:
         messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
+        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but not in team roster ')
         return redirect('teams:my_teams')
 
     # Check max team players
     if team.number_of_players > 15:
         is_buy_valid = False
         messages.error(request, 'You can\'t buy more than 16 players')
+        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but can\'t buy more than 16 players. Players -> ' + str(team.number_of_players))
 
     # check money spent
     if is_buy_valid and roster_player_to_buy.cost > team.treasury:
         is_buy_valid = False
         messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
+        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                       + str(team) + ' but don\'t have money. Treasury -> ' + str(team.treasury)
+                       + ' Player cost -> ' + str(roster_player_to_buy.cost))
 
     # Check big guy: a roster team must have a max number of big guy
     if is_buy_valid and roster_player_to_buy.big_guy:
         if team.big_guy_numbers >= team.roster_team.big_guy_max:
             is_buy_valid = False
             messages.error(request, 'You cant\'t have more big guy')
+            logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                           + str(team) + ' but can\'t have more big guy. Big Guy -> ' + str(team.big_guy_numbers)
+                           + ' Max number of big guy -> ' + str(team.roster_team.big_guy_max))
 
     # Check max position quantity
     if is_buy_valid:
@@ -766,6 +863,10 @@ def manage_buy_player(request, team_id):
             is_buy_valid = False
             messages.error(request, 'You cant\'t buy ' + roster_player_to_buy.position + '! Max quantity is ' +
                            str(roster_player_to_buy.max_quantity))
+            logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
+                           + str(team) + ' but can\'t have more positional of this kind. has -> '
+                           + str(number_of_roster_player_hired)
+                           + ' Max quantity -> ' + str(roster_player_to_buy.max_quantity))
 
     # add Team player -> Create session for rollback
     if is_buy_valid:
@@ -777,9 +878,18 @@ def manage_buy_player(request, team_id):
         team.number_of_players += 1
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
-        team.save()
-        player.save()
-        player.set_initial_skills_and_traits(roster_player_to_buy)
+
+        try:
+            with transaction.atomic():
+                team.save()
+                player.save()
+                player.set_initial_skills_and_traits(roster_player_to_buy)
+        except Exception as e:
+            logger.error('User ' + str(request.user) + ' try to hire ' + str(player) +
+                         ' Exception ' + str(e))
+            messages.error(request, 'Internal error during hire Player')
+            return redirect('teams:my_teams')
+
         messages.success(request, 'You bought ' + str(player.position))
 
     return redirect(team.get_my_team_detail_absolute_url())
@@ -801,13 +911,19 @@ def player_level_up(request, player_id):
 def random_first_skill(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player))
+
     if player.team.coach.id != request.user.id:
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
+                       + ' for not owned team')
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     level_cost = get_levelup_cost_by_level(player, 0)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
+        logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
+                       + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     if request.method == "POST":
@@ -823,23 +939,41 @@ def random_first_skill(request, player_id):
                 first_dice = 4
 
             search_string = category + str(first_dice) + str(second_dice)
-            print("Random first skill for player " + str(player))
-            print("Search String -> " + str(search_string))
-            skill = Skill.objects.filter(random_identifier=search_string).get()
-            print("Add this extra skill " + str(skill))
-            player.extra_skills.add(skill)
-            player.level = get_new_level(player)
-            player.value += 10000
-            player.spp -= level_cost
-            player.save()
-            player.team.value = update_team_value(player.team, True)
-            player.team.current_team_value = update_team_value(player.team)
-            player.team.save()
-            return redirect(player.team.get_my_team_detail_absolute_url())
+            logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player)
+                         + ' First dice set ' + str(form.cleaned_data['first_dice'])
+                         + ' Second dice set ' + str(second_dice)
+                         + ' First dice ' + str(first_dice) + ' search string ' + search_string)
+
+            try:
+                with transaction.atomic():
+                    skill = Skill.objects.filter(random_identifier=search_string).get()
+                    if skill is not None:
+                        logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player)
+                                     + ' Skill -> ' + str(skill))
+                        player.extra_skills.add(skill)
+                        player.level = get_new_level(player)
+                        player.value += 10000
+                        player.spp -= level_cost
+                        player.save()
+                        player.team.value = update_team_value(player.team, True)
+                        player.team.current_team_value = update_team_value(player.team)
+                        player.team.save()
+                    else:
+                        messages.error(request, 'Skill with random identifier ' + str(search_string) + ' not found!!!')
+                        logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
+                                       + ' Skill not found ' + str(search_string))
+
+                    return redirect(player.team.get_my_team_detail_absolute_url())
+            except Exception as e:
+                logger.error('User ' + str(request.user) + ' random skill error ' + str(player) +
+                             ' Exception ' + str(e))
+                messages.error(request, 'Internal error random first skill Player')
+                return redirect('teams:my_teams')
         else:
             err = form.errors
             messages.error(request, 'Some error ' + err)
-            print(err)
+            logger.warning('User ' + str(request.user) + ' random first kill error ' + str(player) +
+                           ' Form errors ' + str(err))
         return
     else:
         form = RandomSkill()
@@ -852,13 +986,19 @@ def random_first_skill(request, player_id):
 def random_second_skill(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player))
+
     if player.team.coach.id != request.user.id:
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
+                       + ' for not owned team')
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     level_cost = get_levelup_cost_by_level(player, 1)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
+        logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
+                       + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     if request.method == "POST":
@@ -872,25 +1012,43 @@ def random_second_skill(request, player_id):
                 first_dice = 1
             if first_dice >= 4:
                 first_dice = 4
-
             search_string = category + str(first_dice) + str(second_dice)
-            print("Random secondary skill for player " + str(player))
-            print("Search String -> " + str(search_string))
-            skill = Skill.objects.filter(random_identifier=search_string).get()
-            print("Add this extra skill " + str(skill))
-            player.extra_skills.add(skill)
-            player.level = get_new_level(player)
-            player.value += 20000
-            player.spp -= level_cost
-            player.save()
-            player.team.value = update_team_value(player.team, True)
-            player.team.current_team_value = update_team_value(player.team)
-            player.team.save()
-            return redirect(player.team.get_my_team_detail_absolute_url())
+
+            logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player)
+                         + ' First dice set ' + str(form.cleaned_data['first_dice'])
+                         + ' Second dice set ' + str(second_dice)
+                         + ' First dice ' + str(first_dice) + ' search string ' + search_string)
+
+            try:
+                with transaction.atomic():
+                    skill = Skill.objects.filter(random_identifier=search_string).get()
+                    if skill is not None:
+                        logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player)
+                                     + ' Skill -> ' + str(skill))
+                        player.extra_skills.add(skill)
+                        player.level = get_new_level(player)
+                        player.value += 20000
+                        player.spp -= level_cost
+                        player.save()
+                        player.team.value = update_team_value(player.team, True)
+                        player.team.current_team_value = update_team_value(player.team)
+                        player.team.save()
+                    else:
+                        messages.error(request, 'Skill with random identifier ' + str(search_string) + ' not found!!!')
+                        logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
+                                       + ' Skill not found ' + str(search_string))
+
+                    return redirect(player.team.get_my_team_detail_absolute_url())
+            except Exception as e:
+                logger.error('User ' + str(request.user) + ' random second skill error ' + str(player) +
+                             ' Exception ' + str(e))
+                messages.error(request, 'Internal error random second skill Player')
+                return redirect('teams:my_teams')
         else:
             err = form.errors
             messages.error(request, 'Some error ' + err)
-            print(err)
+            logger.warning('User ' + str(request.user) + ' random second kill error ' + str(player) +
+                           ' Form errors ' + str(err))
         return
     else:
         form = RandomSkill()
@@ -903,13 +1061,19 @@ def random_second_skill(request, player_id):
 def select_first_skill(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player))
+
     if player.team.coach.id != request.user.id:
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
+                       + ' for not owned team')
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     level_cost = get_levelup_cost_by_level(player, 1)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
+        logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
+                       + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     if request.method == "POST":
@@ -917,33 +1081,51 @@ def select_first_skill(request, player_id):
         skill_id = request.POST['skill']
         skill = Skill.objects.filter(id=skill_id).get()
         if skill is not None:
-            print("Add this extra skill " + str(skill))
-            player.extra_skills.add(skill)
-            player.level = get_new_level(player)
-            player.value += 20000
-            player.spp -= level_cost
-            player.save()
-            player.team.value = update_team_value(player.team, True)
-            player.team.current_team_value = update_team_value(player.team)
-            player.team.save()
+            logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player)
+                         + ' Skill -> ' + str(skill))
+            try:
+                with transaction.atomic():
+                    player.extra_skills.add(skill)
+                    player.level = get_new_level(player)
+                    player.value += 20000
+                    player.spp -= level_cost
+                    player.save()
+                    player.team.value = update_team_value(player.team, True)
+                    player.team.current_team_value = update_team_value(player.team)
+                    player.team.save()
+            except Exception as e:
+                logger.error('User ' + str(request.user) + ' first skill error ' + str(player) +
+                             ' Exception ' + str(e))
+                messages.error(request, 'Internal error first skill Player')
+                return redirect('teams:my_teams')
+
         else:
             messages.error(request, "Skill with id " + skill_id + " not found!!!")
+            logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
+                           + ' Skill not found ' + str(skill_id))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     first_skills = get_first_skills_select_option(player)
     return render(request, 'teams/select_first_skill.html', {'player': player, 'first_skills': first_skills})
 
+
 @login_required
 def select_second_skill(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
+    logger.debug('User ' + str(request.user) + ' second skill for player ' + str(player))
+
     if player.team.coach.id != request.user.id:
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
+        logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
+                       + ' for not owned team')
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     level_cost = get_levelup_cost_by_level(player, 2)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
+        logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
+                       + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     if request.method == "POST":
@@ -951,17 +1133,27 @@ def select_second_skill(request, player_id):
         skill_id = request.POST['skill']
         skill = Skill.objects.filter(id=skill_id).get()
         if skill is not None:
-            print("Add this extra skill " + str(skill))
-            player.extra_skills.add(skill)
-            player.level = get_new_level(player)
-            player.value += 40000
-            player.spp -= level_cost
-            player.save()
-            player.team.value = update_team_value(player.team, True)
-            player.team.current_team_value = update_team_value(player.team)
-            player.team.save()
+            logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player)
+                         + ' Skill -> ' + str(skill))
+            try:
+                with transaction.atomic():
+                    player.extra_skills.add(skill)
+                    player.level = get_new_level(player)
+                    player.value += 40000
+                    player.spp -= level_cost
+                    player.save()
+                    player.team.value = update_team_value(player.team, True)
+                    player.team.current_team_value = update_team_value(player.team)
+                    player.team.save()
+            except Exception as e:
+                logger.error('User ' + str(request.user) + ' second skill error ' + str(player) +
+                             ' Exception ' + str(e))
+                messages.error(request, 'Internal error second skill Player')
+                return redirect('teams:my_teams')
         else:
             messages.error(request, "Skill with id " + skill_id + " not found!!!")
+            logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
+                           + ' Skill not found ' + str(skill_id))
         return redirect(player.team.get_my_team_detail_absolute_url())
 
     second_skills = get_second_skills_select_option(player)

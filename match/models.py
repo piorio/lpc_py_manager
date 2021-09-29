@@ -23,7 +23,8 @@ class Match(models.Model):
     second_team_td = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     second_team_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     second_team_badly_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
-    second_team_serious_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
+    second_team_serious_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True,
+                                                     null=True)
     second_team_kill = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
     second_team_extra_fan = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
     second_team_fan_factor = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
@@ -33,6 +34,31 @@ class Match(models.Model):
 
     def get_absolute_url(self):
         return reverse('match:close_match', args=[str(self.id)])
+
+    def debug(self):
+        return 'Match {' \
+               + '"id": ' + str(self.id) \
+               + ', "first_team": ' + str(self.first_team) \
+               + ', "second_team": ' + str(self.second_team) \
+               + ', "match_date_from": ' + str(self.match_date_from) \
+               + ', "match_date_to": ' + str(self.match_date_to) \
+               + ', "first_team_td": ' + str(self.first_team_td) \
+               + ', "first_team_cas": ' + str(self.first_team_cas) \
+               + ', "first_team_badly_hurt": ' + str(self.first_team_badly_hurt) \
+               + ', "first_team_serious_injury": ' + str(self.first_team_serious_injury) \
+               + ', "first_team_kill": ' + str(self.first_team_kill) \
+               + ', "first_team_extra_fan": ' + str(self.first_team_extra_fan) \
+               + ', "first_team_fan_factor": ' + str(self.first_team_fan_factor) \
+               + ', "first_team_gold": ' + str(self.first_team_gold) \
+               + ', "second_team_td": ' + str(self.second_team_td) \
+               + ', "second_team_cas": ' + str(self.second_team_cas) \
+               + ', "second_team_badly_hurt": ' + str(self.second_team_badly_hurt) \
+               + ', "second_team_serious_injury": ' + str(self.second_team_serious_injury) \
+               + ', "second_team_kill": ' + str(self.second_team_kill) \
+               + ', "second_team_extra_fan": ' + str(self.second_team_extra_fan) \
+               + ', "second_team_fan_factor": ' + str(self.second_team_fan_factor) \
+               + ', "second_team_gold": ' + str(self.second_team_gold) \
+               + '}'
 
 
 class TeamPlayerMatchRecord(models.Model):

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
@@ -9,6 +10,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from teams.team_helper import update_team_value
 from .match_util import CloseMatchDataReader, reset_missing_next_game, is_conceded
 from django.contrib import messages
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -74,16 +78,20 @@ class MyMatchesPlayedListView(LoginRequiredMixin, ListView):
 
 @login_required
 def close_match(request, match_id):
+    logger.debug('User ' + str(request.user) + ' Try to close match ')
     if not request.user.is_superuser:
+        logger.warning('User ' + str(request.user) + ' is not an admin ')
         return HttpResponse(status=403)  # HTTP 403 Forbidden
 
     match = get_object_or_404(Match, id=match_id)
 
+    logger.debug('User ' + str(request.user) + ' close match ' + match.debug())
+
     if request.method == 'POST':
         data = request.POST
-        print(data)
+        logger.debug('User ' + str(request.user) + ' form data ' + str(data))
 
-        # FIRST CHECK IF THERE IS CONCEDED
+        # FIRST CHECK IF THERE IS CONCEDED. TODO: Rewrit all concede code
         conceded, conceded_error, conceded_data = is_conceded(data)
         if conceded_error:
             messages.error(request, conceded_data)
@@ -97,80 +105,89 @@ def close_match(request, match_id):
                            'first_team_dedicated_fan': first_team_dedicated_fan,
                            'second_team_dedicated_fan': second_team_dedicated_fan})
 
-        # Conceded check is OK. Reset next missing game
-        reset_missing_next_game(match.first_team)
-        reset_missing_next_game(match.second_team)
+        try:
+            with transaction.atomic():
 
-        first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match, conceded_data)
-        second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match, conceded_data)
+                # Conceded check is OK. Reset next missing game
+                reset_missing_next_game(match.first_team)
+                reset_missing_next_game(match.second_team)
 
-        first_team_data.prepare()
-        second_team_data.prepare()
+                first_team_data = CloseMatchDataReader(data, match.first_team, 'FIRST', match, conceded_data)
+                second_team_data = CloseMatchDataReader(data, match.second_team, 'SECOND', match, conceded_data)
 
-        total_fan = first_team_data.get_fan_factor() + second_team_data.get_fan_factor()
-        match.first_team.treasury += ((total_fan / 2) + first_team_data.get_number_of_td()) * 10000
-        match.second_team.treasury += ((total_fan / 2) + second_team_data.get_number_of_td()) * 10000
+                first_team_data.prepare()
+                second_team_data.prepare()
 
-        first_team_fan_update = data["first_team_update_fan"]
-        if first_team_fan_update:
-            match.first_team.extra_dedicated_fan += int(first_team_fan_update)
-            if match.first_team.extra_dedicated_fan < 0:
-                match.first_team.extra_dedicated_fan = 0
+                total_fan = first_team_data.get_fan_factor() + second_team_data.get_fan_factor()
+                match.first_team.treasury += ((total_fan / 2) + first_team_data.get_number_of_td()) * 10000
+                match.second_team.treasury += ((total_fan / 2) + second_team_data.get_number_of_td()) * 10000
 
-        second_team_fan_update = data["second_team_update_fan"]
-        if second_team_fan_update:
-            match.second_team.extra_dedicated_fan += int(second_team_fan_update)
-            if match.second_team.extra_dedicated_fan < 0:
-                match.second_team.extra_dedicated_fan = 0
+                first_team_fan_update = data["first_team_update_fan"]
+                if first_team_fan_update:
+                    match.first_team.extra_dedicated_fan += int(first_team_fan_update)
+                    if match.first_team.extra_dedicated_fan < 0:
+                        match.first_team.extra_dedicated_fan = 0
 
-        match.first_team.value = update_team_value(match.first_team, True)
-        match.first_team.current_team_value = update_team_value(match.first_team)
+                second_team_fan_update = data["second_team_update_fan"]
+                if second_team_fan_update:
+                    match.second_team.extra_dedicated_fan += int(second_team_fan_update)
+                    if match.second_team.extra_dedicated_fan < 0:
+                        match.second_team.extra_dedicated_fan = 0
 
-        match.second_team.value = update_team_value(match.second_team, True)
-        match.second_team.current_team_value = update_team_value(match.second_team)
+                match.first_team.value = update_team_value(match.first_team, True)
+                match.first_team.current_team_value = update_team_value(match.first_team)
 
-        first_team_extra_td = data["first_team_extra_td"]
-        second_team_extra_td = data["second_team_extra_td"]
+                match.second_team.value = update_team_value(match.second_team, True)
+                match.second_team.current_team_value = update_team_value(match.second_team)
 
-        if first_team_extra_td:
-            first_team_extra_td_int = int(first_team_extra_td)
-            match.first_team_td += first_team_extra_td_int
-            match.first_team.total_touchdown += first_team_extra_td_int
+                # first_team_extra_td = data["first_team_extra_td"]
+                # second_team_extra_td = data["second_team_extra_td"]
 
-        if second_team_extra_td:
-            second_team_extra_td_int = int(second_team_extra_td)
-            match.second_team_td += second_team_extra_td_int
-            match.second_team.total_touchdown += second_team_extra_td_int
+                #if first_team_extra_td:
+                #    first_team_extra_td_int = int(first_team_extra_td)
+                #    match.first_team_td += first_team_extra_td_int
+                #    match.first_team.total_touchdown += first_team_extra_td_int
 
-        first_team_td = first_team_data.get_number_of_td()
-        second_team_td = second_team_data.get_number_of_td()
-        if first_team_td > second_team_td:
-            match.first_team.win += 1
-            match.second_team.loss += 1
-        elif first_team_td < second_team_td:
-            match.first_team.loss += 1
-            match.second_team.win += 1
-        elif first_team_td == second_team_td:
-            match.first_team.tie += 1
-            match.second_team.tie += 1
+                #if second_team_extra_td:
+                #    second_team_extra_td_int = int(second_team_extra_td)
+                #    match.second_team_td += second_team_extra_td_int
+                #    match.second_team.total_touchdown += second_team_extra_td_int
 
-        first_team_gold = data['first_team_gold']
-        second_team_gold = data['second_team_gold']
+                first_team_td = first_team_data.get_number_of_td()
+                second_team_td = second_team_data.get_number_of_td()
+                if first_team_td > second_team_td:
+                    match.first_team.win += 1
+                    match.second_team.loss += 1
+                elif first_team_td < second_team_td:
+                    match.first_team.loss += 1
+                    match.second_team.win += 1
+                elif first_team_td == second_team_td:
+                    match.first_team.tie += 1
+                    match.second_team.tie += 1
 
-        if first_team_gold:
-            first_team_gold_int = int(first_team_gold)
-            match.first_team_gold = first_team_gold_int
-            match.first_team.treasury += first_team_gold_int
+                first_team_gold = data['first_team_gold']
+                second_team_gold = data['second_team_gold']
 
-        if second_team_gold:
-            second_team_gold_int = int(second_team_gold)
-            match.second_team_gold = second_team_gold_int
-            match.second_team.treasury += second_team_gold_int
+                if first_team_gold:
+                    first_team_gold_int = int(first_team_gold)
+                    match.first_team_gold = first_team_gold_int
+                    match.first_team.treasury += first_team_gold_int
 
-        match.first_team.save()
-        match.second_team.save()
-        match.played = True
-        match.save()
+                if second_team_gold:
+                    second_team_gold_int = int(second_team_gold)
+                    match.second_team_gold = second_team_gold_int
+                    match.second_team.treasury += second_team_gold_int
+
+                match.first_team.save()
+                match.second_team.save()
+                match.played = True
+                match.save()
+
+                logger.debug('User ' + str(request.user) + ' closed match ' + match.debug())
+
+        except Exception as e:
+            logger.error('User ' + str(request.user) + ' close match Exception ' + str(e))
+            messages.error(request, 'Internal error in close match Player')
 
         return redirect('match:all_matches')
     else:

@@ -92,8 +92,9 @@ class CloseMatchDataReader:
 
             if self.is_mvp(player):
                 total_spp += 4
+                player.total_mvp += 1
 
-            if self.conceded_team is not None and self.conceded_team != self.select_team:
+            if self.conceded_team is True and self.conceded_team != self.select_team:
                 if self.is_second_mvp(player):
                     total_spp += 4
 

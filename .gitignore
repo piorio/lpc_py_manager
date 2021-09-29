@@ -13,3 +13,4 @@ teams/__pycache__/
 match/__pycache__/
 teams/migrations/__pycache__/
 lpc_py_manager/secret_settings.py
+log/
