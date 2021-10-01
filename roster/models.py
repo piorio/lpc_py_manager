@@ -56,6 +56,7 @@ class RosterPlayer(models.Model):
     strength = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
     primary_skills = models.CharField(default=None, max_length=5)
     secondary_skills = models.CharField(default=None, max_length=5)
+    is_journeyman = models.BooleanField(default=False)
 
     skills = models.ManyToManyField(Skill, related_name='skills', blank=True)
     traits = models.ManyToManyField(Trait, blank=True)

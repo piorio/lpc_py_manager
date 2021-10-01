@@ -157,13 +157,17 @@ def close_match(request, match_id):
                 second_team_td = second_team_data.get_number_of_td()
                 if first_team_td > second_team_td:
                     match.first_team.win += 1
+                    match.first_team.league_points += 3
                     match.second_team.loss += 1
                 elif first_team_td < second_team_td:
                     match.first_team.loss += 1
                     match.second_team.win += 1
+                    match.second_team.league_points += 3
                 elif first_team_td == second_team_td:
                     match.first_team.tie += 1
                     match.second_team.tie += 1
+                    match.first_team.league_points += 1
+                    match.second_team.league_points += 1
 
                 first_team_gold = data['first_team_gold']
                 second_team_gold = data['second_team_gold']

@@ -41,6 +41,8 @@ class Team(models.Model):
     total_touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
+    league_points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
     def get_absolute_url(self):
         return reverse('teams:all_team_detail', args=[str(self.id)])
 

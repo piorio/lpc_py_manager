@@ -84,7 +84,7 @@ urlpatterns = [
     path('my_teams/manage_team/buy_apothecary/<int:team_id>', manage_buy_apothecary, name='manage_buy_apothecary'),
     path('my_teams/manage_team/remove_apothecary/<int:team_id>', manage_remove_apothecary,
          name='manage_remove_apothecary'),
-    path('my_teams/manage_team/buy_player/<int:team_id>', manage_buy_player, name='manage_buy_player'),
+    path('my_teams/manage_team/buy_player.py/<int:team_id>', manage_buy_player, name='manage_buy_player'),
     path('my_teams/manage_team/levelup/<int:player_id>', player_level_up, name='player_level_up'),
     path('my_teams/manage_team/levelup/first_random/<int:player_id>', random_first_skill, name='random_first_skill'),
     path('my_teams/manage_team/levelup/second_random/<int:player_id>', random_second_skill, name='random_second_skill'),

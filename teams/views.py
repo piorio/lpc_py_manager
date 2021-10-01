@@ -4,6 +4,8 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
+
+from .buy_fire_helpers.buy_journeyman import BuyJourneyman
 from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm, RandomSkill
 from roster.models import RosterTeam, RosterPlayer, Skill
@@ -13,6 +15,7 @@ from django.db.models import Q
 from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
     get_new_level, get_second_skills_category, get_first_skills_select_option, get_second_skills_select_option
 import logging
+from .buy_fire_helpers.buy_player import BuyPlayer
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +155,7 @@ def dismiss_team(request, pk):
 def prepare_team(request, pk):
     team = get_object_or_404(Team, id=pk)
     logger.debug('User ' + str(request.user) + ' try to prepare team ' + str(team))
-    roster_players = team.roster_team.roster_players.all()
+    roster_players = team.roster_team.roster_players.filter(is_journeyman=False).all()
 
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot prepare a team not belongs to you')
@@ -189,6 +192,7 @@ def ready_team(request, pk):
 
 @login_required
 def buy_player(request, team_id):
+    # You can buy only player not journeyman. The J didn't show into the list of players. But add a check
     roster_player_id = request.GET.get('roster_player', None)
     team = get_object_or_404(Team, id=team_id)
     roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
@@ -200,6 +204,12 @@ def buy_player(request, team_id):
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
         logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
                        + str(team) + ' but the team not belong to the user')
+        return redirect(team.get_prepare_absolute_url())
+
+    if roster_player_to_buy.is_journeyman:
+        messages.error(request, 'You cannot buy a Journeyman player during team preparation')
+        logger.warning('User ' + str(request.user) + ' try to buy a journeyman ' + str(roster_player_to_buy)
+                       + ' for team ' + str(team))
         return redirect(team.get_prepare_absolute_url())
 
     is_buy_valid = True
@@ -275,6 +285,7 @@ def buy_player(request, team_id):
 
 @login_required
 def fire_player(request, team_id):
+    # You can fire only player not journeyman. The J didn't show into the list of players. But add a check
     player_id = request.GET.get('player', None)
     team = get_object_or_404(Team, id=team_id)
     player = get_object_or_404(TeamPlayer, id=player_id)
@@ -286,7 +297,13 @@ def fire_player(request, team_id):
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
         logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' for not owned team '
                        + str(team))
-        return redirect('teams:my_teams')
+        return redirect(team.get_prepare_absolute_url())
+
+    if player.roster_player.is_journeyman:
+        messages.error(request, 'You cannot fire a Journeyman player during team preparation')
+        logger.warning('User ' + str(request.user) + ' try to fire a journeyman ' + str(player)
+                       + ' for team ' + str(team))
+        return redirect(team.get_prepare_absolute_url())
 
     # Check if player_id belongs to team
     team_players_id = list(team.players.values_list('id', flat=True))
@@ -319,16 +336,25 @@ def fire_player(request, team_id):
 @login_required
 def my_team_detail(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+    logger.debug('User ' + str(request.user) + ' request detail for ' + str(team))
 
     if team.coach.id != request.user.id:
         messages.error(request, 'Team did not belongs to you')
+        logger.warning('User ' + str(request.user) + ' request detail for ' + str(team) + ' but don\'t own team')
         return redirect('teams:my_teams')
 
     roster_players = team.roster_team.roster_players.all()
     dedicated_fan = team.extra_dedicated_fan + 1
+
+    enable_journeyman = False
+    if team.number_of_players < 11:
+        enable_journeyman = True
+
+    logger.debug('User ' + str(request.user) + ' request detail for ' + str(team) + ' Enable JourneyMan '
+                 + str(enable_journeyman))
     return render(request,
                   'teams/my_team_detail.html', {'team': team, 'roster_players': roster_players,
-                                                'dedicated_fan': dedicated_fan})
+                                                'dedicated_fan': dedicated_fan, 'enable_journeyman': enable_journeyman})
 
 
 @login_required
@@ -587,6 +613,7 @@ def change_player_name_number(request):
 
 @login_required
 def manage_fire_player(request, team_id):
+    # If a coach fire a Journeyman, change the TV, but not the Treasury. TODO
     player_id = request.GET.get('player', None)
     team = get_object_or_404(Team, id=team_id)
     player = get_object_or_404(TeamPlayer, id=player_id)
@@ -608,8 +635,12 @@ def manage_fire_player(request, team_id):
                        + str(team))
         return redirect('teams:my_teams')
 
-    # Delete player and add again the cost
-    team.treasury = team.treasury + player.cost
+    # Fired player and add again the cost
+    if not player.roster_player.is_journeyman:
+        logger.debug('User ' + str(request.user) + ' fire ' + str(player) + ' for team '
+                     + str(team) + ' and is not a journeyman so update treasury')
+        team.treasury = team.treasury + player.cost
+
     if player.big_guy:
         team.big_guy_numbers -= 1
     team.number_of_players -= 1
@@ -822,68 +853,24 @@ def manage_buy_player(request, team_id):
             + str(team))
         return redirect(team.get_my_team_detail_absolute_url())
 
-    is_buy_valid = True
+    buy_engine = None
+    if roster_player_to_buy.is_journeyman:
+        buy_engine = BuyJourneyman(team, roster_player_to_buy, request.user)
+    else:
+        buy_engine = BuyPlayer(team, roster_player_to_buy, request.user)
 
-    # Check if roster_player_id belongs to roster team
-    roster_players_id = list(team.roster_team.roster_players.values_list('id', flat=True))
-    if int(roster_player_id) not in roster_players_id:
-        messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
-        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but not in team roster ')
-        return redirect('teams:my_teams')
-
-    # Check max team players
-    if team.number_of_players > 15:
-        is_buy_valid = False
-        messages.error(request, 'You can\'t buy more than 16 players')
-        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but can\'t buy more than 16 players. Players -> ' + str(team.number_of_players))
-
-    # check money spent
-    if is_buy_valid and roster_player_to_buy.cost > team.treasury:
-        is_buy_valid = False
-        messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
-        logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but don\'t have money. Treasury -> ' + str(team.treasury)
-                       + ' Player cost -> ' + str(roster_player_to_buy.cost))
-
-    # Check big guy: a roster team must have a max number of big guy
-    if is_buy_valid and roster_player_to_buy.big_guy:
-        if team.big_guy_numbers >= team.roster_team.big_guy_max:
-            is_buy_valid = False
-            messages.error(request, 'You cant\'t have more big guy')
-            logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                           + str(team) + ' but can\'t have more big guy. Big Guy -> ' + str(team.big_guy_numbers)
-                           + ' Max number of big guy -> ' + str(team.roster_team.big_guy_max))
-
-    # Check max position quantity
-    if is_buy_valid:
-        number_of_roster_player_hired = team.players.filter(roster_player=roster_player_to_buy.id).count()
-        if number_of_roster_player_hired >= roster_player_to_buy.max_quantity:
-            is_buy_valid = False
-            messages.error(request, 'You cant\'t buy ' + roster_player_to_buy.position + '! Max quantity is ' +
-                           str(roster_player_to_buy.max_quantity))
-            logger.warning('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                           + str(team) + ' but can\'t have more positional of this kind. has -> '
-                           + str(number_of_roster_player_hired)
-                           + ' Max quantity -> ' + str(roster_player_to_buy.max_quantity))
+    player = buy_engine.generate_player_to_buy()
 
     # add Team player -> Create session for rollback
-    if is_buy_valid:
-        player = TeamPlayer()
-        player.init_with_roster_player(roster_player_to_buy, team)
-        team.treasury = team.treasury - roster_player_to_buy.cost
-        if roster_player_to_buy.big_guy:
-            team.big_guy_numbers += 1
-        team.number_of_players += 1
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-
+    if player is not None:
         try:
             with transaction.atomic():
-                team.save()
                 player.save()
+                team.value = update_team_value(team, True)
+                team.current_team_value = update_team_value(team)
+                team.save()
                 player.set_initial_skills_and_traits(roster_player_to_buy)
+                buy_engine.add_more_skill(player)
         except Exception as e:
             logger.error('User ' + str(request.user) + ' try to hire ' + str(player) +
                          ' Exception ' + str(e))
@@ -891,6 +878,8 @@ def manage_buy_player(request, team_id):
             return redirect('teams:my_teams')
 
         messages.success(request, 'You bought ' + str(player.position))
+    else:
+        messages.error(request, buy_engine.message_for_flash)
 
     return redirect(team.get_my_team_detail_absolute_url())
 
