@@ -232,6 +232,7 @@
                             <TH>SKILLS & TRAITS</TH>
                             <TH>Current Value</TH>
                             <TH>SPP</TH>
+                            <TH>NIGGLING INJURY</TH>
                             <TH>ACTION</TH>
                             </thead>
                             <tbody>
@@ -269,6 +270,7 @@
                                         </td>
                                         <td>{{ player.value }}</td>
                                         <td>{{ player.spp }}</td>
+                                        <td>{{ player.niggling_injury }}</td>
                                         <td>
                                             <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
                                                class="btn btn-primary">FIRE</a>
@@ -334,8 +336,16 @@
                                     </td>
                                     <td>{{ roster_player.cost }}</td>
                                     <td>
-                                        <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
-                                           class="btn btn-primary">BUY</a>
+                                        {% if not roster_player.is_journeyman or enable_journeyman %}
+                                            <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
+                                               class="btn btn-primary">
+                                                {% if not roster_player.is_journeyman %}
+                                                    BUY
+                                                {% else %}
+                                                    add Journeyman
+                                                {% endif %}
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
