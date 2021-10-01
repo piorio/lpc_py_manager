@@ -203,7 +203,7 @@ class TeamPlayer(models.Model):
         self.traits.add(*roster_player.traits.all())
 
     def __str__(self):
-        return self.name + " - (" + self.position + ")"
+        return '[' + str(self.player_number) + '] - ' + self.name + " - (" + self.position + ")"
 
     def get_random_first_skill_levelup_absolute_url(self):
         return reverse('teams:random_first_skill', args=[str(self.id)])

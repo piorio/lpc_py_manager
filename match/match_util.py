@@ -1,5 +1,8 @@
 from .casualty_util import PlayerCasualtyFactory
 from .models import TeamPlayerMatchRecord
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CloseMatchDataReader:
@@ -23,8 +26,12 @@ class CloseMatchDataReader:
         return self.number_of_td
 
     def prepare(self):
-        print("Match util prepare DATA FORM " + str(self.data))
+        logger.debug("Match util prepare DATA FORM " + str(self.data))
+        logger.debug("Match util prepare selected team " + str(self.selected_team) + ' TEAM ' + str(self.team))
+
         if self.selected_team not in self.select_team:
+            logger.warning('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                           + '. Unable to find index into select_team ')
             return
 
         extra_fan_string = self.select_team[self.selected_team]
@@ -33,15 +40,20 @@ class CloseMatchDataReader:
         if extra_fan:
             match_extra_fan = int(extra_fan)
 
+        logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                     + '. match_extra_fan ' + str(match_extra_fan))
+
         team_touchdown = 0
         team_cas = 0
         team_badly_hurt = 0
         team_serious_injury = 0
         team_kill = 0
 
-        print("Match util prepare players " + str(self.players))
+        logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                     + '. prepare players ' + str(self.players))
         for player in self.players:
-            print("Match util prepare -> Prepare player " + str(player))
+            logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                         + '. prepare player ' + str(player))
             total_spp = 0
             total_cas = 0
 
@@ -90,9 +102,16 @@ class CloseMatchDataReader:
             total_spp += complete_spp
             player.complete += complete
 
+            logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                         + '. touchdown ' + str(touchdown) + ' badly_hurt ' + str(badly_hurt)
+                         + ' serious_injury ' + str(serious_injury) + ' kill ' + str(kill)
+                         + ' intercept ' + str(intercept) + ' deflection ' + str(deflection)
+                         + ' complete ' + str(complete))
+
             if self.is_mvp(player):
                 total_spp += 4
                 player.total_mvp += 1
+                logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id) + ' Player is MVP ')
 
             if self.conceded_team is True and self.conceded_team != self.select_team:
                 if self.is_second_mvp(player):
@@ -102,14 +121,16 @@ class CloseMatchDataReader:
             player.spp += total_spp
             team_cas += total_cas
 
-            print("Match util prepare -> Prepare player before CAS " + str(player))
             self.apply_cas(player, match_played)
-
             player.save()
 
             # Save match and played match...must be in other place
             match_played.ssp = total_spp
             match_played.total_cas = total_cas
+
+            logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                         + ' Player total spp ' + str(total_spp) + ' total cas ' + str(total_cas))
+
             # INJURY RECEIVED????
             match_played.save()
 
@@ -137,6 +158,9 @@ class CloseMatchDataReader:
             self.match.second_team.total_cas = team_cas
 
         self.number_of_td = team_touchdown
+
+        logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                     + ' Total Touchdown ' + str(team_touchdown))
         self.match.save()
 
     def get_td(self, player):
@@ -220,8 +244,9 @@ class CloseMatchDataReader:
 
     def apply_cas(self, player, match_played):
         factory = PlayerCasualtyFactory()
-        print("Match util prepare -> CAS Factory " + str(factory) + " - player " + str(player))
         engine = factory.get_casualty_engine(self.data, self.team_id, player.id)
+        logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
+                     + ' and match_played ' + str(match_played) + ' CAS engine ' + str(engine))
         if engine is not None:
             engine.apply_to_player(player, match_played)
 
@@ -254,4 +279,3 @@ def is_conceded(data):
         team_conceded = False
 
     return return_flag, False, team_conceded
-
