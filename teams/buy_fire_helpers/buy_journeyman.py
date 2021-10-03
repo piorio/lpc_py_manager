@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from roster.models import Skill
 import logging
 
@@ -23,10 +25,12 @@ class BuyJourneyman:
         return buy_flag
 
     def check_max_team_player(self):
-        if self.team.number_of_players > 10:
+        valid_player_counter = self.team.players.filter(Q(dead=False) & Q(fired=False) & Q(missing_next_game=False))\
+            .count()
+        if valid_player_counter > 10:
             logger.warning('User ' + str(self.user) + ' try to hire journeyman ' + str(self.roster_player)
                            + ' for team ' + str(self.team) + ' but can\'t buy if you have more than 16 players. '
-                           + ' Players counter -> ' + str(self.team.number_of_players))
+                           + ' Players counter -> ' + valid_player_counter)
             self.message_for_flash = 'You can\'t buy a journeyman if you have more  than 11 players'
             return False
 
