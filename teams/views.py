@@ -346,8 +346,10 @@ def my_team_detail(request, team_id):
     roster_players = team.roster_team.roster_players.all()
     dedicated_fan = team.extra_dedicated_fan + 1
 
+    valid_player_counter = team.players.filter(Q(dead=False) & Q(fired=False) & Q(missing_next_game=False)).count()
+
     enable_journeyman = False
-    if team.number_of_players < 11:
+    if valid_player_counter < 11:
         enable_journeyman = True
 
     logger.debug('User ' + str(request.user) + ' request detail for ' + str(team) + ' Enable JourneyMan '
@@ -866,11 +868,12 @@ def manage_buy_player(request, team_id):
         try:
             with transaction.atomic():
                 player.save()
-                team.value = update_team_value(team, True)
+                # Journeyman doesn't change the TV but only current value
+                if not roster_player_to_buy.is_journeyman:
+                    team.value = update_team_value(team, True)
                 team.current_team_value = update_team_value(team)
                 team.save()
                 player.set_initial_skills_and_traits(roster_player_to_buy)
-                buy_engine.add_more_skill(player)
         except Exception as e:
             logger.error('User ' + str(request.user) + ' try to hire ' + str(player) +
                          ' Exception ' + str(e))
