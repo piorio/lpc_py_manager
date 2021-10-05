@@ -15,6 +15,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Value</th>
+                        <th>Current Value</th>
                         <th>Treasury</th>
                         <th>Coach</th>
                         <TH>Points</TH>
@@ -31,6 +32,7 @@
                         </a></span>
                             </td>
                             <td>{{ obj.value }}</td>
+                            <td>{{ obj.current_team_value }}</td>
                             <td>{{ obj.treasury }}</td>
                             <td>{{ obj.coach.username }}</td>
                             <td> {{ obj.league_points }}</td>
