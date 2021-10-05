@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 # teamid_cas_playerId -> BH
 class BadlyHurt:
     def apply_to_player(self, player, match_played):
@@ -93,14 +97,17 @@ class PlayerCasualtyFactory:
     def get_casualty_engine(self, data, team_id, player_id):
         data_cas_string = str(team_id) + '_cas_' + str(player_id)
         data_last_injury_string = str(team_id) + '_lasti_' + str(player_id)
-        cas_type = data[data_cas_string]
-        print("CAS UTIL. data_cas_string => " + data_cas_string + " data_last_injury_string => "
-              + data_last_injury_string + " cas_type => " + cas_type)
+        cas_type = data.get(data_cas_string)
         if cas_type:
+            logger.debug('CAS UTIL for playerId ' + str(player_id) + ' of team ' + str(team_id)
+                         + ' cas type ' + cas_type)
+
             engine = PlayerCasualtyFactory.instance_to_return[cas_type]
-            injury_type = data[data_last_injury_string]
+            injury_type = data.get(data_last_injury_string)
             if injury_type and injury_type != 'NA':
                 engine.set_last_injury(injury_type)
             return engine
         else:
+            logger.debug('CAS UTIL for playerId ' + str(player_id) + ' of team ' + str(team_id)
+                         + ' No cas type ')
             return None

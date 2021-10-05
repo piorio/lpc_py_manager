@@ -11,6 +11,7 @@ class Match(models.Model):
     second_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='second_team')
     match_date_from = models.DateField(default=None, blank=True, null=True)
     match_date_to = models.DateField(default=None, blank=True, null=True)
+
     first_team_td = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     first_team_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     first_team_badly_hurt = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
@@ -77,4 +78,3 @@ class TeamPlayerMatchRecord(models.Model):
     last_injury = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     intercept = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    deflection = models.IntegerField(default=0, validators=[MinValueValidator(0)])
