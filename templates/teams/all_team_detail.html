@@ -249,4 +249,71 @@
         </div>
     </div>
 
+    <!-- Not available player List -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Not available Players list</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>NUMBER</th>
+                            <th>NAME</th>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>ACTION</TH>
+                            </thead>
+                            <tbody>
+                            {% for player in team.players.all %}
+                                {% if player.missing_next_game == True %}
+                                    <tr>
+                                        <td>{{ player.player_number }}</td>
+                                        <td>{{ player.name }}</td>
+                                        <td>{{ player.position }}</td>
+                                        <td>{{ player.movement_allowance }}</td>
+                                        <td>{{ player.strength }}</td>
+                                        <td>{{ player.agility }}+</td>
+                                        <td>
+                                            {% if player.passing != 0 %}
+                                                {{ player.passing }}+
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ player.armor_value }}+</td>
+                                        <td>
+                                            {% for skill in player.base_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
+                                            {% for trait in player.traits.all %}
+                                                {{ trait.name }},
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ player.value }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
+                                               class="btn btn-primary">MANAGE</a>
+                                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                                               class="btn btn-primary">FIRE</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

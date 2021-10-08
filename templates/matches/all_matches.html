@@ -23,8 +23,16 @@
                     <tbody>
                     {% for obj in matches %}
                         <tr>
-                            <td>{{ obj.first_team }}</td>
-                            <td>{{ obj.second_team }}</td>
+                            <td>
+                                <a href="{{ obj.first_team.get_my_team_detail_absolute_url }}">
+                                    {{ obj.first_team }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ obj.second_team.get_my_team_detail_absolute_url }}">
+                                    {{ obj.second_team }}
+                                </a>
+                            </td>
                             <td>{{ obj.match_date_from }}</td>
                             <td>{{ obj.match_date_to }}</td>
                             <td>

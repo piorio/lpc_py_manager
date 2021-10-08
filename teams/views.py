@@ -946,6 +946,7 @@ def random_first_skill(request, player_id):
                         player.level = get_new_level(player)
                         player.value += 10000
                         player.spp -= level_cost
+                        player.spent_spp += level_cost
                         player.save()
                         player.team.value = update_team_value(player.team, True)
                         player.team.current_team_value = update_team_value(player.team)
@@ -1021,6 +1022,7 @@ def random_second_skill(request, player_id):
                         player.level = get_new_level(player)
                         player.value += 20000
                         player.spp -= level_cost
+                        player.spent_spp += level_cost
                         player.save()
                         player.team.value = update_team_value(player.team, True)
                         player.team.current_team_value = update_team_value(player.team)
@@ -1081,6 +1083,7 @@ def select_first_skill(request, player_id):
                     player.level = get_new_level(player)
                     player.value += 20000
                     player.spp -= level_cost
+                    player.spent_spp += level_cost
                     player.save()
                     player.team.value = update_team_value(player.team, True)
                     player.team.current_team_value = update_team_value(player.team)
@@ -1133,6 +1136,7 @@ def select_second_skill(request, player_id):
                     player.level = get_new_level(player)
                     player.value += 40000
                     player.spp -= level_cost
+                    player.spent_spp += level_cost
                     player.save()
                     player.team.value = update_team_value(player.team, True)
                     player.team.current_team_value = update_team_value(player.team)

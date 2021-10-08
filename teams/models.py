@@ -167,6 +167,7 @@ class TeamPlayer(models.Model):
     missing_next_game = models.BooleanField(default=False)
     dead = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)
+    spent_spp = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     LEVEL_CHOICES = (
         ('NONE', 'NONE'),

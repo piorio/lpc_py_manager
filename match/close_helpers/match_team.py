@@ -13,6 +13,12 @@ extra_fan_team = {'FIRST': 'first_team_extra_fan', 'SECOND': 'second_team_extra_
 
 class MatchTeam:
     def __init__(self, team, selected_team, form_data, match):
+
+        if selected_team not in extra_fan_team or selected_team not in mvp_team:
+            logger.warning('For team ' + str(team) + ' and matchId ' + str(match.id)
+                           + '. Unable to find index into mvp_team or extra_fan_team')
+            raise Exception('Unable to find ' + str(selected_team) + ' Into dicts')
+
         self.team = team
         self.selected_team = selected_team
         self.mvp_data_key = mvp_team[selected_team]
@@ -32,7 +38,8 @@ class MatchTeam:
         extra_fan = self.form_data[self.extra_fan_data_key]
         if extra_fan:
             self.extra_fan = int(extra_fan)
-            self.fan_factor = self.extra_fan + self.team.extra_dedicated_fan
+            # A team has extra dedicated fan + 1
+            self.fan_factor = self.extra_fan + self.team.extra_dedicated_fan + 1
 
         logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
                      + '. match_extra_fan ' + str(self.extra_fan))
@@ -116,5 +123,8 @@ class MatchTeam:
 
         logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
                      + ' Total Touchdown ' + str(self.touchdown))
+
+    def __str__(self):
+        return str(self.team)
 
 
