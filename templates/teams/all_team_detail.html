@@ -206,6 +206,7 @@
                             <TH>SKILLS & TRAITS</TH>
                             <TH>Current Value</TH>
                             <TH>SPP</TH>
+                            <TH>NIGGLING INJURY</TH>
                             </thead>
                             <tbody>
                             {% for player in team.players.all %}
@@ -238,6 +239,7 @@
                                         </td>
                                         <td>{{ player.value }}</td>
                                         <td>{{ player.spp }}</td>
+                                        <td>{{ player.niggling_injury }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}

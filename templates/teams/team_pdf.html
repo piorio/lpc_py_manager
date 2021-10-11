@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ team.name }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+        }
+
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        a {
+            text-decoration: underline;
+        }
+
+        body {
+            position: relative;
+            margin: 0 auto;
+            color: #001028;
+            background: #FFFFFF;
+            font-family: Arial, sans-serif;
+            font-size: 6px;
+            font-family: Arial;
+        }
+
+        header {
+            padding: 10px 0;
+            margin-bottom: 30px;
+        }
+
+        #logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #logo img {
+            width: 90px;
+        }
+
+        h1 {
+
+            color: #5D6975;
+            font-size: 2.4em;
+            line-height: 1.4em;
+            font-weight: normal;
+            text-align: center;
+            margin: 0 0 20px 0;
+        }
+
+        #project {
+            float: left;
+        }
+
+        #project span {
+            color: #5D6975;
+            text-align: right;
+            width: 52px;
+            margin-right: 10px;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        #company {
+            float: right;
+            text-align: right;
+        }
+
+        #project div,
+        #company div {
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-bottom: 20px;
+        }
+
+
+        table th,
+        table td {
+            text-align: center;
+        }
+
+        table th {
+
+
+            color: #5D6975;
+            border-bottom: 1px solid #C1CED9;
+            white-space: nowrap;
+            font-weight: normal;
+        }
+
+        table .service,
+        table .desc {
+            text-align: left;
+        }
+
+        table td {
+            padding-top: 5px;
+            padding-bottom: 5px;
+
+        }
+
+        table tr {
+            border-bottom: 1px solid #C1CED9;
+        }
+
+        table td.service,
+        table td.desc {
+            vertical-align: top;
+        }
+
+        table td.unit,
+        table td.qty,
+        table td.total {
+            font-size: 1.2em;
+        }
+
+        table td.grand {
+            border-top: 1px solid #5D6975;;
+        }
+
+        #notices .notice {
+            color: #5D6975;
+            font-size: 1.2em;
+        }
+
+        footer {
+            color: #5D6975;
+            width: 100%;
+            height: 30px;
+            position: absolute;
+            bottom: 0;
+            border-top: 1px solid #C1CED9;
+            padding: 8px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<br>
+<br>
+<center><H1>{{ team.name }}</H1></center>
+<br>
+<hr>
+<center><h2>Players</h2></center>
+<br>
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>NAME</th>
+        <th>POSITION</th>
+        <TH>MA</TH>
+        <TH>ST</TH>
+        <TH>AG</TH>
+        <TH>PA</TH>
+        <TH>AV</TH>
+        <TH>SKILLS & TRAITS</TH>
+        <TH>SPP</TH>
+    </tr>
+    </thead>
+    <tbody>
+    {% for player in team.players.all %}
+        {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
+            <tr>
+                <td>{{ player.player_number }}</td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.position }}</td>
+                <td>{{ player.movement_allowance }}</td>
+                <td>{{ player.strength }}</td>
+                <td>{{ player.agility }}+</td>
+                <td>
+                    {% if player.passing != 0 %}
+                        {{ player.passing }}+
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ player.armor_value }}+</td>
+                <td>
+                    {% for skill in player.base_skills.all %}
+                        {{ skill.name }},
+                    {% endfor %}
+                    {% for trait in player.traits.all %}
+                        {{ trait.name }},
+                    {% endfor %}
+                    {% for skill in player.extra_skills.all %}
+                        {{ skill.name }},
+                    {% endfor %}
+                </td>
+                <td>{{ player.spp }}</td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+<br>
+<hr>
+<center><h2>Extra</h2></center>
+<br>
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>CHEERLEADER</td>
+        <td>{{ team.cheerleader }}</td>
+    </tr>
+    <tr>
+        <td>RE ROLL</td>
+        <td>{{ team.re_roll }}</td>
+    </tr>
+    <tr>
+        <td>Assistant coach</td>
+        <td>{{ team.assistant_coach }}</td>
+    </tr>
+    <tr>
+        <td>Apothecary</td>
+        <td>
+            {% if team.apothecary == True %}
+                YES
+            {% else %}
+                NO
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Current team value</td>
+        <td>{{ team.current_team_value }}</td>
+    </tr>
+    <tr>
+        <td>Treasury</td>
+        <td>{{ team.treasury }}</td>
+    </tr>
+    <tr>
+        <td>Dedicated fan</td>
+        <td>{{ dedicated_fan }}</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

@@ -9,7 +9,7 @@
     <h1>Team {{ team.name }}</h1>
     <br>
 
-    <h3>Details</h3>
+    <h3>Details -- <a href="{% url 'teams:create_pdf' team.id %}" class="btn btn-primary">Create PDF</a></h3>
     <br>
 
     <!-- FIRST ROW -->

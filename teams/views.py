@@ -1,9 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import get_template
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
+from xhtml2pdf import pisa
 
 from .buy_fire_helpers.buy_journeyman import BuyJourneyman
 from .models import Team, TeamPlayer
@@ -1158,3 +1161,33 @@ def select_second_skill(request, player_id):
 
 def index_test(request):
     return render(request, 'index.html')
+
+
+@login_required
+def render_pdf_view(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
+    team = get_object_or_404(Team, id=team_id)
+    logger.debug('User ' + str(request.user) + ' try to create pdf for team' + str(team))
+
+    template_path = 'teams/team_pdf.html'
+    dedicated_fan = team.extra_dedicated_fan + 1
+    context = {'team': team, 'dedicated_fan': dedicated_fan}
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+
+    # To download the file
+    # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    # To view the file
+    response['Content-Disposition'] = 'filename="' + team.name + '.pdf"'
+
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+        html, dest=response)
+    # if error then show some funy view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

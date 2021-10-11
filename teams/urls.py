@@ -40,6 +40,7 @@ from .views import (
     random_second_skill,
     select_first_skill,
     select_second_skill,
+    render_pdf_view,
 )
 
 app_name = 'teams'
@@ -90,5 +91,6 @@ urlpatterns = [
     path('my_teams/manage_team/levelup/second_random/<int:player_id>', random_second_skill, name='random_second_skill'),
     path('my_teams/manage_team/levelup/choose_first/<int:player_id>', select_first_skill, name='select_first_skill'),
     path('my_teams/manage_team/levelup/choose_secondary/<int:player_id>', select_second_skill,
-         name='select_second_skill')
+         name='select_second_skill'),
+    path('my_teams/create_pdf/<int:team_id>', render_pdf_view, name='create_pdf')
 ]
