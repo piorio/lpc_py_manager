@@ -14,12 +14,12 @@ class BuyPlayer:
         self.message_for_flash = None
         self.buy_player_state = False
 
-    def buy_player(self):
+    def buy_player(self, player_value=0):
         buy_flag = self.check_max_team_player()
         if not buy_flag:
             return False
 
-        buy_flag = self.check_money_to_spend()
+        buy_flag = self.check_money_to_spend(player_value)
         if not buy_flag:
             return False
 
@@ -44,11 +44,14 @@ class BuyPlayer:
 
         return True
 
-    def check_money_to_spend(self):
-        if self.roster_player.cost > self.team.treasury:
+    def check_money_to_spend(self, player_value=0):
+        cost_to_use = self.roster_player.cost
+        if player_value > 0:
+            cost_to_use = player_value
+        if cost_to_use > self.team.treasury:
             logger.warning('User ' + str(self.user) + ' try to hire ' + str(self.roster_player) + ' for team '
                            + str(self.team) + ' but don\'t have money. Treasury -> ' + str(self.team.treasury)
-                           + ' Player cost -> ' + str(self.roster_player.cost))
+                           + ' Player cost (cost to use) -> ' + str(cost_to_use))
             self.message_for_flash = 'You don\'t have money for this player ' + self.roster_player.position
             return False
 

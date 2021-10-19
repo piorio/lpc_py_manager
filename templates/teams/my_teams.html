@@ -40,10 +40,10 @@
                             <td>{{ obj.roster_team.name }}</td>
                             <td>
                                 {% if obj.status == 'CREATED' %}
-                                    <a href="{{ obj.get_prepare_absolute_url }}">PREPARE</a>
-                                    <a href="{{ obj.get_dismiss_absolute_url }}">RETIRE</a>
+                                    <a href="{% url 'teams:prepare_team' obj.id %}">PREPARE</a>
+                                    <a href="{% url 'teams:dismiss_team' obj.id %}">RETIRE</a>
                                 {% elif obj.status == 'READY' %}
-                                    <a href="{{ obj.get_dismiss_absolute_url }}">RETIRE</a>
+                                    <a href="{% url 'teams:dismiss_team' obj.id %}">RETIRE</a>
                                 {% endif %}
                             </td>
                         </tr>

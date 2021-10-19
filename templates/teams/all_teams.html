@@ -27,7 +27,7 @@
                     {% for obj in teams %}
                         <tr>
                             <td>
-                        <span><a href="{{ obj.get_absolute_url }}">
+                        <span><a href="{% url 'teams:all_team_detail' obj.id %}">
                             {{ obj.name }}
                         </a></span>
                             </td>

@@ -105,6 +105,23 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLeagueManager"
+                   aria-expanded="true" aria-controls="collapseLeagueManager">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>League manager</span>
+                </a>
+                <div id="collapseLeagueManager" class="collapse" aria-labelledby="headingThree" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">All Leagues:</h6>
+                        <a class="collapse-item" href="{% url 'league:request_new_league' %}">Request new League</a>
+                        <a class="collapse-item" href="#">In progress</a>
+                        <a class="collapse-item" href="#">Closed</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
                    aria-expanded="true" aria-controls="collapseThree">
                     <i class="fas fa-fw fa-cog"></i>
@@ -139,8 +156,9 @@
             <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Site:</h6>
+                    <a class="collapse-item" href="/admin">Root Admin</a>
                     <a class="collapse-item" href="#">About</a>
-                    <a class="collapse-item" href="#">Code</a>
+                    <a class="collapse-item" href="https://github.com/piorio/lpc_py_manager">Code</a>
                 </div>
             </div>
         </li>
@@ -485,7 +503,7 @@
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <span>Copyright &copy; LPC 2021 - Version 0.0.5</span>
+                    <span>Copyright &copy; LPC 2021 - Version 0.0.6</span>
                 </div>
             </div>
         </footer>
