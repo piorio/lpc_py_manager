@@ -23,5 +23,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('teams/', include('teams.urls')),
     path('matches/', include('match.urls')),
+    path('league/', include('league.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]

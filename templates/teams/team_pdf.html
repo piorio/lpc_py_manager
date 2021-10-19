@@ -4,7 +4,7 @@
     <title>{{ team.name }}</title>
     <style>
         @page {
-            size: A4 landscape;
+            size: A4;
         }
 
         .clearfix:after {
@@ -23,26 +23,15 @@
             color: #001028;
             background: #FFFFFF;
             font-family: Arial, sans-serif;
-            font-size: 6px;
-            font-family: Arial;
+            font-size: 10px;
         }
 
         header {
-            padding: 10px 0;
-            margin-bottom: 30px;
-        }
-
-        #logo {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #logo img {
-            width: 90px;
+            padding: 0;
+            margin-bottom: 0px;
         }
 
         h1 {
-
             color: #5D6975;
             font-size: 2.4em;
             line-height: 1.4em;
@@ -51,36 +40,16 @@
             margin: 0 0 20px 0;
         }
 
-        #project {
-            float: left;
-        }
-
-        #project span {
-            color: #5D6975;
-            text-align: right;
-            width: 52px;
-            margin-right: 10px;
-            display: inline-block;
-            font-size: 14px;
-        }
-
-        #company {
-            float: right;
-            text-align: right;
-        }
-
-        #project div,
-        #company div {
-            white-space: nowrap;
+        h2 {
+            text-align: center;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
-            margin-bottom: 20px;
+            margin-bottom: 2px;
         }
-
 
         table th,
         table td {
@@ -88,8 +57,6 @@
         }
 
         table th {
-
-
             color: #5D6975;
             border-bottom: 1px solid #C1CED9;
             white-space: nowrap;
@@ -102,8 +69,8 @@
         }
 
         table td {
-            padding-top: 5px;
-            padding-bottom: 5px;
+            padding-top: 2px;
+            padding-bottom: 2px;
 
         }
 
@@ -126,11 +93,6 @@
             border-top: 1px solid #5D6975;;
         }
 
-        #notices .notice {
-            color: #5D6975;
-            font-size: 1.2em;
-        }
-
         footer {
             color: #5D6975;
             width: 100%;
@@ -147,10 +109,10 @@
 <body>
 <br>
 <br>
-<center><H1>{{ team.name }}</H1></center>
+<H1>{{ team.name }}</H1>
 <br>
 <hr>
-<center><h2>Players</h2></center>
+<h2>Players</h2>
 <br>
 <table>
     <thead>
@@ -165,6 +127,7 @@
         <TH>AV</TH>
         <TH>SKILLS & TRAITS</TH>
         <TH>SPP</TH>
+        <TH>LEVEL</TH>
     </tr>
     </thead>
     <tbody>
@@ -197,6 +160,13 @@
                     {% endfor %}
                 </td>
                 <td>{{ player.spp }}</td>
+                <td>
+                    {% if player.level == 'NONE' %}
+                        --
+                    {% else %}
+                        {{ player.level }}
+                    {% endif %}
+                </td>
             </tr>
         {% endif %}
     {% endfor %}
@@ -204,52 +174,22 @@
 </table>
 <br>
 <hr>
-<center><h2>Extra</h2></center>
 <br>
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>CHEERLEADER</td>
-        <td>{{ team.cheerleader }}</td>
-    </tr>
-    <tr>
-        <td>RE ROLL</td>
-        <td>{{ team.re_roll }}</td>
-    </tr>
-    <tr>
-        <td>Assistant coach</td>
-        <td>{{ team.assistant_coach }}</td>
-    </tr>
-    <tr>
-        <td>Apothecary</td>
-        <td>
-            {% if team.apothecary == True %}
-                YES
-            {% else %}
-                NO
-            {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <td>Current team value</td>
-        <td>{{ team.current_team_value }}</td>
-    </tr>
-    <tr>
-        <td>Treasury</td>
-        <td>{{ team.treasury }}</td>
-    </tr>
-    <tr>
-        <td>Dedicated fan</td>
-        <td>{{ dedicated_fan }}</td>
-    </tr>
-    </tbody>
-</table>
+<h2>Extra</h2>
+<ul>
+    <li><b>CHEERLEADER</b>: {{ team.cheerleader }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>RE
+        ROLL</B>: {{ team.re_roll }}</li>
+    <li><b>Assistant coach</b>: {{ team.assistant_coach }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Apothecary</B>:
+        {% if team.apothecary == True %}
+            YES
+        {% else %}
+            NO
+        {% endif %}
+    </li>
+    <li><b>Current team value</b>: {{ team.current_team_value }}
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Treasury</B>: {{ team.treasury }}</li>
+    <li><b>Dedicated fan</b>: {{ dedicated_fan }} </li>
+</ul>
 
 </body>
 </html>

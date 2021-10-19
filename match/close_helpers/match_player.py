@@ -23,6 +23,10 @@ class MatchPlayer:
         self.mvp_data_key = mvp_data_key
 
     def calculate_all_from_form_data(self):
+        # Update the number of play matched
+        self.player.number_of_matches += 1
+        logger.debug('Player ' + self.player.debug() + ' played ' + str(self.player.number_of_matches))
+
         self.calculate_player_touchdown()
         self.calculate_player_badly_hurt()
         self.calculate_player_serious_injury()

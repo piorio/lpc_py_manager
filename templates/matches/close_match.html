@@ -108,12 +108,12 @@
                                 <th>PLAYER NUMBER</th>
                                 <th>PLAYER</th>
                                 <th>TD</th>
+                                <th>COMPLETE</th>
+                                <th>DEFLECTION</th>
+                                <th>INTERCEPT</th>
                                 <th>BH</th>
                                 <th>SI</th>
                                 <th>KI</th>
-                                <th>INTERCEPT</th>
-                                <th>DEFLECTION</th>
-                                <th>COMPLETE</th>
                                 <th>CASUALTY</th>
                                 <th>Lasting Injury</th>
                                 </thead>
@@ -126,6 +126,27 @@
                                             <div class="form-group">
                                                 <input type="number" id="{{ match.first_team.id }}_td_{{ player.id }}"
                                                        name="{{ match.first_team.id }}_td_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_comp_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_comp_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_def_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_def_{{ player.id }}"
+                                                       class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.first_team.id }}_int_{{ player.id }}"
+                                                       name="{{ match.first_team.id }}_int_{{ player.id }}"
                                                        class="form-control form-control-user"/>
                                             </div>
                                         </td>
@@ -147,27 +168,6 @@
                                             <div class="form-group">
                                                 <input type="number" id="{{ match.first_team.id }}_ki_{{ player.id }}"
                                                        name="{{ match.first_team.id }}_ki_{{ player.id }}"
-                                                       class="form-control form-control-user"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" id="{{ match.first_team.id }}_int_{{ player.id }}"
-                                                       name="{{ match.first_team.id }}_int_{{ player.id }}"
-                                                       class="form-control form-control-user"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" id="{{ match.first_team.id }}_def_{{ player.id }}"
-                                                       name="{{ match.first_team.id }}_def_{{ player.id }}"
-                                                       class="form-control form-control-user"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" id="{{ match.first_team.id }}_comp_{{ player.id }}"
-                                                       name="{{ match.first_team.id }}_comp_{{ player.id }}"
                                                        class="form-control form-control-user"/>
                                             </div>
                                         </td>
@@ -223,12 +223,12 @@
                                 <TH>PLAYER NUMBER</TH>
                                 <th>PLAYER</th>
                                 <th>TD</th>
+                                <th>COMPLETE</th>
+                                <th>DEFLECTION</th>
+                                <th>INTERCEPT</th>
                                 <th>BH</th>
                                 <th>SI</th>
                                 <th>KI</th>
-                                <th>INTERCEPT</th>
-                                <th>DEFLECTION</th>
-                                <th>COMPLETE</th>
                                 <th>CASUALTY</th>
                                 <th>Lasting Injury</th>
                                 </thead>
@@ -242,6 +242,28 @@
                                                 <input type="number" id="{{ match.second_team.id }}_td_{{ player.id }}"
                                                        name="{{ match.second_team.id }}_td_{{ player.id }}"
                                                        class="form-control form-control-user"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number"
+                                                       id="{{ match.second_team.id }}_comp_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_comp_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_def_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_def_{{ player.id }}"
+                                                       class="form-control form-control-user">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="number" id="{{ match.second_team.id }}_int_{{ player.id }}"
+                                                       name="{{ match.second_team.id }}_int_{{ player.id }}"
+                                                       class="form-control form-control-user">
                                             </div>
                                         </td>
                                         <td>
@@ -262,28 +284,6 @@
                                             <div class="form-group">
                                                 <input type="number" id="{{ match.second_team.id }}_ki_{{ player.id }}"
                                                        name="{{ match.second_team.id }}_ki_{{ player.id }}"
-                                                       class="form-control form-control-user">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" id="{{ match.second_team.id }}_int_{{ player.id }}"
-                                                       name="{{ match.second_team.id }}_int_{{ player.id }}"
-                                                       class="form-control form-control-user">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" id="{{ match.second_team.id }}_def_{{ player.id }}"
-                                                       name="{{ match.second_team.id }}_def_{{ player.id }}"
-                                                       class="form-control form-control-user">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number"
-                                                       id="{{ match.second_team.id }}_comp_{{ player.id }}"
-                                                       name="{{ match.second_team.id }}_comp_{{ player.id }}"
                                                        class="form-control form-control-user">
                                             </div>
                                         </td>
@@ -369,7 +369,8 @@
                                                     class="form-control form-control-user">
                                                 <option value="--">--</option>
                                                 {% for player in first_team_players %}
-                                                    <option value="{{ player.id }}">{{ player.player_number }} - {{ player.name }}</option>
+                                                    <option value="{{ player.id }}">{{ player.player_number }}
+                                                        - {{ player.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -400,7 +401,8 @@
                                                     class="form-control form-control-user">
                                                 <option value="--">--</option>
                                                 {% for player in second_team_players %}
-                                                    <option value="{{ player.id }}">{{ player.player_number }} - {{ player.name }}</option>
+                                                    <option value="{{ player.id }}">{{ player.player_number }}
+                                                        - {{ player.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>

@@ -42,7 +42,7 @@ class MatchTeam:
             self.fan_factor = self.extra_fan + self.team.extra_dedicated_fan + 1
 
         logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)
-                     + '. match_extra_fan ' + str(self.extra_fan))
+                     + '. match_extra_fan ' + str(self.extra_fan) + ' final fan factor ' + str(self.fan_factor))
 
     def calculate_for_all_players(self):
         logger.debug('For team ' + str(self.team) + ' and matchId ' + str(self.match.id)

@@ -130,7 +130,9 @@ class CloseMatchDataReader:
 
 def reset_missing_next_game(team):
     for player in team.players.all():
+        logger.debug('Close match for team ' + str(team) + ' check MNG for player ' + str(player))
         if player.missing_next_game:
+            logger.debug('Close match for team ' + str(team) + ' player ' + str(player) + ' Reset MNG')
             player.missing_next_game = False
             player.save()
 

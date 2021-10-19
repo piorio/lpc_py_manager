@@ -108,10 +108,6 @@ def close_match(request, match_id):
         try:
             with transaction.atomic():
 
-                # Conceded check is OK. Reset next missing game
-                reset_missing_next_game(match.first_team)
-                reset_missing_next_game(match.second_team)
-
                 match_data = CloseMatchDataReader(data, match, conceded_data)
 
                 match_data.prepare()
@@ -155,7 +151,6 @@ def close_match(request, match_id):
                 #    match.second_team_td += second_team_extra_td_int
                 #    match.second_team.total_touchdown += second_team_extra_td_int
 
-
                 first_team_gold = data.get('first_team_gold')
                 second_team_gold = data.get('second_team_gold')
 
@@ -172,6 +167,10 @@ def close_match(request, match_id):
                     logger.debug('For match ' + str(match) + ' team ' + str(match.second_team)
                                  + ' add gold ' + second_team_gold)
                     match.second_team.treasury += second_team_gold_int
+
+                # Reset the MNG flag
+                reset_missing_next_game(match.first_team)
+                reset_missing_next_game(match.second_team)
 
                 match.first_team.save()
                 match.second_team.save()

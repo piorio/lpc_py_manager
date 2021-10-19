@@ -41,6 +41,7 @@ from .views import (
     select_first_skill,
     select_second_skill,
     render_pdf_view,
+    confirm_journeyman,
 )
 
 app_name = 'teams'
@@ -92,5 +93,6 @@ urlpatterns = [
     path('my_teams/manage_team/levelup/choose_first/<int:player_id>', select_first_skill, name='select_first_skill'),
     path('my_teams/manage_team/levelup/choose_secondary/<int:player_id>', select_second_skill,
          name='select_second_skill'),
-    path('my_teams/create_pdf/<int:team_id>', render_pdf_view, name='create_pdf')
+    path('my_teams/create_pdf/<int:team_id>', render_pdf_view, name='create_pdf'),
+    path('my_teams/manage_team/confirm_journeyman/<int:team_id>', confirm_journeyman, name='confirm_journeyman')
 ]

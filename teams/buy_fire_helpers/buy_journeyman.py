@@ -44,6 +44,7 @@ class BuyJourneyman:
             player = TeamPlayer()
             player.init_with_roster_player(self.roster_player, self.team)
             self.team.number_of_players += 1
+            player.is_journeyman = True
 
             logger.debug('User ' + str(self.user) + ' hire ' + str(self.roster_player) + ' for team '
                          + str(self.team) + ' New Treasury ' + str(self.team.treasury))

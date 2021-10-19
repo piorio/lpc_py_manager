@@ -43,24 +43,6 @@ class Team(models.Model):
 
     league_points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
-    def get_absolute_url(self):
-        return reverse('teams:all_team_detail', args=[str(self.id)])
-
-    def get_dismiss_absolute_url(self):
-        return reverse('teams:dismiss_team', args=[str(self.id)])
-
-    def get_ready_absolute_url(self):
-        return reverse('teams:ready_team', args=[str(self.id)])
-
-    def get_prepare_absolute_url(self):
-        return reverse('teams:prepare_team', args=[str(self.id)])
-
-    def get_ready_absolute_url(self):
-        return reverse('teams:ready_team', args=[str(self.id)])
-
-    def get_buy_player_absolute_url(self):
-        return reverse('teams:buy_player', args=[str(self.id)])
-
     def get_fire_player_absolute_url(self):
         return reverse('teams:fire_player', args=[str(self.id)])
 
@@ -168,6 +150,8 @@ class TeamPlayer(models.Model):
     dead = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)
     spent_spp = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    number_of_matches = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    is_journeyman = models.BooleanField(default=False)
 
     LEVEL_CHOICES = (
         ('NONE', 'NONE'),
