@@ -4,7 +4,7 @@
     <title>{{ team.name }}</title>
     <style>
         @page {
-            size: A4;
+            size: A4 landscape;
         }
 
         .clearfix:after {
@@ -108,26 +108,27 @@
 
 <body>
 <br>
-<br>
 <H1>{{ team.name }}</H1>
-<br>
 <hr>
 <h2>Players</h2>
-<br>
-<table>
+<table style="width: 100%; border: 1px solid black;" >
     <thead>
     <tr>
-        <th>#</th>
-        <th>NAME</th>
-        <th>POSITION</th>
-        <TH>MA</TH>
-        <TH>ST</TH>
-        <TH>AG</TH>
-        <TH>PA</TH>
-        <TH>AV</TH>
-        <TH>SKILLS & TRAITS</TH>
-        <TH>SPP</TH>
-        <TH>LEVEL</TH>
+        <th style="width: 2%; padding-top: 3px;">#</th>
+        <th style="width: 15%; padding-top: 3px;">NAME</th>
+        <th style="width: 10%; padding-top: 3px;">POSITION</th>
+        <TH style="width: 2%; padding-top: 3px;">MA</TH>
+        <TH style="width: 2%; padding-top: 3px;">ST</TH>
+        <TH style="width: 2%; padding-top: 3px;">AG</TH>
+        <TH style="width: 2%; padding-top: 3px;">PA</TH>
+        <TH style="width: 2%; padding-top: 3px;">AV</TH>
+        <TH style="width: 45%; padding-top: 3px;">SKILLS & TRAITS</TH>
+        <th style="width: 3%; padding-top: 3px;">CAS</th>
+        <th style="width: 3%; padding-top: 3px;">TD</th>
+        <th style="width: 3%; padding-top: 3px;">COMP</th>
+        <th style="width: 3%; padding-top: 3px;">DEF</th>
+        <th style="width: 3%; padding-top: 3px;">INT</th>
+        <TH style="width: 3%; padding-top: 3px;">SPP</TH>
     </tr>
     </thead>
     <tbody>
@@ -159,22 +160,18 @@
                         {{ skill.name }},
                     {% endfor %}
                 </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td>{{ player.spp }}</td>
-                <td>
-                    {% if player.level == 'NONE' %}
-                        --
-                    {% else %}
-                        {{ player.level }}
-                    {% endif %}
-                </td>
             </tr>
         {% endif %}
     {% endfor %}
     </tbody>
 </table>
-<br>
 <hr>
-<br>
 <h2>Extra</h2>
 <ul>
     <li><b>CHEERLEADER</b>: {{ team.cheerleader }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>RE

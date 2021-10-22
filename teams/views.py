@@ -293,7 +293,8 @@ def buy_player(request, *args, **kwargs):
 
 
 @login_required
-def fire_player(request, team_id):
+def fire_player(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     # You can fire only player not journeyman. The J didn't show into the list of players. But add a check
     player_id = request.GET.get('player', None)
     team = get_object_or_404(Team, id=team_id)
@@ -370,13 +371,14 @@ def my_team_detail(request, team_id):
 
 
 @login_required
-def buy_re_roll(request, team_id):
+def buy_re_roll(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
-    kwargs = {'pk': team.id}
+    kwargs_for_redirect = {'pk': team.id}
 
     if team.coach.id != request.user.id:
         messages.error(request, 'You cannot buy a re roll for a team not belongs to you')
-        return redirect('teams:prepare_team', **kwargs)
+        return redirect('teams:prepare_team', **kwargs_for_redirect)
 
     # check money spent and max number
     if team.roster_team.re_roll_cost > team.treasury or team.re_roll > team.roster_team.re_roll_max:
@@ -387,7 +389,7 @@ def buy_re_roll(request, team_id):
         team.treasury -= team.roster_team.re_roll_cost
         team.save()
 
-    return redirect('teams:prepare_team', **kwargs)
+    return redirect('teams:prepare_team', **kwargs_for_redirect)
 
 
 @login_required

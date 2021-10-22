@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block content %}
+
+    <H1 style="alignment: center">CALENDAR</H1>
+    <br>
+    <hr>
+    <br>
+    <H3>Calendario</H3>
+    <br>
+    <img src="{% static '/img/CALENDARIO.jpg' %}">
+    <br>
+    <hr>
+    <H3>Prima fase a gironi</H3>
+    <br>
+    <img src="{% static '/img/PRIME_FASI.jpg' %}">
+    <br>
+    <hr>
+    <br>
+    <h3>TOTALE</h3>
+    <br>
+    <img src="{% static '/img/TOTALE.jpg' %}">
+
+{% endblock %}

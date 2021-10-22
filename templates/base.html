@@ -105,6 +105,26 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
+                   aria-expanded="true" aria-controls="collapseThree">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Leagues</span>
+                </a>
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">All Leagues:</h6>
+                        <a class="collapse-item" href="{% url 'league:calendar' %}">Calendar</a>
+                        <!--
+                        <a class="collapse-item" href="#">In progress</a>
+                        <a class="collapse-item" href="#">My In progress league</a>
+                        <a class="collapse-item" href="#">Closed</a>
+                        -->
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLeagueManager"
                    aria-expanded="true" aria-controls="collapseLeagueManager">
                     <i class="fas fa-fw fa-cog"></i>
@@ -115,23 +135,6 @@
                         <h6 class="collapse-header">All Leagues:</h6>
                         <a class="collapse-item" href="{% url 'league:request_new_league' %}">Request new League</a>
                         <a class="collapse-item" href="#">In progress</a>
-                        <a class="collapse-item" href="#">Closed</a>
-                    </div>
-                </div>
-            </li>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
-                   aria-expanded="true" aria-controls="collapseThree">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>All Leagues</span>
-                </a>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">All Leagues:</h6>
-                        <a class="collapse-item" href="#">In progress</a>
-                        <a class="collapse-item" href="#">My In progress league</a>
                         <a class="collapse-item" href="#">Closed</a>
                     </div>
                 </div>

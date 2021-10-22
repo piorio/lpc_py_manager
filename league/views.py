@@ -37,3 +37,5 @@ def request_new_league(request, *args, **kwargs):
         return render(request, 'league/require_new_league.html', {'form': form})
 
 
+def calendar(request):
+    return render(request, 'league/calendar.html')
