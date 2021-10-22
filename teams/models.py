@@ -43,14 +43,8 @@ class Team(models.Model):
 
     league_points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
-    def get_fire_player_absolute_url(self):
-        return reverse('teams:fire_player', args=[str(self.id)])
-
     def get_my_team_detail_absolute_url(self):
         return reverse('teams:my_team_detail', args=[str(self.id)])
-
-    def get_buy_re_roll_absolute_url(self):
-        return reverse('teams:buy_re_roll', args=[str(self.id)])
 
     def get_remove_re_roll_absolute_url(self):
         return reverse('teams:remove_re_roll', args=[str(self.id)])

@@ -23,7 +23,7 @@
                 <td>{{ team.roster_team.re_roll_cost }}</td>
                 <td>{{ team.re_roll }}</td>
                 <td>
-                    <a href="{{ team.get_buy_re_roll_absolute_url }}" class="btn btn-primary">ADD</a>
+                    <a href="{% url 'teams:buy_re_roll' team.id %}" class="btn btn-primary">ADD</a>
                     <a href="{{ team.get_remove_re_roll_absolute_url }}" class="btn btn-primary">REMOVE</a>
                 </td>
             </tr>
@@ -113,7 +113,7 @@
                 <tr>
                     <td>{{ player.position }}</td>
                     <td>{{ player.cost }}</td>
-                    <td><a href="{{ team.get_fire_player_absolute_url }}?player={{ player.id }}"
+                    <td><a href="{% url 'team:fire_player' team.id %}?player={{ player.id }}"
                            class="btn btn-primary">FIRE</a></td>
                 </tr>
             {% endfor %}
