@@ -7,12 +7,6 @@
             size: A4 landscape;
         }
 
-        .clearfix:after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
         a {
             text-decoration: underline;
         }
@@ -45,7 +39,7 @@
         }
 
         table {
-            width: 100%;
+            width: 90%;
             border-collapse: collapse;
             border-spacing: 0;
             margin-bottom: 2px;
@@ -63,11 +57,6 @@
             font-weight: normal;
         }
 
-        table .service,
-        table .desc {
-            text-align: left;
-        }
-
         table td {
             padding-top: 2px;
             padding-bottom: 2px;
@@ -76,21 +65,6 @@
 
         table tr {
             border-bottom: 1px solid #C1CED9;
-        }
-
-        table td.service,
-        table td.desc {
-            vertical-align: top;
-        }
-
-        table td.unit,
-        table td.qty,
-        table td.total {
-            font-size: 1.2em;
-        }
-
-        table td.grand {
-            border-top: 1px solid #5D6975;;
         }
 
         footer {
@@ -111,7 +85,7 @@
 <H1>{{ team.name }}</H1>
 <hr>
 <h2>Players</h2>
-<table style="width: 100%; border: 1px solid black;" >
+<table style="border: 1px solid black;" >
     <thead>
     <tr>
         <th style="width: 2%; padding-top: 3px;">#</th>
@@ -132,7 +106,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for player in team.players.all %}
+    {% for player in players %}
         {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
             <tr>
                 <td>{{ player.player_number }}</td>

@@ -1189,9 +1189,11 @@ def render_pdf_view(request, *args, **kwargs):
     team = get_object_or_404(Team, id=team_id)
     logger.debug('User ' + str(request.user) + ' try to create pdf for team' + str(team))
 
+    players = team.players.order_by('player_number').all()
+
     template_path = 'teams/team_pdf.html'
     dedicated_fan = team.extra_dedicated_fan + 1
-    context = {'team': team, 'dedicated_fan': dedicated_fan}
+    context = {'team': team, 'dedicated_fan': dedicated_fan, 'players': players}
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
 
@@ -1207,7 +1209,7 @@ def render_pdf_view(request, *args, **kwargs):
     # create a pdf
     pisa_status = pisa.CreatePDF(
         html, dest=response)
-    # if error then show some funy view
+    # if error then show some funny view
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
