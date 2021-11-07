@@ -177,6 +177,8 @@ def close_match(request, match_id):
                 match.played = True
                 match.save()
 
+                # UPDATE TORUNAMENT RESULT
+
                 logger.debug('User ' + str(request.user) + ' closed match ' + match.debug())
 
         except Exception as e:

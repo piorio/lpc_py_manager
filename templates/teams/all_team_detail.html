@@ -195,9 +195,8 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable">
                             <thead>
-                            <th>NUMBER</th>
+                            <th>No.</th>
                             <th>NAME</th>
-                            <th>POSITION</th>
                             <TH>MA</TH>
                             <TH>ST</TH>
                             <TH>AG</TH>
@@ -217,8 +216,13 @@
                                         <tr>
                                     {% endif %}
                                 <td>{{ player.player_number }}</td>
-                                <td>{{ player.name }}</td>
-                                <td>{{ player.position }}</td>
+                                <td>
+                                    {{ player.name }}
+                                    <br>
+                                    <div style="font-size: 12px;">
+                                        {{ player.position }}
+                                    </div>
+                                </td>
                                 {% if player.movement_allowance == player.roster_player.movement_allowance %}
                                     <td>
                                         {% elif player.movement_allowance > player.roster_player.movement_allowance %}
@@ -261,7 +265,7 @@
                                 </td>
                                 {% if player.armor_value == player.roster_player.armor_value %}
                                     <td>
-                                        {% elif player.armor_value < player.roster_player.armor_value %}
+                                        {% elif player.armor_value > player.roster_player.armor_value %}
                                     <td style="background-color: lightblue">
                                         {% else %}
                                     <td style="background-color: lightcoral">
@@ -314,6 +318,8 @@
                             <TH>AV</TH>
                             <TH>SKILLS & TRAITS</TH>
                             <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>NIGGLING INJURY</TH>
                             </thead>
                             <tbody>
                             {% for player in team.players.all %}
@@ -342,6 +348,8 @@
                                             {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
+                                    <td>{{ player.spp }}</td>
+                                <td>{{ player.niggling_injury }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}

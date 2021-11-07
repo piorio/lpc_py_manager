@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import League, Season, Tournament
+from .models import League, Season, Tournament, TournamentTeamResult
 
 
 # Register your models here.
@@ -31,3 +31,13 @@ class TournamentAdmin(admin.ModelAdmin):
     raw_id_fields = ('season',)
     ordering = ('name',)
     autocomplete_fields = ('season',)
+
+
+@admin.register(TournamentTeamResult)
+class TournamentTeamResult(admin.ModelAdmin):
+    list_display = ('team', 'tournament')
+    list_filter = ('team', 'tournament')
+    search_fields = ('team', ' tournament')
+    raw_id_fields = ('tournament',)
+    ordering = ('team',)
+    autocomplete_fields = ('tournament',)

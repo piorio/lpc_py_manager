@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}League I Manage{% endblock %}
+
+{% block content %}
+
+    <!-- FIRST ROW -->
+    <div class="row">
+        <!-- Admin card -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Best team for each tournament
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <br>
+                                <ul>
+                                    <li>Nome team (tournament)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Number of teams -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Number of teams
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_of_teams }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Number of tournaments -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Best player for each tournament
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Best player</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Third ROW: teams list -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Teams List</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="longDataTable">
+                            <thead>
+                            <th>Name</th>
+                            <th>Coach</th>
+                            </thead>
+                            <tbody>
+                            {% for team in all_teams %}
+                                <tr>
+                                    <td>
+                                        <a href="#">
+                                            {{ team.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ team.coach }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <a href="{% url 'league:season_detail' season.id %}" class="btn btn-primary">Back</a>
+    <a href="{% url 'league:add_team_to_tournament' tournament.id %}" class="btn btn-primary">Add team</a>
+
+{% endblock %}
