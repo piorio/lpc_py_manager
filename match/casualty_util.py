@@ -53,7 +53,7 @@ class LastingInjury:
 
         player.missing_next_game = True
         if self.injury_type == 'JI':
-            player.armor_value += 1
+            player.armor_value -= 1
             match_played.received_cas = 'Head Injury'
         elif self.injury_type == 'SK':
             if player.movement_allowance > 0:

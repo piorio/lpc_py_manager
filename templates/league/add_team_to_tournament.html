@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Add team to season{% endblock %}
+
+{% block content %}
+
+    <h1>Add team to tournament <b>{{ tournament.name }}</b> for <b>{{ season.name }}</b> season</h1>
+    <br>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-xl-12 col-md-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">Choose team to add</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            Teams into season *
+                            <BR>
+                            <BR>
+                            <select class="form-control form-control-user" id="id_team" name="team">
+                                {% for team in teams %}
+                                    <option id="{{ team.id }}" name="{{ team.id }}" value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <button type="submit" class="btn btn-primary">Add team</button>
+
+    </form>
+
+{% endblock %}

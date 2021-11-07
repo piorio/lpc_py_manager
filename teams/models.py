@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.urls import reverse
 
+from league.models import Season
 from roster.models import Race, RosterTeam, Skill, Trait, RosterPlayer
 from django.contrib.auth.models import User
 
@@ -42,6 +43,8 @@ class Team(models.Model):
     total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     league_points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, blank=True, null=True)
 
     def get_my_team_detail_absolute_url(self):
         return reverse('teams:my_team_detail', args=[str(self.id)])

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}League I Manage{% endblock %}
+
+{% block content %}
+
+    <h1>List of leagues I manage</h1>
+    <br>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Leagues list</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <th>Leagues name</th>
+                            <th>Status</th>
+                            </thead>
+                            <tbody>
+                            {% for league in leagues %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'league:league_detail' league.id %}">
+                                            {{ league.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ league.status }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

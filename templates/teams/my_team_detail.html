@@ -221,9 +221,8 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable">
                             <thead>
-                            <th>NUMBER</th>
+                            <th>NO.</th>
                             <th>NAME</th>
-                            <th>POSITION</th>
                             <TH>MA</TH>
                             <TH>ST</TH>
                             <TH>AG</TH>
@@ -244,13 +243,16 @@
                                             {% else %}
                                         <tr>
                                     {% endif %}
-                                <td>{{ player.player_number }}</td>
+                                <td>#{{ player.player_number }}</td>
                                 <td>
                                     <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}">
                                         {{ player.name }}
                                     </a>
+                                    <br>
+                                    <div style="font-size: 12px;">
+                                        {{ player.position }}
+                                    </div>
                                 </td>
-                                <td>{{ player.position }}</td>
                                 {% if player.movement_allowance == player.roster_player.movement_allowance %}
                                     <td>
                                         {% elif player.movement_allowance > player.roster_player.movement_allowance %}
@@ -293,7 +295,7 @@
                                 </td>
                                 {% if player.armor_value == player.roster_player.armor_value %}
                                     <td>
-                                        {% elif player.armor_value < player.roster_player.armor_value %}
+                                        {% elif player.armor_value > player.roster_player.armor_value %}
                                     <td style="background-color: lightblue">
                                         {% else %}
                                     <td style="background-color: lightcoral">
@@ -427,6 +429,8 @@
                             <TH>AV</TH>
                             <TH>SKILLS & TRAITS</TH>
                             <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>NIGGLING INJURY</TH>
                             <TH>ACTION</TH>
                             </thead>
                             <tbody>
@@ -456,6 +460,8 @@
                                             {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
+                                        <td>{{ player.spp }}</td>
+                                        <td>{{ player.niggling_injury }}</td>
                                         <td>
                                             <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
                                                class="btn btn-primary">MANAGE</a>
@@ -477,7 +483,7 @@
         <div class="col-xl-12 col-md-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h3 class="m-0 font-weight-bold text-primary">DEAD!!</h3>
+                    <h3 class="m-0 font-weight-bold text-primary">FIRED OR DEAD!!</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">

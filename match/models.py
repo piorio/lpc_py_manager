@@ -32,6 +32,7 @@ class Match(models.Model):
     second_team_gold = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True, null=True)
 
     played = models.BooleanField(default=False)
+    tournament = models.ForeignKey('league.Tournament', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('match:close_match', args=[str(self.id)])

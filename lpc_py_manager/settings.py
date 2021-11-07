@@ -137,9 +137,6 @@ LOGOUT_REDIRECT_URL = 'home'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-# Only for test
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 try:
     from django.contrib.messages import constants as messages
 
@@ -181,3 +178,5 @@ LOGGING = {
         },
     },
 }
+
+ADMINS = [('Paolo Iorio', 'iorio.paolo@gmail.com')]
