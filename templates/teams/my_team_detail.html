@@ -219,9 +219,13 @@
                             </div>
                             <br>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if team.season is not None %}
                                 <a href="{% url 'league:league_user_detail' team.season.league.id %}">
                                     {{ team.season.league }}
                                 </a>
+                                {% else %}
+                                    NONE
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -243,9 +247,13 @@
                             </div>
                             <br>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if team.season is not None %}
                                 <a href="{% url 'league:season_user_detail' team.season.id %}">
                                     {{ team.season }}<br>
                                 </a>
+                                {% else %}
+                                    NONE
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-auto">
