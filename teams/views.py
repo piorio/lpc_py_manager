@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
 
+from league.models import Tournament, TournamentTeamResult
 from .buy_fire_helpers.buy_journeyman import BuyJourneyman
 from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm, RandomSkill
@@ -363,11 +364,15 @@ def my_team_detail(request, team_id):
     if valid_player_counter < 11:
         enable_journeyman = True
 
+    tournaments = Tournament.objects.filter(season=team.season).all()
+    tournaments_results = TournamentTeamResult.objects.filter(team=team).filter(tournament__in=tournaments).all()
+
     logger.debug('User ' + str(request.user) + ' request detail for ' + str(team) + ' Enable JourneyMan '
                  + str(enable_journeyman))
     return render(request,
                   'teams/my_team_detail.html', {'team': team, 'roster_players': roster_players,
-                                                'dedicated_fan': dedicated_fan, 'enable_journeyman': enable_journeyman})
+                                                'dedicated_fan': dedicated_fan, 'enable_journeyman': enable_journeyman,
+                                                'tournaments': tournaments, 'tournaments_results': tournaments_results})
 
 
 @login_required

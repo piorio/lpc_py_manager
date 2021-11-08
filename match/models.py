@@ -34,9 +34,6 @@ class Match(models.Model):
     played = models.BooleanField(default=False)
     tournament = models.ForeignKey('league.Tournament', on_delete=models.CASCADE, blank=True, null=True)
 
-    def get_absolute_url(self):
-        return reverse('match:close_match', args=[str(self.id)])
-
     def debug(self):
         return 'Match {' \
                + '"id": ' + str(self.id) \
