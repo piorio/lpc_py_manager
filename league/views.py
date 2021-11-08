@@ -10,7 +10,8 @@ from teams.models import Team
 from .mail_utils import send_league_creation_request
 from django.contrib import messages
 from .league_utils import create_new_season, get_number_of_teams_for_season, get_number_of_teams_for_seasons, \
-    create_new_tournament, get_all_teams_for_season, get_all_ready_teams_without_season, get_all_teams_for_tournament
+    create_new_tournament, get_all_teams_for_season, get_all_ready_teams_without_season, get_all_teams_for_tournament, \
+    get_all_matches_for_tournament, get_all_results_for_tournament
 from .models import League, Season, Tournament, TournamentTeamResult
 import logging
 
@@ -65,6 +66,23 @@ def get_league_detail(request, *args, **kwargs):
 
 
 @login_required()
+def get_league_user_detail(request, *args, **kwargs):
+    league_id = kwargs.get('league_id')
+    league = League.objects.filter(id=league_id).first()
+    if league is not None:
+        logger.debug('User ' + str(request.user) + ' request user detail for league ' + league.debug())
+        league_seasons = Season.objects.filter(league_id=league.id).all()
+        number_of_teams = get_number_of_teams_for_seasons(league_seasons)
+        return render(request, 'league/league_user_detail.html', {'league': league, 'league_seasons': league_seasons,
+                                                                  'number_of_teams': number_of_teams})
+    else:
+        logger.warning('User ' + str(request.user) + ' request detail for league ' + str(league_id)
+                       + ' but return empty result')
+        messages.warning(request, 'Invalid leagueId ' + str(league_id))
+        return redirect('teams:my_teams')
+
+
+@login_required()
 def create_season(request, *args, **kwargs):
     league_id = kwargs.get('league_id')
     league = League.objects.filter(managers__in=[request.user]).filter(id=league_id).first()
@@ -116,6 +134,27 @@ def get_season_detail(request, *args, **kwargs):
                        + ' but return empty result')
         messages.warning(request, 'You are not a manager for seasonId ' + str(season_id))
         return redirect('league:league_i_manage')
+
+
+@login_required()
+def get_season_user_detail(request, *args, **kwargs):
+    season_id = kwargs.get('season_id')
+    season = get_object_or_404(Season, id=season_id)
+    league = League.objects.filter(id=season.league.id).first()
+    if league is not None:
+        logger.debug('User ' + str(request.user) + ' request detail for user season ' + season.debug())
+        season_tournaments = Tournament.objects.filter(season_id=season.id).all()
+        number_of_teams = get_number_of_teams_for_season(season)
+        all_teams = get_all_teams_for_season(season)
+        return render(request, 'league/season_user_detail.html', {'league': league, 'season': season,
+                                                                  'season_tournaments': season_tournaments,
+                                                                  'number_of_teams': number_of_teams,
+                                                                  'all_teams': all_teams})
+    else:
+        logger.warning('User ' + str(request.user) + ' request detail for user season ' + str(season_id)
+                       + ' but return empty result')
+        messages.warning(request, 'Invalid seasonId ' + str(season_id))
+        return redirect('teams:my_teams')
 
 
 @login_required()
@@ -209,13 +248,39 @@ def get_tournament_detail(request, *args, **kwargs):
     if league is not None:
         logger.debug('User ' + str(request.user) + ' request detail for tournament ' + tournament.debug())
         all_teams = get_all_teams_for_tournament(tournament)
+        all_matches = get_all_matches_for_tournament(tournament)
+        all_results = get_all_results_for_tournament(tournament)
         return render(request, 'league/tournament_detail.html', {'league': league, 'season': season,
-                                                                 'all_teams': all_teams, 'tournament': tournament})
+                                                                 'all_teams': all_teams, 'tournament': tournament,
+                                                                 'all_matches': all_matches,
+                                                                 'all_results': all_results})
     else:
         logger.warning('User ' + str(request.user) + ' request detail for tournament ' + str(tournament_id)
                        + ' but return empty result')
         messages.warning(request, 'You are not a manager for tournamentId ' + str(tournament_id))
         return redirect('league:league_i_manage')
+
+
+@login_required()
+def get_tournament_user_detail(request, *args, **kwargs):
+    tournament_id = kwargs.get('tournament_id')
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    season = tournament.season
+    league = League.objects.filter(id=season.league.id).first()
+    if league is not None:
+        logger.debug('User ' + str(request.user) + ' request detail for tournament ' + tournament.debug())
+        all_teams = get_all_teams_for_tournament(tournament)
+        all_matches = get_all_matches_for_tournament(tournament)
+        all_results = get_all_results_for_tournament(tournament)
+        return render(request, 'league/tournament_user_detail.html', {'league': league, 'season': season,
+                                                                      'all_teams': all_teams, 'tournament': tournament,
+                                                                      'all_matches': all_matches,
+                                                                      'all_results': all_results})
+    else:
+        logger.warning('User ' + str(request.user) + ' request detail for tournament ' + str(tournament_id)
+                       + ' but return empty result')
+        messages.warning(request, 'Invalid tournamentId ' + str(tournament_id))
+        return redirect('teams:my_teams')
 
 
 @login_required()

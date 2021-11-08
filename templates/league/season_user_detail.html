@@ -68,6 +68,39 @@
         </div>
     </div>
 
+    <!-- Second ROW: Seasons list -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Tournament List</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="longDataTable">
+                            <thead>
+                            <th>Name</th>
+                            <th>Status</th>
+                            </thead>
+                            <tbody>
+                            {% for tournament in season_tournaments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'league:tournament_user_detail' tournament.id %}">
+                                            {{ tournament.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ tournament.status }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Third ROW: teams list -->
     <div class="row">
         <div class="col-xl-12 col-md-6 mb-4">
@@ -81,28 +114,16 @@
                             <thead>
                             <th>Name</th>
                             <th>Coach</th>
-                            <th>WIN</th>
-                            <th>TIE</th>
-                            <th>LOSS</th>
-                            <th>CAS</th>
-                            <th>TD</th>
-                            <th>POINT</th>
                             </thead>
                             <tbody>
-                            {% for result in all_results %}
+                            {% for team in all_teams %}
                                 <tr>
                                     <td>
                                         <a href="#">
-                                            {{ result.team.name }}
+                                            {{ team.name }}
                                         </a>
                                     </td>
-                                    <td>{{ result.team.coach }}</td>
-                                    <td>{{ result.win }}</td>
-                                    <td>{{ result.tie }}</td>
-                                    <td>{{ result.loss }}</td>
-                                    <td>{{ result.total_cas }}</td>
-                                    <td>{{ result.total_touchdown }}</td>
-                                    <td>{{ result.league_points }}</td>
+                                    <td>{{ team.coach }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -112,54 +133,5 @@
             </div>
         </div>
     </div>
-
-    <!-- Third ROW: teams list -->
-    <div class="row">
-        <div class="col-xl-12 col-md-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h3 class="m-0 font-weight-bold text-primary">Match List</h3>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="longDataTable">
-                            <thead>
-                            <th>Team A</th>
-                            <th>Team B</th>
-                            <th>From Date</th>
-                            <th>To Date</th>
-                            <th>Action</th>
-                            </thead>
-                            <tbody>
-                            {% for match in all_matches %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'teams:all_team_detail' match.first_team.id %}">{{ match.first_team }}</a>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'teams:all_team_detail' match.second_team.id %}">{{ match.second_team }}</a>
-                                    </td>
-                                    <td>{{ match.match_date_from }}</td>
-                                    <td>{{ match.match_date_to }}</td>
-                                    <td>
-                                        {% if match.played %}
-                                            PLAYED
-                                        {% else %}
-                                            <a href="{% url 'match:close_match' match.id %}" class="btn btn-primary">CLOSE</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <br>
-    <a href="{% url 'league:season_detail' season.id %}" class="btn btn-primary">Back</a>
-    <a href="{% url 'league:add_team_to_tournament' tournament.id %}" class="btn btn-primary">Add team</a>
 
 {% endblock %}

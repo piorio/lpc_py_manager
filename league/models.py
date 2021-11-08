@@ -63,3 +63,6 @@ class TournamentTeamResult(models.Model):
     total_touchdown = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     total_cas = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     league_points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    def debug(self):
+        return 'TournamentResult {"tournament": ' + str(self.tournament) + ', "team":' + str(self.team) + ' }'

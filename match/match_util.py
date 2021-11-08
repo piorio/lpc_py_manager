@@ -127,6 +127,62 @@ class CloseMatchDataReader:
             logger.debug('For match ' + str(self.match) + ' team ' + str(self.match.second_team)
                          + ' gain 1 league point for 0 TD received ' + str(first_team_td))
 
+    def update_tournament_team_data(self, tournament_first_team, tournament_second_team):
+        first_team_td = self.first_team_match.touchdown
+        second_team_td = self.second_team_match.touchdown
+
+        if first_team_td > second_team_td:
+            tournament_first_team.win += 1
+            tournament_first_team.league_points += 3
+            tournament_second_team.loss += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.first_team) + ' win')
+        elif first_team_td < second_team_td:
+            tournament_first_team.loss += 1
+            tournament_second_team.win += 1
+            tournament_second_team.league_points += 3
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.second_team) + ' win')
+        elif first_team_td == second_team_td:
+            tournament_first_team.tie += 1
+            tournament_second_team.tie += 1
+            tournament_first_team.league_points += 1
+            tournament_second_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.first_team) + ' and team '
+                         + str(self.match.second_team) + ' tie')
+
+        # More league points for team 1
+        if first_team_td > 2:
+            tournament_first_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.first_team)
+                         + ' gain 1 league point for TD ' + str(first_team_td))
+        if self.match.first_team_cas > 2:
+            tournament_first_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.first_team)
+                         + ' gain 1 league point for CAS ' + str(self.match.first_team_cas))
+        if second_team_td == 0:
+            tournament_first_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.first_team)
+                         + ' gain 1 league point for 0 TD received ' + str(second_team_td))
+
+        # More league points for team 2
+        if second_team_td > 2:
+            tournament_second_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.second_team)
+                         + ' gain 1 league point for TD ' + str(first_team_td))
+        if self.match.second_team_cas > 2:
+            tournament_second_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.second_team)
+                         + ' gain 1 league point for CAS ' + str(self.match.second_team_cas))
+        if first_team_td == 0:
+            tournament_second_team.league_points += 1
+            logger.debug('For T match ' + str(self.match) + ' team ' + str(self.match.second_team)
+                         + ' gain 1 league point for 0 TD received ' + str(first_team_td))
+
+        tournament_first_team.total_touchdown += first_team_td
+        tournament_second_team.total_touchdown += second_team_td
+
+        tournament_first_team.total_cas += self.match.first_team_cas
+        tournament_second_team.total_cas += self.match.second_team_cas
+
 
 def reset_missing_next_game(team):
     for player in team.players.all():

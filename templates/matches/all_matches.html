@@ -37,7 +37,7 @@
                             <td>{{ obj.match_date_to }}</td>
                             <td>
                                 {% if user.is_superuser %}
-                                    <a href="{{ obj.get_absolute_url }}" class="btn btn-primary">CLOSE</a>
+                                    <a href="{% url 'match:close_match' obj.id %}" class="btn btn-primary">CLOSE</a>
                                 {% else %}
                                     <b>NO ACTION</b>
                                 {% endif %}

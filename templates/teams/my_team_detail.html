@@ -206,6 +206,111 @@
         </div>
     </div>
 
+    <!-- LEAGUE ROW -->
+    <div class="row">
+        <!-- LEAGUE Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                League
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{% url 'league:league_user_detail' team.season.league.id %}">
+                                    {{ team.season.league }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEASON Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Season
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="{% url 'league:season_user_detail' team.season.id %}">
+                                    {{ team.season }}<br>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOURNAMENT Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tournaments of the season
+                            </div>
+                            <br>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <ul>
+                                    {% for tournament in tournaments %}
+                                        <a href="{% url 'league:tournament_user_detail' tournament.id %}">
+                                            {{ tournament.name }}<br>
+                                        </a>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Value Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tournaments result (W/T/L)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <ul>
+                                    {% for result in tournaments_results %}
+                                        {{ result.tournament }} [{{ result.win }}/{{ result.tie }}/{{ result.loss }}]
+                                        <br>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <br>
     <hr>
     <br>

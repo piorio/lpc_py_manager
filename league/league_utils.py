@@ -1,7 +1,8 @@
 from django.db import transaction
-from league.models import Season, Tournament
+from league.models import Season, Tournament, TournamentTeamResult
 import logging
 
+from match.models import Match
 from teams.models import Team
 
 logger = logging.getLogger(__name__)
@@ -63,3 +64,11 @@ def get_all_ready_teams_without_season():
 
 def get_all_teams_for_tournament(tournament):
     return tournament.team.all()
+
+
+def get_all_results_for_tournament(tournament):
+    return TournamentTeamResult.objects.filter(tournament=tournament).all()
+
+
+def get_all_matches_for_tournament(tournament):
+    return Match.objects.filter(tournament=tournament).all()
