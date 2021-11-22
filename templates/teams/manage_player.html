@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load custom_tags %}
+
 {% block title %}Player details{% endblock %}
 
 {% block content %}
@@ -8,65 +10,130 @@
     <br>
     <hr>
     <h3>Statistics</h3>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <th>POSITION</th>
-            <TH>MA</TH>
-            <TH>ST</TH>
-            <TH>AG</TH>
-            <TH>PA</TH>
-            <TH>AV</TH>
-            <TH>SKILLS & TRAITS</TH>
-            <TH>Current Value</TH>
-            <TH>SPP</TH>
-            <TH>STATUS</TH>
-            <TH></TH>
-            </thead>
-            <tbody>
-            <td>{{ player.position }}</td>
-            <td>{{ player.movement_allowance }}</td>
-            <td>{{ player.strength }}</td>
-            <td>{{ player.agility }}+</td>
-            <td>
-                {% if player.passing != 0 %}
-                    {{ player.passing }}+
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>{{ player.armor_value }}+</td>
-            <td>
-                {% for skill in player.base_skills.all %}
-                    {{ skill.name }},
-                {% endfor %}
-                {% for trait in player.traits.all %}
-                    {{ trait.name }},
-                {% endfor %}
-            </td>
-            <td>{{ player.value }}</td>
-            <td>{{ player.spp }}</td>
-            <td>
-                {% if player.dead %}
-                    DEAD!!
-                {% elif player.missing_next_game %}
-                    MNG
-                {% else %}
-                    --
-                {% endif %}
-            </td>
-            </tbody>
-        </table>
+    <!-- THIRD ROW: Players list -->
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                            <th>POSITION</th>
+                            <TH>MA</TH>
+                            <TH>ST</TH>
+                            <TH>AG</TH>
+                            <TH>PA</TH>
+                            <TH>AV</TH>
+                            <TH>SKILLS & TRAITS</TH>
+                            <TH>Current Value</TH>
+                            <TH>SPP</TH>
+                            <TH>STATUS</TH>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ player.position }}</td>
+                                {% if player.movement_allowance == player.roster_player.movement_allowance %}
+                                    <td>
+                                        {% elif player.movement_allowance > player.roster_player.movement_allowance %}
+                                    <td style="background-color: lightblue">
+                                        {% else %}
+                                    <td style="background-color: lightcoral">
+                                {% endif %}
+                                {{ player.movement_allowance }}
+                                </td>
+                                {% if player.strength == player.roster_player.strength %}
+                                    <td>
+                                        {% elif player.strength > player.roster_player.strength %}
+                                    <td style="background-color: lightblue">
+                                        {% else %}
+                                    <td style="background-color: lightcoral">
+                                {% endif %}
+                                {{ player.strength }}
+                                </td>
+                                {% if player.agility == player.roster_player.agility %}
+                                    <td>
+                                        {% elif player.agility < player.roster_player.agility %}
+                                    <td style="background-color: lightblue">
+                                        {% else %}
+                                    <td style="background-color: lightcoral">
+                                {% endif %}
+                                {{ player.agility }}+
+                                </td>
+                                {% if player.passing == player.roster_player.passing %}
+                                    <td>
+                                        {% elif player.passing < player.roster_player.passing %}
+                                    <td style="background-color: lightblue">
+                                        {% else %}
+                                    <td style="background-color: lightcoral">
+                                {% endif %}
+                                {% if player.passing != 0 %}
+                                    {{ player.passing }}+
+                                {% else %}
+                                    -
+                                {% endif %}
+                                </td>
+                                {% if player.armor_value == player.roster_player.armor_value %}
+                                    <td>
+                                        {% elif player.armor_value > player.roster_player.armor_value %}
+                                    <td style="background-color: lightblue">
+                                        {% else %}
+                                    <td style="background-color: lightcoral">
+                                {% endif %}
+                                {{ player.armor_value }}+
+                                </td>
+                                <td>
+                                    {% for skill in player.base_skills.all %}
+                                        {{ skill.name }},
+                                    {% endfor %}
+                                    {% for trait in player.traits.all %}
+                                        {{ trait.name }},
+                                    {% endfor %}
+                                </td>
+                                <td>{{ player.value }}</td>
+                                <td>{{ player.spp }}</td>
+                                <td>
+                                    {% if player.dead %}
+                                        DEAD!!
+                                    {% elif player.missing_next_game %}
+                                        MNG
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <br>
     <hr>
     <h1>Action</h1>
     <br>
+    <UL>
+        <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}" class="btn btn-primary">FIRE</a>
+        <BR>
+        <BR>
+        {% if player.is_journeyman %}
+            <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"
+               class="btn btn-primary">CONFIRM</a>
+            <BR>
+            <BR>
+        {% endif %}
+        {{ player | add_level_up_action }}
+    </UL>
+
+    <br>
+    <hr>
+    <h1>Change Name or number</h1>
+    <br>
     <ul>
         <form method="post" action="{% url 'teams:change_player_name_number' %}">
-        {% csrf_token %}
-        <input type="hidden" name="playerId" id="playerId" value="{{ player.id }}" />
-        <input type="hidden" name="teamId" id="teamId" value="{{ player.team_id }}" />
+            {% csrf_token %}
+            <input type="hidden" name="playerId" id="playerId" value="{{ player.id }}"/>
+            <input type="hidden" name="teamId" id="teamId" value="{{ player.team_id }}"/>
             <li>
                 Change number -
                 <select name="new_number" id="new_number">

@@ -391,7 +391,7 @@ def buy_re_roll(request, *args, **kwargs):
                        'You don\'t have money for another re roll or you reached the max number of re roll permitted')
     else:
         team.re_roll += 1
-        team.treasury -= team.roster_team.re_roll_cost
+        team.treasury -= (team.roster_team.re_roll_cost * 2)
         team.save()
 
     return redirect('teams:prepare_team', **kwargs_for_redirect)
@@ -601,7 +601,7 @@ def manage_player(request, team_id):
 
     player = get_object_or_404(TeamPlayer, id=player_id)
     return render(request,
-                  'teams/manage_player.html', {'player': player, 'range': range(1, 101),
+                  'teams/manage_player.html', {'player': player, 'team': team, 'range': range(1, 101),
                                                'team_detail': team.get_my_team_detail_absolute_url()})
 
 

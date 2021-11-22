@@ -85,82 +85,90 @@
 <H1>{{ team.name }}</H1>
 <hr>
 <h2>Players</h2>
-<table style="border: 1px solid black;" >
-    <thead>
-    <tr>
-        <th style="width: 2%; padding-top: 3px;">#</th>
-        <th style="width: 15%; padding-top: 3px;">NAME</th>
-        <th style="width: 10%; padding-top: 3px;">POSITION</th>
-        <TH style="width: 2%; padding-top: 3px;">MA</TH>
-        <TH style="width: 2%; padding-top: 3px;">ST</TH>
-        <TH style="width: 2%; padding-top: 3px;">AG</TH>
-        <TH style="width: 2%; padding-top: 3px;">PA</TH>
-        <TH style="width: 2%; padding-top: 3px;">AV</TH>
-        <TH style="width: 45%; padding-top: 3px;">SKILLS & TRAITS</TH>
-        <th style="width: 3%; padding-top: 3px;">CAS</th>
-        <th style="width: 3%; padding-top: 3px;">TD</th>
-        <th style="width: 3%; padding-top: 3px;">COMP</th>
-        <th style="width: 3%; padding-top: 3px;">DEF</th>
-        <th style="width: 3%; padding-top: 3px;">INT</th>
-        <TH style="width: 3%; padding-top: 3px;">SPP</TH>
-    </tr>
-    </thead>
-    <tbody>
-    {% for player in players %}
-        {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
-            <tr>
-                <td>{{ player.player_number }}</td>
-                <td>{{ player.name }}</td>
-                <td>{{ player.position }}</td>
-                <td>{{ player.movement_allowance }}</td>
-                <td>{{ player.strength }}</td>
-                <td>{{ player.agility }}+</td>
-                <td>
-                    {% if player.passing != 0 %}
-                        {{ player.passing }}+
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>{{ player.armor_value }}+</td>
-                <td>
-                    {% for skill in player.base_skills.all %}
-                        {{ skill.name }},
-                    {% endfor %}
-                    {% for trait in player.traits.all %}
-                        {{ trait.name }},
-                    {% endfor %}
-                    {% for skill in player.extra_skills.all %}
-                        {{ skill.name }},
-                    {% endfor %}
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>{{ player.spp }}</td>
-            </tr>
-        {% endif %}
-    {% endfor %}
-    </tbody>
-</table>
-<hr>
-<h2>Extra</h2>
-<ul>
-    <li><b>CHEERLEADER</b>: {{ team.cheerleader }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>RE
-        ROLL</B>: {{ team.re_roll }}</li>
-    <li><b>Assistant coach</b>: {{ team.assistant_coach }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Apothecary</B>:
-        {% if team.apothecary == True %}
-            YES
-        {% else %}
-            NO
-        {% endif %}
-    </li>
-    <li><b>Current team value</b>: {{ team.current_team_value }}
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Treasury</B>: {{ team.treasury }}</li>
-    <li><b>Dedicated fan</b>: {{ dedicated_fan }} </li>
-</ul>
+<div style=" margin-left: 50px;">
+    <table style="border: 1px black;">
+        <thead>
+        <tr>
+            <th style="width: 2%; padding-top: 3px;">#</th>
+            <th style="width: 19%; padding-top: 3px;">NAME</th>
+            <!-- <th style="width: 10%; padding-top: 3px;">POSITION</th>-->
+            <TH style="width: 3%; padding-top: 3px;">MA</TH>
+            <TH style="width: 3%; padding-top: 3px;">ST</TH>
+            <TH style="width: 3%; padding-top: 3px;">AG</TH>
+            <TH style="width: 3%; padding-top: 3px;">PA</TH>
+            <TH style="width: 3%; padding-top: 3px;">AV</TH>
+            <TH style="width: 40%; padding-top: 3px;">SKILLS & TRAITS</TH>
+            <th style="width: 3%; padding-top: 3px;">CAS</th>
+            <th style="width: 3%; padding-top: 3px;">TD</th>
+            <th style="width: 3%; padding-top: 3px;">COMP</th>
+            <th style="width: 3%; padding-top: 3px;">DEF</th>
+            <th style="width: 3%; padding-top: 3px;">INT</th>
+            <TH style="width: 3%; padding-top: 3px;">SPP</TH>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for player in players %}
+            {% if player.dead == False and player.missing_next_game == False and player.fired == False %}
+                <tr>
+                    <td>{{ player.player_number }}</td>
+                    <td>
+                        {{ player.name }}
+                        <br>
+                        {{ player.position }}
+                    </td>
+                    <!-- <td>{{ player.position }}</td> -->
+                    <td>{{ player.movement_allowance }}</td>
+                    <td>{{ player.strength }}</td>
+                    <td>{{ player.agility }}+</td>
+                    <td>
+                        {% if player.passing != 0 %}
+                            {{ player.passing }}+
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ player.armor_value }}+</td>
+                    <td>
+                        {% for skill in player.base_skills.all %}
+                            {{ skill.name }},
+                        {% endfor %}
+                        {% for trait in player.traits.all %}
+                            {{ trait.name }},
+                        {% endfor %}
+                        {% for skill in player.extra_skills.all %}
+                            {{ skill.name }},
+                        {% endfor %}
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ player.spp }}</td>
+                    <td></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <h2>Extra</h2>
+    <ul>
+        <li><b>CHEERLEADER</b>: {{ team.cheerleader }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>RE
+            ROLL</B>: {{ team.re_roll }}</li>
+        <li><b>Assistant coach</b>: {{ team.assistant_coach }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Apothecary</B>:
+            {% if team.apothecary == True %}
+                YES
+            {% else %}
+                NO
+            {% endif %}
+        </li>
+        <li><b>Current team value</b>: {{ team.current_team_value }}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Treasury</B>: {{ team.treasury }}</li>
+        <li><b>Dedicated fan</b>: {{ dedicated_fan }} </li>
+    </ul>
+</div>
 
 </body>
 </html>

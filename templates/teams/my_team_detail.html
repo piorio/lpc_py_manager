@@ -220,9 +220,9 @@
                             <br>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {% if team.season is not None %}
-                                <a href="{% url 'league:league_user_detail' team.season.league.id %}">
-                                    {{ team.season.league }}
-                                </a>
+                                    <a href="{% url 'league:league_user_detail' team.season.league.id %}">
+                                        {{ team.season.league }}
+                                    </a>
                                 {% else %}
                                     NONE
                                 {% endif %}
@@ -248,9 +248,9 @@
                             <br>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {% if team.season is not None %}
-                                <a href="{% url 'league:season_user_detail' team.season.id %}">
-                                    {{ team.season }}<br>
-                                </a>
+                                    <a href="{% url 'league:season_user_detail' team.season.id %}">
+                                        {{ team.season }}<br>
+                                    </a>
                                 {% else %}
                                     NONE
                                 {% endif %}
@@ -334,17 +334,17 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable">
                             <thead>
-                            <th>NO.</th>
-                            <th>NAME</th>
+                            <th>#</th>
+                            <th>PLAYER</th>
                             <TH>MA</TH>
                             <TH>ST</TH>
                             <TH>AG</TH>
                             <TH>PA</TH>
                             <TH>AV</TH>
                             <TH>SKILLS & TRAITS</TH>
-                            <TH>Current Value</TH>
+                            <TH>Value</TH>
                             <TH>SPP</TH>
-                            <TH>NIGGLING INJURY</TH>
+                            <TH>N.INJ.</TH>
                             <TH>SKILLS</TH>
                             <TH>ACTION</TH>
                             </thead>
@@ -473,7 +473,7 @@
                             <TH>PA</TH>
                             <TH>AV</TH>
                             <TH>SKILLS & TRAITS</TH>
-                            <TH>Current Value</TH>
+                            <TH>Cost</TH>
                             <TH>ACTION</TH>
                             </thead>
                             <tbody>
@@ -532,18 +532,17 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable">
                             <thead>
-                            <th>NUMBER</th>
-                            <th>NAME</th>
-                            <th>POSITION</th>
+                            <th>#</th>
+                            <th>PLAYER</th>
                             <TH>MA</TH>
                             <TH>ST</TH>
                             <TH>AG</TH>
                             <TH>PA</TH>
                             <TH>AV</TH>
                             <TH>SKILLS & TRAITS</TH>
-                            <TH>Current Value</TH>
+                            <TH>Value</TH>
                             <TH>SPP</TH>
-                            <TH>NIGGLING INJURY</TH>
+                            <TH>N.INJ.</TH>
                             <TH>ACTION</TH>
                             </thead>
                             <tbody>
@@ -551,8 +550,15 @@
                                 {% if player.missing_next_game == True %}
                                     <tr>
                                         <td>{{ player.player_number }}</td>
-                                        <td>{{ player.name }}</td>
-                                        <td>{{ player.position }}</td>
+                                        <td>
+                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}">
+                                                {{ player.name }}
+                                            </a>
+                                            <br>
+                                            <div style="font-size: 12px;">
+                                                {{ player.position }}
+                                            </div>
+                                        </td>
                                         <td>{{ player.movement_allowance }}</td>
                                         <td>{{ player.strength }}</td>
                                         <td>{{ player.agility }}+</td>
@@ -576,10 +582,13 @@
                                         <td>{{ player.spp }}</td>
                                         <td>{{ player.niggling_injury }}</td>
                                         <td>
-                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}"
-                                               class="btn btn-primary">MANAGE</a>
                                             <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
                                                class="btn btn-primary">FIRE</a>
+                                            {% if player.is_journeyman %}
+                                                <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"
+                                                   class="btn btn-primary">CONFIRM</a>
+                                            {% endif %}
+                                            {{ player | add_level_up_action }}
                                         </td>
                                     </tr>
                                 {% endif %}
