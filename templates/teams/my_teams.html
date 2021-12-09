@@ -27,7 +27,7 @@
                         <tr>
                             <td>
                                 {% if obj.status == 'READY' %}
-                                    <span><a href="{{ obj.get_my_team_detail_absolute_url }}">
+                                    <span><a href="{% url 'teams:my_team_detail' obj.id %}">
                             {{ obj.name }}
                         </a></span>
                                 {% else %}

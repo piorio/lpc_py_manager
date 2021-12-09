@@ -113,7 +113,7 @@
                             <br>
                             {% if player.spp >= level_cost.0 %}
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <a href="{{ player.get_random_first_skill_levelup_absolute_url }}"
+                                    <a href="{% url 'teams:random_first_skill' player.id %}"
                                        class="btn btn-primary">GET THIS LEVELUP</a>
                                 </div>
                             {% endif %}
@@ -139,7 +139,7 @@
                             <br>
                             {% if player.spp >= level_cost.1 %}
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <a href="{{ player.get_choose_first_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                    <a href="{% url 'teams:select_first_skill' player.id %}" class="btn btn-primary">GET THIS LEVELUP</a>
                                 </div>
                             {% endif %}
                         </div>
@@ -164,7 +164,7 @@
                             <br>
                             {% if player.spp >= level_cost.1 %}
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <a href="{{ player.get_random_second_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                    <a href="{% url 'teams:random_second_skill' player.id %}" class="btn btn-primary">GET THIS LEVELUP</a>
                                 </div>
                             {% endif %}
                         </div>
@@ -191,7 +191,7 @@
                             <br>
                             {% if player.spp >= level_cost.2 %}
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <a href="{{ player.get_choose_secondary_skill_levelup_absolute_url }}" class="btn btn-primary">GET THIS LEVELUP</a>
+                                    <a href="{% url 'teams:select_second_skill' player.id %}" class="btn btn-primary">GET THIS LEVELUP</a>
                                 </div>
                             {% endif %}
                         </div>

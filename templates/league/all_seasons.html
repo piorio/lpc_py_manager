@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}All Seasons{% endblock %}
+
+{% block content %}
+
+    <h1>List of seasons</h1>
+
+    <div>
+    So you play into a league, don't you? Each new year there is a new season, a new opportunity
+    to bright and shine. These are the seasons in which you have a team.
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Seasons list</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="longDataTable">
+                            <thead>
+                            <th>Season Name</th>
+                            <th>League name</th>
+                            <th>Tournaments</th>
+                            <th>Teams</th>
+                            <th>League Status</th>
+                            </thead>
+                            <tbody>
+                            {% for season in season_dto %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'league:season_detail' season.season.id %}">
+                                            {{ season.season.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ season.season.league.name }}</td>
+                                    <td>{{ season.tournaments_count }}</td>
+                                    <td>{{ season.teams_count }}</td>
+                                    <td>{{ season.season.league.status }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,4 +1,5 @@
 {% load static %}
+{% load league_custom_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,15 +45,47 @@
 
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
-            <a class="nav-link" href="#">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span></a>
+            <a class="nav-link" href="/">
+                <i class="fas fa-home"></i>
+                <span>Home</span></a>
         </li>
 
         <!-- Divider -->
         <hr class="sidebar-divider">
 
         {% if user.is_authenticated %}
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                LEAGUES SECTION
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLeagueSection"
+                   aria-expanded="true" aria-controls="collapseLeagueSection">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Leagues</span>
+                </a>
+                <div id="collapseLeagueSection" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url 'league:get_all_leagues' %}">All Leagues</a>
+                        <a class="collapse-item" href="{% url 'league:request_new_league' %}">Request new League</a>
+                        {{ user | enable_league_admin }}
+                        <h6 class="collapse-header">- Coach specific -</h6>
+                        <a class="collapse-item" href="{% url 'league:get_all_joined_leagues' %}">Joined Leagues</a>
+                        <a class="collapse-item" href="{% url 'league:get_all_joined_seasons' %}">Joined Seasons</a>
+                        <a class="collapse-item" href="{% url 'league:get_all_joined_tournaments' %}">Joined Tournaments</a>
+                        <a class="collapse-item" href="{% url 'league:calendar' %}">Calendar</a>
+                    </div>
+                </div>
+            </li>
+
+
+
+
+
+
             <!-- Heading -->
             <div class="sidebar-heading">
                 TEAMS
@@ -95,15 +128,15 @@
                 </div>
             </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
             <!-- Heading -->
+            <!--
             <div class="sidebar-heading">
                 LEAGUES
             </div>
+            -->
 
             <!-- Nav Item - Pages Collapse Menu -->
+            <!-- TO REMOVE
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
                    aria-expanded="true" aria-controls="collapseThree">
@@ -114,16 +147,18 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">All Leagues:</h6>
                         <a class="collapse-item" href="{% url 'league:calendar' %}">Calendar</a>
-                        <!--
+
                         <a class="collapse-item" href="#">In progress</a>
                         <a class="collapse-item" href="#">My In progress league</a>
                         <a class="collapse-item" href="#">Closed</a>
-                        -->
+
                     </div>
                 </div>
             </li>
+            -->
 
             <!-- Nav Item - Pages Collapse Menu -->
+            <!-- TO REMOVE
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLeagueManager"
                    aria-expanded="true" aria-controls="collapseLeagueManager">
@@ -134,12 +169,12 @@
                      data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">All Leagues:</h6>
-                        <a class="collapse-item" href="{% url 'league:request_new_league' %}">Request new League</a>
                         <a class="collapse-item" href="{% url 'league:league_i_manage' %}">League I manage</a>
                         <a class="collapse-item" href="#">Closed</a>
                     </div>
                 </div>
             </li>
+            -->
         {% else %}
             <!-- Heading -->
             <div class="sidebar-heading">
@@ -473,6 +508,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">Login / Signup</span>
+                                <i class="fas fa-sign-in-alt fa-2x"></i>
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -528,7 +564,7 @@
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <span>Copyright &copy; LPC 2021 - Version 0.0.7</span>
+                    <span>Copyright &copy; LPC 2021 - Version 1.0.0</span>
                 </div>
             </div>
         </footer>

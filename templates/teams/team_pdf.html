@@ -90,14 +90,15 @@
         <thead>
         <tr>
             <th style="width: 2%; padding-top: 3px;">#</th>
-            <th style="width: 19%; padding-top: 3px;">NAME</th>
+            <th style="width: 18%; padding-top: 3px;">NAME</th>
             <!-- <th style="width: 10%; padding-top: 3px;">POSITION</th>-->
             <TH style="width: 3%; padding-top: 3px;">MA</TH>
             <TH style="width: 3%; padding-top: 3px;">ST</TH>
             <TH style="width: 3%; padding-top: 3px;">AG</TH>
             <TH style="width: 3%; padding-top: 3px;">PA</TH>
             <TH style="width: 3%; padding-top: 3px;">AV</TH>
-            <TH style="width: 40%; padding-top: 3px;">SKILLS & TRAITS</TH>
+            <TH style="width: 38%; padding-top: 3px;">SKILLS & TRAITS</TH>
+            <th style="width: 3%; padding-top: 3px;">NI</th>
             <th style="width: 3%; padding-top: 3px;">CAS</th>
             <th style="width: 3%; padding-top: 3px;">TD</th>
             <th style="width: 3%; padding-top: 3px;">COMP</th>
@@ -139,6 +140,11 @@
                         {% for skill in player.extra_skills.all %}
                             {{ skill.name }},
                         {% endfor %}
+                    </td>
+                    <td>
+                        {% if player.niggling_injury > 0 %}
+                            {{ player.niggling_injury }}
+                        {% endif %}
                     </td>
                     <td></td>
                     <td></td>

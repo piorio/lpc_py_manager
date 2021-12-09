@@ -113,7 +113,7 @@
     <h1>Action</h1>
     <br>
     <UL>
-        <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}" class="btn btn-primary">FIRE</a>
+        <a href="{% url 'teams:manage_fire_player' team.id %}?player={{ player.id }}" class="btn btn-primary">FIRE</a>
         <BR>
         <BR>
         {% if player.is_journeyman %}

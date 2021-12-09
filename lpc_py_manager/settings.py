@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'widget_tweaks',
     'roster.apps.LpcmanagerConfig',
+    'rest_framework',
     'accounts',
     'teams',
     'match',

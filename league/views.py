@@ -1,18 +1,17 @@
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 
 from league.forms import RequireNewLeagueForm, RequireNewSeasonForm, RequireNewTournamentForm, AddTeamForm
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
 
-from teams.models import Team
 from .mail_utils import send_league_creation_request
 from django.contrib import messages
 from .league_utils import create_new_season, get_number_of_teams_for_season, get_number_of_teams_for_seasons, \
     create_new_tournament, get_all_teams_for_season, get_all_ready_teams_without_season, get_all_teams_for_tournament, \
-    get_all_matches_for_tournament, get_all_results_for_tournament
-from .models import League, Season, Tournament, TournamentTeamResult
+    get_all_matches_for_tournament, get_all_results_for_tournament, \
+    get_joined_leagues_contained_info, get_joined_seasons_contained_info, get_joined_tournaments_contained_info, \
+    get_managed_leagues_by_league_id, get_all_leagues_contained_info
+from .models import League, Season, Tournament
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,15 +23,15 @@ def request_new_league(request, *args, **kwargs):
     if request.method == 'POST':
         form = RequireNewLeagueForm(request.POST)
         if form.is_valid():
-            logger.debug('User ' + str(request.user) + ' require a new league with name '
-                         + str(form.cleaned_data['name']) + ' and author email '
-                         + str(form.cleaned_data['author_email']))
+            logger.debug(f"User {str(request.user)} require a new league with name {str(form.cleaned_data['name'])} "
+                         f"and author email {str(form.cleaned_data['author_email'])}")
+
             messages.success(request, 'Your request is send to admin. You will be contacted')
             send_league_creation_request(request.user, form.cleaned_data['name'], form.cleaned_data['author_email'])
             return HttpResponseRedirect('/')
         else:
-            logger.debug('User ' + str(request.user) + ' require a new league with invalid form ' + str(form))
-            messages.warning(request, 'You provide invalid information: ' + str(form.errors))
+            logger.debug(f"User {str(request.user)} require a new league with invalid form {str(form)}")
+            messages.warning(request, f"You provide invalid information: {str(form.errors)}")
             form = RequireNewLeagueForm()
             return render(request, 'league/require_new_league.html', {'form': form})
     else:
@@ -43,26 +42,48 @@ def request_new_league(request, *args, **kwargs):
 
 @login_required()
 def get_league_i_manage(request):
-    logged_user = request.user
-    leagues = League.objects.filter(managers__in=[logged_user])
+    leagues = League.objects.filter(managers__in=[request.user])
     return render(request, 'league/league_i_manage.html', {'leagues': leagues})
+
+
+@login_required()
+def get_all_leagues(request):
+    leagues_dto = get_all_leagues_contained_info()
+    return render(request, 'league/all_leagues.html', {'leagues_dto': leagues_dto,
+                                                       'leagues_list_title': 'Leagues list'})
+
+
+@login_required()
+def get_all_joined_leagues(request):
+    leagues_dto = get_joined_leagues_contained_info(request.user)
+    return render(request, 'league/all_leagues.html', {'leagues_dto': leagues_dto,
+                                                       'leagues_list_title': 'All Leagues you have  joined'})
+
+
+@login_required()
+def get_all_joined_seasons(request):
+    season_dto = get_joined_seasons_contained_info(request.user)
+    return render(request, 'league/all_seasons.html', {'season_dto': season_dto})
+
+
+@login_required()
+def get_all_joined_tournaments(request):
+    tournament_dto = get_joined_tournaments_contained_info(request.user)
+    return render(request, 'league/all_tournaments.html', {'tournament_dto': tournament_dto})
 
 
 @login_required()
 def get_league_detail(request, *args, **kwargs):
     league_id = kwargs.get('league_id')
-    league = League.objects.filter(managers__in=[request.user]).filter(id=league_id).first()
+    league = get_managed_leagues_by_league_id(request, league_id)
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request detail for league ' + league.debug())
+        logger.debug(f"User {str(request.user)} request detail for league {league.debug()}")
         league_seasons = Season.objects.filter(league_id=league.id).all()
         number_of_teams = get_number_of_teams_for_seasons(league_seasons)
         return render(request, 'league/league_detail.html', {'league': league, 'league_seasons': league_seasons,
                                                              'number_of_teams': number_of_teams})
-    else:
-        logger.warning('User ' + str(request.user) + ' request detail for league ' + str(league_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for leagueId ' + str(league_id))
-        return redirect('league:league_i_manage')
+
+    return redirect('league:league_i_manage')
 
 
 @login_required()
@@ -70,14 +91,13 @@ def get_league_user_detail(request, *args, **kwargs):
     league_id = kwargs.get('league_id')
     league = League.objects.filter(id=league_id).first()
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request user detail for league ' + league.debug())
+        logger.debug(f"User {str(request.user)} request user detail for league {league.debug()}")
         league_seasons = Season.objects.filter(league_id=league.id).all()
         number_of_teams = get_number_of_teams_for_seasons(league_seasons)
         return render(request, 'league/league_user_detail.html', {'league': league, 'league_seasons': league_seasons,
                                                                   'number_of_teams': number_of_teams})
     else:
-        logger.warning('User ' + str(request.user) + ' request detail for league ' + str(league_id)
-                       + ' but return empty result')
+        logger.warning(f"User {str(request.user)} request detail for league {str(league_id)} but return empty result")
         messages.warning(request, 'Invalid leagueId ' + str(league_id))
         return redirect('teams:my_teams')
 
@@ -85,19 +105,16 @@ def get_league_user_detail(request, *args, **kwargs):
 @login_required()
 def create_season(request, *args, **kwargs):
     league_id = kwargs.get('league_id')
-    league = League.objects.filter(managers__in=[request.user]).filter(id=league_id).first()
+    league = get_managed_leagues_by_league_id(request, league_id)
 
     if league is None:
-        logger.warning('User ' + str(request.user) + ' wants create season for league ' + str(league_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for leagueId ' + str(league_id))
         return redirect('league:league_i_manage')
 
     if request.method == "POST":
         form = RequireNewSeasonForm(request.POST)
         if form.is_valid():
-            logger.debug('User ' + str(request.user) + ' require a new season with name '
-                         + str(form.cleaned_data['name']) + ' for league ' + league.name)
+            logger.debug(f"User {str(request.user)} require a new season with name {str(form.cleaned_data['name'])} "
+                         f"for league {league.name}")
             flag = create_new_season(league, form.cleaned_data['name'])
             if flag:
                 messages.success(request, 'Your create successfully a new season')
@@ -106,8 +123,8 @@ def create_season(request, *args, **kwargs):
                 messages.error(request, 'Error in create season')
                 return redirect('league:league_i_manage')
         else:
-            logger.debug('User ' + str(request.user) + ' require a new season with invalid form ' + str(form))
-            messages.warning(request, 'You provide invalid information: ' + str(form.errors))
+            logger.debug(f"User {str(request.user)} require a new season with invalid form {str(form)}")
+            messages.warning(request, f"You provide invalid information: {str(form.errors)}")
             form = RequireNewLeagueForm()
             return render(request, 'league/create_new_season.html', {'form': form, 'league': league})
     else:
@@ -119,9 +136,10 @@ def create_season(request, *args, **kwargs):
 def get_season_detail(request, *args, **kwargs):
     season_id = kwargs.get('season_id')
     season = get_object_or_404(Season, id=season_id)
-    league = League.objects.filter(managers__in=[request.user]).filter(id=season.league.id).first()
+    league = get_managed_leagues_by_league_id(request, season.league.id)
+
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request detail for season ' + season.debug())
+        logger.debug(f"User {str(request.user)} request detail for season {season.debug()}")
         season_tournaments = Tournament.objects.filter(season_id=season.id).all()
         number_of_teams = get_number_of_teams_for_season(season)
         all_teams = get_all_teams_for_season(season)
@@ -129,11 +147,8 @@ def get_season_detail(request, *args, **kwargs):
                                                              'season_tournaments': season_tournaments,
                                                              'number_of_teams': number_of_teams,
                                                              'all_teams': all_teams})
-    else:
-        logger.warning('User ' + str(request.user) + ' request detail for season ' + str(season_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for seasonId ' + str(season_id))
-        return redirect('league:league_i_manage')
+
+    return redirect('league:league_i_manage')
 
 
 @login_required()
@@ -142,7 +157,7 @@ def get_season_user_detail(request, *args, **kwargs):
     season = get_object_or_404(Season, id=season_id)
     league = League.objects.filter(id=season.league.id).first()
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request detail for user season ' + season.debug())
+        logger.debug(f"User {str(request.user)} request detail for user season {season.debug()}")
         season_tournaments = Tournament.objects.filter(season_id=season.id).all()
         number_of_teams = get_number_of_teams_for_season(season)
         all_teams = get_all_teams_for_season(season)
@@ -151,9 +166,9 @@ def get_season_user_detail(request, *args, **kwargs):
                                                                   'number_of_teams': number_of_teams,
                                                                   'all_teams': all_teams})
     else:
-        logger.warning('User ' + str(request.user) + ' request detail for user season ' + str(season_id)
-                       + ' but return empty result')
-        messages.warning(request, 'Invalid seasonId ' + str(season_id))
+        logger.warning(f"User {str(request.user)} request detail for user season {str(season_id)} "
+                       f"but return empty result")
+        messages.warning(request, f"Invalid seasonId {str(season_id)}")
         return redirect('teams:my_teams')
 
 
@@ -161,20 +176,16 @@ def get_season_user_detail(request, *args, **kwargs):
 def create_tournament(request, *args, **kwargs):
     season_id = kwargs.get('season_id')
     season = get_object_or_404(Season, id=season_id)
-    league = League.objects.filter(managers__in=[request.user]).filter(id=season.league.id).first()
+    league = get_managed_leagues_by_league_id(request, season.league.id)
 
     if league is None:
-        logger.warning('User ' + str(request.user) + ' wants create new tournament for seasonId ' + str(season_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for leagueId ' + str(season.league.id))
         return redirect('league:league_i_manage')
 
     if request.method == "POST":
         form = RequireNewTournamentForm(request.POST)
         if form.is_valid():
-            logger.debug('User ' + str(request.user) + ' require a new tournament with name '
-                         + str(form.cleaned_data['name']) + ' for league ' + league.name
-                         + ' and season ' + season.debug())
+            logger.debug(f"User {str(request.user)} require a new tournament with name {str(form.cleaned_data['name'])}"
+                         f" for league {league.name} and season {season.debug()}")
             flag = create_new_tournament(season, form.cleaned_data['name'])
             if flag:
                 messages.success(request, 'Your create successfully a new tournament')
@@ -183,8 +194,8 @@ def create_tournament(request, *args, **kwargs):
                 messages.error(request, 'Error in create tournament')
                 return redirect('league:league_i_manage')
         else:
-            logger.debug('User ' + str(request.user) + ' require a new tournament with invalid form ' + str(form))
-            messages.warning(request, 'You provide invalid information: ' + str(form.errors))
+            logger.debug(f"User {str(request.user)} require a new tournament with invalid form {str(form)}")
+            messages.warning(request, f"You provide invalid information: {str(form.errors)}")
             form = RequireNewLeagueForm()
             return render(request, 'league/create_new_tournament.html', {'form': form, 'league': league,
                                                                          'season': season})
@@ -197,12 +208,9 @@ def create_tournament(request, *args, **kwargs):
 def add_team_to_season(request, *args, **kwargs):
     season_id = kwargs.get('season_id')
     season = get_object_or_404(Season, id=season_id)
-    league = League.objects.filter(managers__in=[request.user]).filter(id=season.league.id).first()
+    league = get_managed_leagues_by_league_id(request, season.league.id)
 
     if league is None:
-        logger.warning('User ' + str(request.user) + ' wants add a team to seasonId ' + str(season_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for leagueId ' + str(season.league.id))
         return redirect('league:season_detail', **kwargs)
 
     if request.method == "POST":
@@ -211,23 +219,15 @@ def add_team_to_season(request, *args, **kwargs):
         teams_id = [team.id for team in teams]
         chosen_team = form.data['team']
         if chosen_team is not None:
-            chosen_team_id = int(chosen_team)
-            if chosen_team_id in teams_id:
-                team = Team.objects.filter(id=chosen_team).get()
-                team.season = season
-                team.save()
-                messages.success(request, 'Add team ' + str(team.name) + ' successfully')
+            result = add_team_to_season(chosen_team, teams_id, season, request)
+            if result:
                 return redirect('league:season_detail', **kwargs)
             else:
-                logger.warning('User ' + str(request.user) + ' wants add a team to seasonId ' + str(season_id)
-                               + ' but the teamId ' + str(chosen_team) + ' is not a valid id. List is ' + str(teams_id))
                 form = AddTeamForm()
-                messages.warning(request, 'You chosen an invalid team')
                 return render(request, 'league/add_team_to_season.html', {'form': form, 'league': league,
                                                                           'season': season, 'teams': teams})
         else:
-            logger.warning('User ' + str(request.user) + ' wants add a team to seasonId ' + str(season_id)
-                           + ' but chosen no team')
+            logger.warning(f"User {str(request.user)} wants add a team to seasonId {str(season_id)} but chosen no team")
             form = AddTeamForm()
             messages.error(request, 'You must choose a team')
             return render(request, 'league/add_team_to_season.html', {'form': form, 'league': league,
@@ -244,9 +244,9 @@ def get_tournament_detail(request, *args, **kwargs):
     tournament_id = kwargs.get('tournament_id')
     tournament = get_object_or_404(Tournament, id=tournament_id)
     season = tournament.season
-    league = League.objects.filter(managers__in=[request.user]).filter(id=season.league.id).first()
+    league = get_managed_leagues_by_league_id(request, season.league.id)
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request detail for tournament ' + tournament.debug())
+        logger.debug(f"User {str(request.user)} request detail for tournament {tournament.debug()}")
         all_teams = get_all_teams_for_tournament(tournament)
         all_matches = get_all_matches_for_tournament(tournament)
         all_results = get_all_results_for_tournament(tournament)
@@ -254,11 +254,7 @@ def get_tournament_detail(request, *args, **kwargs):
                                                                  'all_teams': all_teams, 'tournament': tournament,
                                                                  'all_matches': all_matches,
                                                                  'all_results': all_results})
-    else:
-        logger.warning('User ' + str(request.user) + ' request detail for tournament ' + str(tournament_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for tournamentId ' + str(tournament_id))
-        return redirect('league:league_i_manage')
+    return redirect('league:league_i_manage')
 
 
 @login_required()
@@ -268,7 +264,7 @@ def get_tournament_user_detail(request, *args, **kwargs):
     season = tournament.season
     league = League.objects.filter(id=season.league.id).first()
     if league is not None:
-        logger.debug('User ' + str(request.user) + ' request detail for tournament ' + tournament.debug())
+        logger.debug(f"User {str(request.user)} request detail for tournament {tournament.debug()}")
         all_teams = get_all_teams_for_tournament(tournament)
         all_matches = get_all_matches_for_tournament(tournament)
         all_results = get_all_results_for_tournament(tournament)
@@ -277,8 +273,8 @@ def get_tournament_user_detail(request, *args, **kwargs):
                                                                       'all_matches': all_matches,
                                                                       'all_results': all_results})
     else:
-        logger.warning('User ' + str(request.user) + ' request detail for tournament ' + str(tournament_id)
-                       + ' but return empty result')
+        logger.warning(f"User {str(request.user)} request detail for tournament {str(tournament_id)} "
+                       f"but return empty result")
         messages.warning(request, 'Invalid tournamentId ' + str(tournament_id))
         return redirect('teams:my_teams')
 
@@ -289,12 +285,9 @@ def add_team_to_tournament(request, *args, **kwargs):
     tournament_id = kwargs.get('tournament_id')
     tournament = get_object_or_404(Tournament, id=tournament_id)
     season = tournament.season
-    league = League.objects.filter(managers__in=[request.user]).filter(id=season.league.id).first()
+    league = get_managed_leagues_by_league_id(request, season.league.id)
 
     if league is None:
-        logger.warning('User ' + str(request.user) + ' wants add a team to tournamentId ' + str(tournament_id)
-                       + ' but return empty result')
-        messages.warning(request, 'You are not a manager for leagueId ' + str(season.league.id))
         return redirect('league:season_detail', **kwargs)
 
     if request.method == "POST":
@@ -303,38 +296,16 @@ def add_team_to_tournament(request, *args, **kwargs):
         teams_id = [team.id for team in teams]
         chosen_team = form.data['team']
         if chosen_team is not None:
-            chosen_team_id = int(chosen_team)
-            if chosen_team_id in teams_id:
-                try:
-                    with transaction.atomic():
-                        team = Team.objects.filter(id=chosen_team).get()
-                        if team not in tournament.team.all():
-                            tournament_result = TournamentTeamResult()
-                            tournament_result.team = team
-                            tournament_result.tournament = tournament
-                            tournament_result.save()
-                            tournament.team.add(team)
-
-                        messages.success(request, 'Add team ' + str(team.name) + ' successfully')
-                        return redirect('league:tournament_detail', **kwargs)
-                except Exception as e:
-                    logger.error(
-                        'User ' + str(request.user) + ' wants add a team to tournamentId ' + str(tournament_id)
-                        + ' but there is exception ' + str(e))
-                    form = AddTeamForm()
-                    messages.error(request, 'Internal error')
-                    return render(request, 'league/add_team_to_tournament.html', {'form': form, 'league': league,
-                                                                                  'season': season, 'teams': teams})
+            result = add_team_to_tournament(chosen_team, teams_id, tournament, request)
+            if result:
+                return redirect('league:tournament_detail', **kwargs)
             else:
-                logger.warning('User ' + str(request.user) + ' wants add a team to tournamentId ' + str(tournament_id)
-                               + ' but the teamId ' + str(chosen_team) + ' is not a valid id. List is ' + str(teams_id))
                 form = AddTeamForm()
-                messages.warning(request, 'You chosen an invalid team')
                 return render(request, 'league/add_team_to_tournament.html', {'form': form, 'league': league,
                                                                               'season': season, 'teams': teams})
         else:
-            logger.warning('User ' + str(request.user) + ' wants add a team to tournamentId ' + str(tournament_id)
-                           + ' but chosen no team')
+            logger.warning(f"User {str(request.user)} wants add a team to tournamentId {str(tournament_id)} "
+                           f"but chosen no team")
             form = AddTeamForm()
             messages.error(request, 'You must choose a team')
             return render(request, 'league/add_team_to_tournament.html', {'form': form, 'league': league,

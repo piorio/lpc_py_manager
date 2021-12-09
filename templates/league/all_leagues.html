@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}All Leagues{% endblock %}
+
+{% block content %}
+
+    <h1>List of leagues</h1>
+
+    <div>
+    List of leagues hosted by portal: if you would join the community, and use us to manage your league,
+        use the <a href="{% url 'league:request_new_league' %}">ask for a league procedure</a>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">{{ leagues_list_title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="longDataTable">
+                            <thead>
+                            <th>Leagues name</th>
+                            <th>Seasons</th>
+                            <th>Tournaments</th>
+                            <th>Teams</th>
+                            <th>Status</th>
+                            </thead>
+                            <tbody>
+                            {% for league in leagues_dto %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'league:league_detail' league.league.id %}">
+                                            {{ league.league.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ league.seasons_count }}</td>
+                                    <td>{{ league.tournaments_count }}</td>
+                                    <td>{{ league.teams_count }}</td>
+                                    <td>{{ league.league_status }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

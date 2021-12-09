@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.urls import reverse
 
 from league.models import Season
 from roster.models import Race, RosterTeam, Skill, Trait, RosterPlayer
@@ -46,68 +45,7 @@ class Team(models.Model):
 
     season = models.ForeignKey(Season, on_delete=models.CASCADE, blank=True, null=True)
 
-    def get_my_team_detail_absolute_url(self):
-        return reverse('teams:my_team_detail', args=[str(self.id)])
-
-    def get_remove_re_roll_absolute_url(self):
-        return reverse('teams:remove_re_roll', args=[str(self.id)])
-
-    def get_buy_assistant_coach_absolute_url(self):
-        return reverse('teams:buy_assistant_coach', args=[str(self.id)])
-
-    def get_remove_assistant_coach_absolute_url(self):
-        return reverse('teams:remove_assistant_coach', args=[str(self.id)])
-
-    def get_buy_cheerleader_absolute_url(self):
-        return reverse('teams:buy_cheerleader', args=[str(self.id)])
-
-    def get_remove_cheerleader_absolute_url(self):
-        return reverse('teams:remove_cheerleader', args=[str(self.id)])
-
-    def get_buy_extra_fan_absolute_url(self):
-        return reverse('teams:buy_extra_fan', args=[str(self.id)])
-
-    def get_remove_extra_fan_absolute_url(self):
-        return reverse('teams:remove_extra_fan', args=[str(self.id)])
-
-    def get_buy_apothecary_absolute_url(self):
-        return reverse('teams:buy_apothecary', args=[str(self.id)])
-
-    def get_remove_apothecary_absolute_url(self):
-        return reverse('teams:remove_apothecary', args=[str(self.id)])
-
-    def get_manage_player_absolute_url(self):
-        return reverse('teams:manage_player', args=[str(self.id)])
-
-    def get_manage_fire_player_absolute_url(self):
-        return reverse('teams:manage_fire_player', args=[str(self.id)])
-
-    def get_manage_buy_re_roll_absolute_url(self):
-        return reverse('teams:manage_buy_re_roll', args=[str(self.id)])
-
-    def get_manage_remove_re_roll_absolute_url(self):
-        return reverse('teams:manage_remove_re_roll', args=[str(self.id)])
-
-    def get_manage_buy_assistant_coach_absolute_url(self):
-        return reverse('teams:manage_buy_assistant_coach', args=[str(self.id)])
-
-    def get_manage_remove_assistant_coach_absolute_url(self):
-        return reverse('teams:manage_remove_assistant_coach', args=[str(self.id)])
-
-    def get_manage_buy_cheerleader_absolute_url(self):
-        return reverse('teams:manage_buy_cheerleader', args=[str(self.id)])
-
-    def get_manage_remove_cheerleader_absolute_url(self):
-        return reverse('teams:manage_remove_cheerleader', args=[str(self.id)])
-
-    def get_manage_buy_apothecary_absolute_url(self):
-        return reverse('teams:manage_buy_apothecary', args=[str(self.id)])
-
-    def get_manage_remove_apothecary_absolute_url(self):
-        return reverse('teams:manage_remove_apothecary', args=[str(self.id)])
-
-    def get_manage_buy_player_absolute_url(self):
-        return reverse('teams:manage_buy_player', args=[str(self.id)])
+    freeze = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -116,7 +54,7 @@ class Team(models.Model):
 class TeamPlayer(models.Model):
     name = models.CharField(default='NAME', max_length=100)
     agility = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
-    armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
+    armor_value = models.IntegerField(default=0, validators=[MaxValueValidator(20), MinValueValidator(0)])
     cost = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
     value = models.IntegerField(default=0, validators=[MaxValueValidator(1000000), MinValueValidator(0)])
     movement_allowance = models.IntegerField(default=0, validators=[MaxValueValidator(20), MinValueValidator(0)])
@@ -190,14 +128,3 @@ class TeamPlayer(models.Model):
     def debug(self):
         return str(self)
 
-    def get_random_first_skill_levelup_absolute_url(self):
-        return reverse('teams:random_first_skill', args=[str(self.id)])
-
-    def get_random_second_skill_levelup_absolute_url(self):
-        return reverse('teams:random_second_skill', args=[str(self.id)])
-
-    def get_choose_first_skill_levelup_absolute_url(self):
-        return reverse('teams:select_first_skill', args=[str(self.id)])
-
-    def get_choose_secondary_skill_levelup_absolute_url(self):
-        return reverse('teams:select_second_skill', args=[str(self.id)])

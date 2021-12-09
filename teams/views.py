@@ -4,18 +4,30 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
 
+from league.league_utils import get_joined_leagues_contained_info, get_joined_seasons_contained_info, \
+    get_joined_tournaments_contained_info
 from league.models import Tournament, TournamentTeamResult
+from lpc_py_manager.security_util import is_team_belong_to_logged_user, is_roster_player_belongs_to_roster, \
+    is_player_belongs_to_team
 from .buy_fire_helpers.buy_journeyman import BuyJourneyman
 from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm, RandomSkill
 from roster.models import RosterTeam, RosterPlayer, Skill, Trait
 from django.contrib import messages
-from .team_helper import update_team_value
-from django.db.models import Q, Max
+from .team_helper import update_team_value, perform_dismiss_team, perform_ready_team, is_players_count_to_prepare_team, \
+    can_you_buy_player, add_re_roll_during_team_prepare, remove_re_roll_during_team_prepare, \
+    add_assistant_coach_during_team_prepare, remove_assistant_coach_during_team_prepare, \
+    add_cheerleader_during_team_prepare, remove_cheerleader_during_team_prepare, add_extra_fan_during_team_prepare, \
+    remove_extra_fan_during_team_prepare, add_apothecary_during_team_prepare, remove_apothecary_during_team_prepare, \
+    change_player_name_number_by_request, buy_team_re_roll, remove_team_re_roll, buy_team_assistant_coach, \
+    remove_team_assistant_coach, buy_team_cheerleader, remove_team_cheerleader, buy_team_apothecary, \
+    remove_team_apothecary, get_random_skill_search_string, update_teams_freeze
+from django.db.models import Q
 from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
     get_new_level, get_second_skills_category, get_first_skills_select_option, get_second_skills_select_option
 import logging
@@ -81,9 +93,11 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Team.objects.filter(
+        teams = Team.objects.filter(
             (Q(coach=self.request.user) & ~Q(status='RETIRED'))
         ).order_by('name')
+        return_teams = update_teams_freeze(teams)
+        return return_teams
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -146,14 +160,11 @@ def dismiss_team(request, *args, **kwargs):
     pk = kwargs.get('pk')
     team = get_object_or_404(Team, id=pk)
     logger.debug('User ' + str(request.user) + ' try to dismiss team ' + str(team))
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot retire a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to dismiss not owned team ' + str(team))
     else:
-        team.status = 'RETIRED'
-        team.save()
+        perform_dismiss_team(team, request)
         messages.success(request, 'You retire ' + str(team))
-        logger.debug('User ' + str(request.user) + ' dismiss successfully team ' + str(team))
     return redirect('teams:my_teams')
 
 
@@ -164,9 +175,8 @@ def prepare_team(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' try to prepare team ' + str(team))
     roster_players = team.roster_team.roster_players.filter(is_journeyman=False).all()
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot prepare a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to prepare not owned team ' + str(team))
         return redirect('teams:my_teams')
 
     return render(request,
@@ -177,24 +187,13 @@ def prepare_team(request, *args, **kwargs):
 def ready_team(request, *args, **kwargs):
     pk = kwargs.get('pk')
     team = get_object_or_404(Team, id=pk)
-    players_count = team.players.all().count()
-    logger.debug('User ' + str(request.user) + ' try to ready team ' + str(team) + '. Players count '
-                 + str(players_count))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot ready a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to ready a not owned team ' + str(team))
-    elif players_count < 11 or players_count > 16:
+    elif not is_players_count_to_prepare_team(team, request):
         messages.error(request, 'A team must have 11 to 16 players. You cannot ready a not complete team')
-        logger.warning('User ' + str(request.user) + ' try to ready team ' + str(team)
-                       + ' with invalid player count ' + str(players_count))
     else:
-        team_value = update_team_value(team)
-        team.value = team_value
-        team.current_team_value = team_value
-        team.status = 'READY'
-        team.save()
-        logger.warning('User ' + str(request.user) + ' ready team ' + str(team))
+        perform_ready_team(team, request)
     return redirect('teams:my_teams')
 
 
@@ -210,10 +209,8 @@ def buy_player(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
                  + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but the team not belong to the user')
         return redirect('teams:prepare_team', **kwargs)
 
     if roster_player_to_buy.is_journeyman:
@@ -225,48 +222,11 @@ def buy_player(request, *args, **kwargs):
     is_buy_valid = True
 
     # Check if roster_player_id belongs to roster team
-    roster_players_id = list(team.roster_team.roster_players.values_list('id', flat=True))
-    if int(roster_player_id) not in roster_players_id:
+    if not is_roster_player_belongs_to_roster(team, roster_player_id, request.user):
         messages.error(request, 'You cannot buy that player because it is not belong with the chosen roster')
-        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but the player not belong to the roster')
         return redirect('teams:my_teams')
 
-    # Check max team players
-    if team.number_of_players > 15:
-        is_buy_valid = False
-        messages.error(request, 'You can\'t buy more than 16 players')
-        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but can\'t buy more than 16 players. Players ' + str(team.number_of_players))
-
-    # check money spent
-    if is_buy_valid and roster_player_to_buy.cost > team.treasury:
-        is_buy_valid = False
-        messages.error(request, 'You don\'t have money for this player ' + roster_player_to_buy.position)
-        logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                       + str(team) + ' but can\'t have money. Treasury ' + str(team.treasury)
-                       + ' player cost ' + str(roster_player_to_buy.cost))
-
-    # Check big guy: a roster team must have a max number of big guy
-    if is_buy_valid and roster_player_to_buy.big_guy:
-        if team.big_guy_numbers >= team.roster_team.big_guy_max:
-            is_buy_valid = False
-            messages.error(request, 'You cant\'t have more big guy')
-            logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                           + str(team) + ' but can\'t have more big guy. Big Guy ' + str(team.big_guy_numbers)
-                           + ' permitted big guy ' + str(team.roster_team.big_guy_max))
-
-    # Check max position quantity
-    if is_buy_valid:
-        number_of_roster_player_hired = team.players.filter(roster_player=roster_player_to_buy.id).count()
-        if number_of_roster_player_hired >= roster_player_to_buy.max_quantity:
-            is_buy_valid = False
-            messages.error(request, 'You cant\'t buy ' + roster_player_to_buy.position + '! Max quantity is ' +
-                           str(roster_player_to_buy.max_quantity))
-            logger.warning('User ' + str(request.user) + ' try to buy ' + str(roster_player_to_buy) + ' for team '
-                           + str(team) + ' but can\'t have player for this position. Positional Hired '
-                           + str(number_of_roster_player_hired)
-                           + ' permitted player max quantity ' + str(roster_player_to_buy.max_quantity))
+    is_buy_valid = can_you_buy_player(team, request, roster_player_to_buy)
 
     if is_buy_valid:
         player = TeamPlayer()
@@ -305,10 +265,8 @@ def fire_player(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' try to fire ' + str(player) + ' for team '
                  + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' for not owned team '
-                       + str(team))
         return redirect('teams:prepare_team', **kwargs)
 
     if player.roster_player.is_journeyman:
@@ -318,11 +276,8 @@ def fire_player(request, *args, **kwargs):
         return redirect('teams:prepare_team', **kwargs)
 
     # Check if player_id belongs to team
-    team_players_id = list(team.players.values_list('id', flat=True))
-    if int(player_id) not in team_players_id:
+    if not is_player_belongs_to_team(team, player_id, request.user):
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
-        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' but not play for team '
-                       + str(team))
         return redirect('teams:my_teams')
 
     # Delete player and add again the cost
@@ -346,13 +301,13 @@ def fire_player(request, *args, **kwargs):
 
 
 @login_required
-def my_team_detail(request, team_id):
+def my_team_detail(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     logger.debug('User ' + str(request.user) + ' request detail for ' + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'Team did not belongs to you')
-        logger.warning('User ' + str(request.user) + ' request detail for ' + str(team) + ' but don\'t own team')
         return redirect('teams:my_teams')
 
     roster_players = team.roster_team.roster_players.all()
@@ -364,7 +319,7 @@ def my_team_detail(request, team_id):
     if valid_player_counter < 11:
         enable_journeyman = True
 
-    tournaments = Tournament.objects.filter(season=team.season).all()
+    tournaments = Tournament.objects.filter(team=team).all()
     tournaments_results = TournamentTeamResult.objects.filter(team=team).filter(tournament__in=tournaments).all()
 
     logger.debug('User ' + str(request.user) + ' request detail for ' + str(team) + ' Enable JourneyMan '
@@ -381,7 +336,7 @@ def buy_re_roll(request, *args, **kwargs):
     team = get_object_or_404(Team, id=team_id)
     kwargs_for_redirect = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy a re roll for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs_for_redirect)
 
@@ -390,19 +345,18 @@ def buy_re_roll(request, *args, **kwargs):
         messages.error(request,
                        'You don\'t have money for another re roll or you reached the max number of re roll permitted')
     else:
-        team.re_roll += 1
-        team.treasury -= (team.roster_team.re_roll_cost * 2)
-        team.save()
+        add_re_roll_during_team_prepare(team)
 
     return redirect('teams:prepare_team', **kwargs_for_redirect)
 
 
 @login_required
-def remove_re_roll(request, team_id):
+def remove_re_roll(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove a re roll for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
@@ -410,199 +364,152 @@ def remove_re_roll(request, team_id):
     if team.re_roll <= 0:
         messages.error(request, 'You don\'t have re roll to remove')
     else:
-        team.re_roll -= 1
-        team.treasury += team.roster_team.re_roll_cost
-        team.save()
+        remove_re_roll_during_team_prepare(team)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def buy_assistant_coach(request, team_id):
+def buy_assistant_coach(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an assistant coach for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent
-    if team.treasury - 10000 < 0 or team.assistant_coach > 5:
-        messages.error(request, 'You don\'t have money for another assistant coach')
-    else:
-        team.assistant_coach += 1
-        team.treasury -= 10000
-        team.save()
+    add_assistant_coach_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def remove_assistant_coach(request, team_id):
+def remove_assistant_coach(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove an assistant coach for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent and max number
-    if team.assistant_coach <= 0:
-        messages.error(request, 'You don\'t have assistant coach to remove or too many assistant coach')
-    else:
-        team.assistant_coach -= 1
-        team.treasury += 10000
-        team.save()
+    remove_assistant_coach_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def buy_cheerleader(request, team_id):
+def buy_cheerleader(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an cheerleader for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent
-    if team.treasury - 10000 < 0 or team.cheerleader > 11:
-        messages.error(request, 'You don\'t have money for another cheerleader or too many cheerleaders')
-    else:
-        team.cheerleader += 1
-        team.treasury -= 10000
-        team.save()
+    add_cheerleader_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def remove_cheerleader(request, team_id):
+def remove_cheerleader(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove a cheerleader for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent and max number
-    if team.cheerleader <= 0:
-        messages.error(request, 'You don\'t have cheerleader to remove')
-    else:
-        team.cheerleader -= 1
-        team.treasury += 10000
-        team.save()
+    remove_cheerleader_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def buy_extra_fan(request, team_id):
+def buy_extra_fan(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an extra fan for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent
-    if team.treasury - 10000 < 0 or team.extra_dedicated_fan > 4:
-        messages.error(request, 'You don\'t have money for another extra fan or too many extra fan')
-    else:
-        team.extra_dedicated_fan += 1
-        team.treasury -= 10000
-        team.save()
+    add_extra_fan_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def remove_extra_fan(request, team_id):
+def remove_extra_fan(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove an extra fan for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent and max number
-    if team.extra_dedicated_fan <= 0:
-        messages.error(request, 'You don\'t have extra fan to remove')
-    else:
-        team.extra_dedicated_fan -= 1
-        team.treasury += 10000
-        team.save()
+    remove_extra_fan_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def buy_apothecary(request, team_id):
+def buy_apothecary(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an apothecary for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    if team.roster_team.apothecary is False:
-        messages.error(request, 'Your team cannot have an apothecary')
-        return redirect('teams:prepare_team', **kwargs)
-
-    # check money spent
-    if team.treasury - 50000 < 0 or team.apothecary is True:
-        messages.error(request,
-                       'You don\'t have money for the apothecary or too many apothecary (You can buy only one)')
-    else:
-        team.apothecary = True
-        team.treasury -= 50000
-        team.save()
+    add_apothecary_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def remove_apothecary(request, team_id):
+def remove_apothecary(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     kwargs = {'pk': team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove an apothecary for a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
-    # check money spent and max number
-    if team.apothecary is False:
-        messages.error(request, 'You don\'t have apothecary to remove')
-    else:
-        team.apothecary = False
-        team.treasury += 50000
-        team.save()
+    remove_apothecary_during_team_prepare(team, request)
 
     return redirect('teams:prepare_team', **kwargs)
 
 
 @login_required
-def manage_player(request, team_id):
+def manage_player(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     player_id = request.GET.get('player', None)
     print('Manage ' + str(player_id) + ' for teamId ' + str(team_id))
     team = get_object_or_404(Team, id=team_id)
-    kwargs = {'pk', team.id}
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot manage a player of a team not belongs to you')
         return redirect('teams:prepare_team', **kwargs)
 
     # Check if player_id belongs to team
-    team_players_id = list(team.players.values_list('id', flat=True))
-    if int(player_id) not in team_players_id:
+    if not is_player_belongs_to_team(team, player_id, request.user):
         messages.error(request, 'You cannot manage that player because it is not belong with team you are working on')
         return redirect('teams:my_teams')
 
     player = get_object_or_404(TeamPlayer, id=player_id)
+    team_detail_url = reverse('teams:my_team_detail', **kwargs)
     return render(request,
                   'teams/manage_player.html', {'player': player, 'team': team, 'range': range(1, 101),
-                                               'team_detail': team.get_my_team_detail_absolute_url()})
+                                               'team_detail': team_detail_url})
 
 
 @login_required
@@ -614,35 +521,26 @@ def change_player_name_number(request):
         player = get_object_or_404(TeamPlayer, id=player_id)
         team = get_object_or_404(Team, id=team_id)
 
-        if team.coach.id != request.user.id:
+        if not is_team_belong_to_logged_user(team, request):
             messages.error(request, 'You cannot change player name of a team not belongs to you')
             return redirect('teams:my_teams')
 
-        team_players_id = list(team.players.values_list('id', flat=True))
-        if int(player_id) not in team_players_id:
+        if not is_player_belongs_to_team(team, player_id, request.user):
             messages.error(request, 'You cannot change the name of that player because it is not belong with team '
                                     'you are working on')
             return redirect('teams:my_teams')
 
-        player_name = request.POST['new_name']
-        player_number = request.POST['new_number']
+        change_player_name_number_by_request(player, request)
 
-        if player_name:
-            player.name = player_name
-
-        if player_number and player_number != '--':
-            player.player_number = int(player_number)
-
-        player.save()
-
-        return redirect(team.get_manage_player_absolute_url() + '?player=' + player_id)
-
+        url_to_redirect = reverse('teams:manage_player', args=[str(team.id)]) + '?player=' + player_id
+        return redirect(url_to_redirect)
     else:
         return redirect('teams:my_teams')
 
 
 @login_required
-def manage_fire_player(request, team_id):
+def manage_fire_player(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     # If a coach fire a Journeyman, change the TV, but not the Treasury. TODO
     player_id = request.GET.get('player', None)
     team = get_object_or_404(Team, id=team_id)
@@ -651,224 +549,136 @@ def manage_fire_player(request, team_id):
     logger.debug('User ' + str(request.user) + ' try to fire ' + str(player) + ' for team '
                  + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' for not owned team '
-                       + str(team))
         return redirect('teams:my_teams')
 
     # Check if player_id belongs to team
-    team_players_id = list(team.players.values_list('id', flat=True))
-    if int(player_id) not in team_players_id:
+    if not is_player_belongs_to_team(team, player_id, request.user):
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
-        logger.warning('User ' + str(request.user) + ' try to fire ' + str(player) + ' but not play for team '
-                       + str(team))
         return redirect('teams:my_teams')
 
-    # Fired player and add again the cost
-    if not player.roster_player.is_journeyman:
-        logger.debug('User ' + str(request.user) + ' fire ' + str(player) + ' for team '
-                     + str(team) + ' and is not a journeyman so update treasury')
-        team.treasury = team.treasury + player.cost
-
-    if player.big_guy:
-        team.big_guy_numbers -= 1
-    team.number_of_players -= 1
-    player.fired = True
-    player.missing_next_game = False
-
-    try:
-        with transaction.atomic():
-            player.save()
-            team.value = update_team_value(team, True)
-            team.current_team_value = update_team_value(team)
-            team.save()
-    except Exception as e:
-        logger.error('User ' + str(request.user) + ' try to fire ' + str(player) +
-                     ' Exception ' + str(e))
-        messages.error(request, 'Internal error during fire Player')
+    if fire_player(player, team, request):
+        return redirect('teams:my_team_detail', **kwargs)
+    else:
         return redirect('teams:my_teams')
-
-    messages.success(request, 'You fire a ' + str(player.position))
-    return redirect(team.get_my_team_detail_absolute_url())
 
 
 @login_required
-def manage_buy_re_roll(request, team_id):
+def manage_buy_re_roll(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy a re roll for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent and max number
-    if team.roster_team.re_roll_cost > team.treasury or team.re_roll > team.roster_team.re_roll_max:
-        messages.error(request,
-                       'You don\'t have money for another re roll or you reached the max number of re roll permitted')
-    else:
-        team.re_roll += 1
-        team.treasury -= team.roster_team.re_roll_cost
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    buy_team_re_roll(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_remove_re_roll(request, team_id):
+def manage_remove_re_roll(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove a re roll for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent and max number
-    if team.re_roll <= 0:
-        messages.error(request, 'You don\'t have re roll to remove')
-    else:
-        team.re_roll -= 1
-        team.treasury += team.roster_team.re_roll_cost
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    remove_team_re_roll(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_buy_assistant_coach(request, team_id):
+def manage_buy_assistant_coach(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an assistant coach for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent
-    if team.treasury - 10000 < 0 or team.assistant_coach > 5:
-        messages.error(request, 'You don\'t have money for another assistant coach')
-    else:
-        team.assistant_coach += 1
-        team.treasury -= 10000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    buy_team_assistant_coach(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_remove_assistant_coach(request, team_id):
+def manage_remove_assistant_coach(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove an assistant coach for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent and max number
-    if team.assistant_coach <= 0:
-        messages.error(request, 'You don\'t have assistant coach to remove or too many assistant coach')
-    else:
-        team.assistant_coach -= 1
-        team.treasury += 10000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    remove_team_assistant_coach(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_buy_cheerleader(request, team_id):
+def manage_buy_cheerleader(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an cheerleader for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent
-    if team.treasury - 10000 < 0 or team.cheerleader > 11:
-        messages.error(request, 'You don\'t have money for another cheerleader or too many cheerleaders')
-    else:
-        team.cheerleader += 1
-        team.treasury -= 10000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    buy_team_cheerleader(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_remove_cheerleader(request, team_id):
+def manage_remove_cheerleader(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove a cheerleader for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent and max number
-    if team.cheerleader <= 0:
-        messages.error(request, 'You don\'t have cheerleader to remove')
-    else:
-        team.cheerleader -= 1
-        team.treasury += 10000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    remove_team_cheerleader(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_buy_apothecary(request, team_id):
+def manage_buy_apothecary(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy an apothecary for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    if team.roster_team.apothecary is False:
-        messages.error(request, 'Your team cannot have an apothecary')
-        return redirect(team.get_my_team_detail_absolute_url())
+    buy_team_apothecary(team, request)
 
-    # check money spent
-    if team.treasury - 50000 < 0 or team.apothecary is True:
-        messages.error(request,
-                       'You don\'t have money for the apothecary or too many apothecary (You can buy only one)')
-    else:
-        team.apothecary = True
-        team.treasury -= 50000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
-
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_remove_apothecary(request, team_id):
+def manage_remove_apothecary(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot remove an apothecary for a team not belongs to you')
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
-    # check money spent and max number
-    if team.apothecary is False:
-        messages.error(request, 'You don\'t have apothecary to remove')
-    else:
-        team.apothecary = False
-        team.treasury += 50000
-        team.value = update_team_value(team, True)
-        team.current_team_value = update_team_value(team)
-        team.save()
+    remove_team_apothecary(team, request)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
-def manage_buy_player(request, team_id):
+def manage_buy_player(request, *args, **kwargs):
+    team_id = kwargs.get('team_id')
     roster_player_id = request.GET.get('roster_player', None)
     team = get_object_or_404(Team, id=team_id)
     roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
@@ -876,12 +686,9 @@ def manage_buy_player(request, team_id):
     logger.debug('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
                  + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
-        logger.warning(
-            'User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for not owned team '
-            + str(team))
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
     buy_engine = None
     if roster_player_to_buy.is_journeyman:
@@ -912,58 +719,45 @@ def manage_buy_player(request, team_id):
     else:
         messages.error(request, buy_engine.message_for_flash)
 
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
 
 
 @login_required
 def player_level_up(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
-    if player.team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(player.team, request):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        kwargs = {'team_id': player.team.id}
+        return redirect('teams:my_team_detail', **kwargs)
 
     level_cost = get_levelup_cost_all_levels(player)
     return render(request, 'teams/levelup.html', {'player': player, 'level_cost': level_cost})
 
 
 @login_required
-def random_first_skill(request, player_id):
+def random_first_skill(request, *args, **kwargs):
+    player_id = kwargs.get('player_id')
     player = get_object_or_404(TeamPlayer, id=player_id)
 
     logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player))
+    kwargs = {'team_id': player.team.id}
 
-    if player.team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(player.team, request):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
-                       + ' for not owned team')
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
     level_cost = get_levelup_cost_by_level(player, 0)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
         logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
                        + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
     if request.method == "POST":
         form = RandomSkill(request.POST)
         if form.is_valid():
-            category = form.cleaned_data['category']
-            first_dice = form.cleaned_data['first_dice']
-            second_dice = form.cleaned_data['second_dice']
-
-            if first_dice <= 3:
-                first_dice = 1
-            if first_dice >= 4:
-                first_dice = 4
-
-            search_string = category + str(first_dice) + str(second_dice)
-            logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player)
-                         + ' First dice set ' + str(form.cleaned_data['first_dice'])
-                         + ' Second dice set ' + str(second_dice)
-                         + ' First dice ' + str(first_dice) + ' search string ' + search_string)
-
+            search_string = get_random_skill_search_string(form, request, player)
             try:
                 with transaction.atomic():
                     skill = Skill.objects.filter(random_identifier=search_string).get()
@@ -984,7 +778,8 @@ def random_first_skill(request, player_id):
                         logger.warning('User ' + str(request.user) + ' random first skill for player ' + str(player)
                                        + ' Skill not found ' + str(search_string))
 
-                    return redirect(player.team.get_my_team_detail_absolute_url())
+                    kwargs = {'team_id': player.team.id}
+                    return redirect('teams:my_team_detail', **kwargs)
             except Exception as e:
                 logger.error('User ' + str(request.user) + ' random skill error ' + str(player) +
                              ' Exception ' + str(e))
@@ -1004,42 +799,28 @@ def random_first_skill(request, player_id):
 
 
 @login_required
-def random_second_skill(request, player_id):
+def random_second_skill(request, *args, **kwargs):
+    player_id = kwargs.get('player_id')
     player = get_object_or_404(TeamPlayer, id=player_id)
 
     logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player))
+    kwargs_team = {'team_id': player.team.id}
 
-    if player.team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(player.team, request):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
-                       + ' for not owned team')
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     level_cost = get_levelup_cost_by_level(player, 1)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
         logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
                        + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     if request.method == "POST":
         form = RandomSkill(request.POST)
         if form.is_valid():
-            category = form.cleaned_data['category']
-            first_dice = form.cleaned_data['first_dice']
-            second_dice = form.cleaned_data['second_dice']
-
-            if first_dice <= 3:
-                first_dice = 1
-            if first_dice >= 4:
-                first_dice = 4
-            search_string = category + str(first_dice) + str(second_dice)
-
-            logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player)
-                         + ' First dice set ' + str(form.cleaned_data['first_dice'])
-                         + ' Second dice set ' + str(second_dice)
-                         + ' First dice ' + str(first_dice) + ' search string ' + search_string)
-
+            search_string = get_random_skill_search_string(form, request, player)
             try:
                 with transaction.atomic():
                     skill = Skill.objects.filter(random_identifier=search_string).get()
@@ -1060,7 +841,7 @@ def random_second_skill(request, player_id):
                         logger.warning('User ' + str(request.user) + ' random second skill for player ' + str(player)
                                        + ' Skill not found ' + str(search_string))
 
-                    return redirect(player.team.get_my_team_detail_absolute_url())
+                    return redirect('teams:my_team_detail', **kwargs_team)
             except Exception as e:
                 logger.error('User ' + str(request.user) + ' random second skill error ' + str(player) +
                              ' Exception ' + str(e))
@@ -1080,23 +861,23 @@ def random_second_skill(request, player_id):
 
 
 @login_required
-def select_first_skill(request, player_id):
+def select_first_skill(request, *args, **kwargs):
+    player_id = kwargs.get('player_id')
     player = get_object_or_404(TeamPlayer, id=player_id)
 
     logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player))
+    kwargs_team = {'team_id': player.team.id}
 
-    if player.team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(player.team, request):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
-                       + ' for not owned team')
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     level_cost = get_levelup_cost_by_level(player, 1)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
         logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
                        + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     if request.method == "POST":
         # TODO: Check if the skill could be chosen: input validation
@@ -1126,30 +907,30 @@ def select_first_skill(request, player_id):
             messages.error(request, "Skill with id " + skill_id + " not found!!!")
             logger.warning('User ' + str(request.user) + ' first skill for player ' + str(player)
                            + ' Skill not found ' + str(skill_id))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     first_skills = get_first_skills_select_option(player)
     return render(request, 'teams/select_first_skill.html', {'player': player, 'first_skills': first_skills})
 
 
 @login_required
-def select_second_skill(request, player_id):
+def select_second_skill(request, *args, **kwargs):
+    player_id = kwargs.get('player_id')
     player = get_object_or_404(TeamPlayer, id=player_id)
 
     logger.debug('User ' + str(request.user) + ' second skill for player ' + str(player))
+    kwargs_team = {'team_id': player.team.id}
 
-    if player.team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(player.team, request):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
-        logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
-                       + ' for not owned team')
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     level_cost = get_levelup_cost_by_level(player, 2)
     if player.spp < level_cost:
         messages.error(request, 'You cannot level up a this player: too few SPP')
         logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
                        + ' not enough SPP. SPP -> ' + str(player.spp) + ' - Level cost ' + str(level_cost))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     if request.method == "POST":
         # TODO: Check if the skill could be chosen: input validation
@@ -1178,7 +959,7 @@ def select_second_skill(request, player_id):
             messages.error(request, "Skill with id " + skill_id + " not found!!!")
             logger.warning('User ' + str(request.user) + ' second skill for player ' + str(player)
                            + ' Skill not found ' + str(skill_id))
-        return redirect(player.team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs_team)
 
     second_skills = get_second_skills_select_option(player)
     return render(request, 'teams/select_second_skill.html', {'player': player, 'second_skills': second_skills})
@@ -1229,12 +1010,9 @@ def confirm_journeyman(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' try to confirm journeymanId ' + str(player_id) + ' for team '
                  + str(team))
 
-    if team.coach.id != request.user.id:
+    if not is_team_belong_to_logged_user(team, request):
         messages.error(request, 'You cannot confirm a journeyman for a team not belongs to you')
-        logger.warning(
-            'User ' + str(request.user) + ' try to confirm journeymanId ' + str(player_id) + ' for not owned team '
-            + str(team))
-        return redirect(team.get_my_team_detail_absolute_url())
+        return redirect('teams:my_team_detail', **kwargs)
 
     player = get_object_or_404(TeamPlayer, id=player_id)
     logger.debug('User ' + str(request.user) + ' try to confirm journeymanId ' + player.debug() + ' for team '
@@ -1281,4 +1059,4 @@ def confirm_journeyman(request, *args, **kwargs):
         return redirect('teams:my_teams')
 
     messages.success(request, 'You bought ' + str(player.position))
-    return redirect(team.get_my_team_detail_absolute_url())
+    return redirect('teams:my_team_detail', **kwargs)
