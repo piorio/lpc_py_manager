@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 
+from league.models import LeagueConfiguration
 from match.models import Match
 
 logger = logging.getLogger(__name__)
@@ -369,20 +370,25 @@ def get_random_skill_search_string(form, request, player):
     return search_string
 
 
-def update_teams_freeze(teams):
+def update_team_freeze(team):
     try:
         with transaction.atomic():
-            for team in teams:
-                if team.freeze is not True:
+            # If a team is already frozen or is not belong to a season, don't check the feature: only team in a
+            # season could be frozen
+            if team.freeze is not True and team.season is not None:
+                feature = LeagueConfiguration.objects\
+                    .filter(league=team.season.league)\
+                    .filter(key='EnableFrozen').first()
+                if feature is not None and feature.value == 'true':
                     first_team_match = Match.objects.filter(
                         (Q(first_team=team) | Q(second_team=team)) & Q(played=False))\
-                        .order_by('match_date_from')\
+                        .order_by('freeze_date')\
                         .first()
-                    if first_team_match is not None and first_team_match.match_date_from is not None \
-                            and first_team_match.match_date_from <= datetime.today().date():
+                    if first_team_match is not None and first_team_match.freeze_date is not None \
+                            and first_team_match.freeze_date <= datetime.today().date():
                         team.freeze = True
                         team.save()
     except Exception as e:
-        logger.error(f"Unable to update freeze team for teams {teams}")
+        logger.error(f"Unable to update freeze team for teams {team}")
 
-    return teams
+    return team

@@ -26,7 +26,7 @@ from .team_helper import update_team_value, perform_dismiss_team, perform_ready_
     remove_extra_fan_during_team_prepare, add_apothecary_during_team_prepare, remove_apothecary_during_team_prepare, \
     change_player_name_number_by_request, buy_team_re_roll, remove_team_re_roll, buy_team_assistant_coach, \
     remove_team_assistant_coach, buy_team_cheerleader, remove_team_cheerleader, buy_team_apothecary, \
-    remove_team_apothecary, get_random_skill_search_string, update_teams_freeze
+    remove_team_apothecary, get_random_skill_search_string, update_team_freeze
 from django.db.models import Q
 from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
     get_new_level, get_second_skills_category, get_first_skills_select_option, get_second_skills_select_option
@@ -93,11 +93,9 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        teams = Team.objects.filter(
+        return Team.objects.filter(
             (Q(coach=self.request.user) & ~Q(status='RETIRED'))
         ).order_by('name')
-        return_teams = update_teams_freeze(teams)
-        return return_teams
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -304,6 +302,7 @@ def fire_player(request, *args, **kwargs):
 def my_team_detail(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
+    team = update_team_freeze(team)
     logger.debug('User ' + str(request.user) + ' request detail for ' + str(team))
 
     if not is_team_belong_to_logged_user(team, request):

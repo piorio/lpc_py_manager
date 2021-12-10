@@ -65,3 +65,12 @@ class TournamentTeamResult(models.Model):
 
     def debug(self):
         return 'TournamentResult {"tournament": ' + str(self.tournament) + ', "team":' + str(self.team) + ' }'
+
+
+class LeagueConfiguration(models.Model):
+    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name='league_configuration')
+    CONFIGURATION_KEYS = (
+        ('EnableFrozen', 'EnableFrozen'),
+    )
+    key = models.CharField(max_length=20, choices=CONFIGURATION_KEYS)
+    value = models.CharField(max_length=100)
