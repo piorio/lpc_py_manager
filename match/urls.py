@@ -1,19 +1,13 @@
 from django.urls import path
-from .views import (
-    AllMatchesToPlayListView,
-    AllMatchesPlayedListView,
-    MyMatchesToPlayListView,
-    MyMatchesPlayedListView,
-    close_match,
-)
+from . import views
 
 
 app_name = 'match'
 
 urlpatterns = [
-    path('', AllMatchesToPlayListView.as_view(), name='all_matches'),
-    path('played', AllMatchesPlayedListView.as_view(), name='all_matches_played'),
-    path('my_matches/', MyMatchesToPlayListView.as_view(), name='my_matches'),
-    path('my_matches/played', MyMatchesPlayedListView.as_view(), name='my_matches_played'),
-    path('close/<int:match_id>/', close_match, name='close_match'),
+    path('', views.AllMatchesToPlayListView.as_view(), name='all_matches'),
+    path('played', views.AllMatchesPlayedListView.as_view(), name='all_matches_played'),
+    path('my_matches/', views.MyMatchesToPlayListView.as_view(), name='my_matches'),
+    path('my_matches/played',views. MyMatchesPlayedListView.as_view(), name='my_matches_played'),
+    path('close/<int:match_id>/', views.close_match, name='close_match'),
 ]

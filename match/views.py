@@ -174,6 +174,11 @@ def close_match(request, *args, **kwargs):
                                  + ' add gold ' + second_team_gold)
                     match.second_team.treasury += second_team_gold_int
 
+                # Reset freeze status
+                logger.debug(f"Reset freeze status for {str(match.first_team)} and {str(match.second_team)}")
+                match.first_team.freeze = False
+                match.second_team.freeze = False
+
                 match.first_team.save()
                 match.second_team.save()
                 match.played = True

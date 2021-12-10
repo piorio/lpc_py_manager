@@ -5,6 +5,8 @@ LpcManager/__pycache__/*.*
 .idea/vcs.xml
 lpc_py_manager/__pycache__/
 venv/
+venv/*.*
+venv/*.*/
 accounts/__pycache__/
 accounts/migrations/__pycache__/
 roster/__pycache__/

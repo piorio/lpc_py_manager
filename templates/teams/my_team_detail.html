@@ -11,6 +11,13 @@
 
     <h3>Details -- <a href="{% url 'teams:create_pdf' team.id %}" class="btn btn-primary">Create PDF</a></h3>
     <br>
+    {% if team.freeze %}
+        <h2>Your team is in a freeze status</h2>
+        <div>
+        So you cannot buy or fire nothing
+        </div>
+        <br>
+    {% endif %}
 
     <!-- FIRST ROW -->
     <div class="row">
@@ -107,11 +114,14 @@
                             <hr>
                             <h6>Single cheerleader cost 10000</h6>
                             <br>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <a href="{{ team.get_manage_buy_cheerleader_absolute_url }}"
-                                   class="btn btn-primary">ADD</a>
-                                <a href="{{ team.get_manage_remove_cheerleader_absolute_url }}" class="btn btn-primary">REMOVE</a>
-                            </div>
+                            {% if team.freeze is False %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{% url 'teams:manage_buy_cheerleader' team.id %}"
+                                       class="btn btn-primary">ADD</a>
+                                    <a href="{% url 'teams:manage_remove_cheerleader' team.id %}"
+                                       class="btn btn-primary">REMOVE</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -132,10 +142,14 @@
                             <hr>
                             <h6>Single re roll cost {{ team.roster_team.re_roll_cost }}</h6>
                             <br>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <a href="{{ team.get_manage_buy_re_roll_absolute_url }}" class="btn btn-primary">ADD</a>
-                                <a href="{{ team.get_manage_remove_re_roll_absolute_url }}" class="btn btn-primary">REMOVE</a>
-                            </div>
+                            {% if team.freeze is False %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{% url 'teams:manage_buy_re_roll' team.id %}"
+                                       class="btn btn-primary">ADD</a>
+                                    <a href="{% url 'teams:manage_remove_re_roll' team.id %}"
+                                       class="btn btn-primary">REMOVE</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -156,12 +170,14 @@
                             <hr>
                             <h6>Single Assistant coach cost 10000</h6>
                             <br>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <a href="{{ team.get_manage_buy_assistant_coach_absolute_url }}"
-                                   class="btn btn-primary">ADD</a>
-                                <a href="{{ team.get_manage_remove_assistant_coach_absolute_url }}"
-                                   class="btn btn-primary">REMOVE</a>
-                            </div>
+                            {% if team.freeze is False %}
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <a href="{% url 'teams:manage_buy_assistant_coach' team.id %}"
+                                       class="btn btn-primary">ADD</a>
+                                    <a href="{% url 'teams:manage_remove_assistant_coach' team.id %}"
+                                       class="btn btn-primary">REMOVE</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -189,11 +205,14 @@
                                 <hr>
                                 <h6>Single Apothecary cost 50000</h6>
                                 <br>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <a href="{{ team.get_manage_buy_apothecary_absolute_url }}" class="btn btn-primary">BUY</a>
-                                    <a href="{{ team.get_manage_remove_apothecary_absolute_url }}"
-                                       class="btn btn-primary">REMOVE</a>
-                                </div>
+                                {% if team.freeze is False %}
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        <a href="{% url 'teams:manage_buy_apothecary' team.id %}"
+                                           class="btn btn-primary">BUY</a>
+                                        <a href="{% url 'teams:manage_remove_apothecary' team.id %}"
+                                           class="btn btn-primary">REMOVE</a>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
                                     Your team cannot have an apothecary
@@ -209,7 +228,7 @@
     <!-- LEAGUE ROW -->
     <div class="row">
         <!-- LEAGUE Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -237,7 +256,7 @@
         </div>
 
         <!-- SEASON Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -265,6 +284,7 @@
         </div>
 
         <!-- TOURNAMENT Card -->
+    <!--
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -291,9 +311,10 @@
                 </div>
             </div>
         </div>
+        -->
 
-        <!-- Current Value Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <!-- Tournament result -->
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -301,10 +322,14 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Tournaments result (W/T/L)
                             </div>
+                            <br>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <ul>
                                     {% for result in tournaments_results %}
-                                        {{ result.tournament }} [{{ result.win }}/{{ result.tie }}/{{ result.loss }}]
+                                        <a href="{% url 'league:tournament_user_detail' result.tournament.id %}">
+                                            {{ result.tournament.name }}
+                                        </a>
+                                        -> {{ result.league_points }} points [{{ result.win }}/{{ result.tie }}/{{ result.loss }}]
                                         <br>
                                     {% endfor %}
                                 </ul>
@@ -358,7 +383,7 @@
                                     {% endif %}
                                 <td>#{{ player.player_number }}</td>
                                 <td>
-                                    <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}">
+                                    <a href="{% url 'teams:manage_player' team.id %}?player={{ player.id }}">
                                         {{ player.name }}
                                     </a>
                                     <br>
@@ -433,13 +458,17 @@
                                     ({{ player.roster_player.secondary_skills }})
                                 </td>
                                 <td>
-                                    <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
-                                       class="btn btn-primary">FIRE</a>
-                                    {% if player.is_journeyman %}
-                                        <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"
-                                           class="btn btn-primary">CONFIRM</a>
+                                    {% if team.freeze is False %}
+                                        <a href="{% url 'teams:manage_fire_player' team.id %}?player={{ player.id }}"
+                                           class="btn btn-primary">FIRE</a>
+                                        {% if player.is_journeyman %}
+                                            <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"
+                                               class="btn btn-primary">CONFIRM</a>
+                                        {% endif %}
+                                        {{ player | add_level_up_action }}
+                                    {% else %}
+                                        --
                                     {% endif %}
-                                    {{ player | add_level_up_action }}
                                 </td>
                                 </tr>
                                 {% endif %}
@@ -501,15 +530,19 @@
                                     </td>
                                     <td>{{ roster_player.cost }}</td>
                                     <td>
-                                        {% if not roster_player.is_journeyman or enable_journeyman %}
-                                            <a href="{{ team.get_manage_buy_player_absolute_url }}?roster_player={{ roster_player.id }}"
-                                               class="btn btn-primary">
-                                                {% if not roster_player.is_journeyman %}
-                                                    BUY
-                                                {% else %}
-                                                    add Journeyman
-                                                {% endif %}
-                                            </a>
+                                        {% if team.freeze is False %}
+                                            {% if not roster_player.is_journeyman or enable_journeyman %}
+                                                <a href="{% url 'teams:manage_buy_player' team.id %}?roster_player={{ roster_player.id }}"
+                                                   class="btn btn-primary">
+                                                    {% if not roster_player.is_journeyman %}
+                                                        BUY
+                                                    {% else %}
+                                                        add Journeyman
+                                                    {% endif %}
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            --
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -551,7 +584,7 @@
                                     <tr>
                                         <td>{{ player.player_number }}</td>
                                         <td>
-                                            <a href="{{ team.get_manage_player_absolute_url }}?player={{ player.id }}">
+                                            <a href="{% url 'teams:manage_player' team.id %}?player={{ player.id }}">
                                                 {{ player.name }}
                                             </a>
                                             <br>
@@ -577,12 +610,15 @@
                                             {% for trait in player.traits.all %}
                                                 {{ trait.name }},
                                             {% endfor %}
+                                            {% for skill in player.extra_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
                                         <td>{{ player.spp }}</td>
                                         <td>{{ player.niggling_injury }}</td>
                                         <td>
-                                            <a href="{{ team.get_manage_fire_player_absolute_url }}?player={{ player.id }}"
+                                            <a href="{% url 'teams:manage_fire_player' team.id %}?player={{ player.id }}"
                                                class="btn btn-primary">FIRE</a>
                                             {% if player.is_journeyman %}
                                                 <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"

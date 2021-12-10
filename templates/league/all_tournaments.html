@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}All Tournaments{% endblock %}
+
+{% block content %}
+
+    <h1>List of tournaments</h1>
+
+    <div>
+        You play some seasons in a league, but in which tournament you really play? How is going on your path
+        to the glory? See All tournaments your joined, search for next match and your position inside the tournament
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-xl-12 col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h3 class="m-0 font-weight-bold text-primary">Tournaments list</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="longDataTable">
+                            <thead>
+                            <th>Tournament Name</th>
+                            <th>Season</th>
+                            <th>League</th>
+                            <th>League Status</th>
+                            <TH>Teams</TH>
+                            </thead>
+                            <tbody>
+                            {% for tournament in tournament_dto %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'league:tournament_detail' tournament.tournament.id %}">
+                                            {{ tournament.tournament.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ tournament.season.name }}</td>
+                                    <td>{{ tournament.season.league.name }}</td>
+                                    <td>{{ tournament.season.league.status }}</td>
+                                    <td>{{ tournament.teams_count }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
