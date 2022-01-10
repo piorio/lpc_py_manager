@@ -135,9 +135,11 @@
                                 <tr>
                                     <td>
                                         <a href="{% url 'teams:all_team_detail' match.first_team.id %}">{{ match.first_team }}</a>
+                                        - [CTV {{ obj.first_team.current_team_value }}]
                                     </td>
                                     <td>
                                         <a href="{% url 'teams:all_team_detail' match.second_team.id %}">{{ match.second_team }}</a>
+                                        - [CTV {{ obj.second_team.current_team_value }}]
                                     </td>
                                     <td>{{ match.match_date_from }}</td>
                                     <td>{{ match.match_date_to }}</td>

@@ -221,7 +221,7 @@ def change_player_name_number_by_request(player, request):
     player.save()
 
 
-def fire_player(player, team, request):
+def fire_player_helper(player, team, request):
     # Fired player and add again the cost
     if not player.roster_player.is_journeyman:
         logger.debug('User ' + str(request.user) + ' fire ' + str(player) + ' for team '

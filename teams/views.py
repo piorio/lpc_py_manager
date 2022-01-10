@@ -9,11 +9,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
 
-from league.league_utils import get_joined_leagues_contained_info, get_joined_seasons_contained_info, \
-    get_joined_tournaments_contained_info
 from league.models import Tournament, TournamentTeamResult
 from lpc_py_manager.security_util import is_team_belong_to_logged_user, is_roster_player_belongs_to_roster, \
-    is_player_belongs_to_team
+    is_player_belongs_to_team, is_team_in_league_i_manage
 from .buy_fire_helpers.buy_journeyman import BuyJourneyman
 from .models import Team, TeamPlayer
 from .forms import CreateMyTeamForm, RandomSkill
@@ -26,7 +24,7 @@ from .team_helper import update_team_value, perform_dismiss_team, perform_ready_
     remove_extra_fan_during_team_prepare, add_apothecary_during_team_prepare, remove_apothecary_during_team_prepare, \
     change_player_name_number_by_request, buy_team_re_roll, remove_team_re_roll, buy_team_assistant_coach, \
     remove_team_assistant_coach, buy_team_cheerleader, remove_team_cheerleader, buy_team_apothecary, \
-    remove_team_apothecary, get_random_skill_search_string, update_team_freeze
+    remove_team_apothecary, get_random_skill_search_string, update_team_freeze, fire_player_helper
 from django.db.models import Q
 from .levelup_helper import get_levelup_cost_by_level, get_levelup_cost_all_levels, get_first_skills_category, \
     get_new_level, get_second_skills_category, get_first_skills_select_option, get_second_skills_select_option
@@ -73,16 +71,19 @@ class AllTeamDetail(DetailView):
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
+        self.request = request
         return super(AllTeamDetail, self).dispatch(request, args, kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(AllTeamDetail, self).get_context_data(**kwargs)
         team = context['team']
         dedicated_fan = getattr(team, 'extra_dedicated_fan')
+        enable_edit = is_team_in_league_i_manage(team, self.request)
 
-        logger.debug('All team details for team ' + str(team) + ' - Dedicated fan => ' + str(dedicated_fan))
+        logger.debug(f"All team details for team {team} - Dedicated fan => {dedicated_fan} - Enable edit {enable_edit}")
 
         context['dedicated_fan'] = dedicated_fan + 1
+        context['enable_edit'] = enable_edit
         return context
 
 
@@ -303,9 +304,9 @@ def my_team_detail(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
     team = update_team_freeze(team)
-    logger.debug('User ' + str(request.user) + ' request detail for ' + str(team))
+    logger.debug(f"User {request.user} request detail for {team}")
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'Team did not belongs to you')
         return redirect('teams:my_teams')
 
@@ -492,12 +493,12 @@ def remove_apothecary(request, *args, **kwargs):
 def manage_player(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     player_id = request.GET.get('player', None)
-    print('Manage ' + str(player_id) + ' for teamId ' + str(team_id))
+    logger.debug(f"Manage {player_id} for teamId {team_id})")
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot manage a player of a team not belongs to you')
-        return redirect('teams:prepare_team', **kwargs)
+        return redirect('teams:my_team_detail', **kwargs)
 
     # Check if player_id belongs to team
     if not is_player_belongs_to_team(team, player_id, request.user):
@@ -505,7 +506,7 @@ def manage_player(request, *args, **kwargs):
         return redirect('teams:my_teams')
 
     player = get_object_or_404(TeamPlayer, id=player_id)
-    team_detail_url = reverse('teams:my_team_detail', **kwargs)
+    team_detail_url = reverse('teams:my_team_detail', args=[str(team.id)])
     return render(request,
                   'teams/manage_player.html', {'player': player, 'team': team, 'range': range(1, 101),
                                                'team_detail': team_detail_url})
@@ -520,7 +521,7 @@ def change_player_name_number(request):
         player = get_object_or_404(TeamPlayer, id=player_id)
         team = get_object_or_404(Team, id=team_id)
 
-        if not is_team_belong_to_logged_user(team, request):
+        if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
             messages.error(request, 'You cannot change player name of a team not belongs to you')
             return redirect('teams:my_teams')
 
@@ -545,10 +546,9 @@ def manage_fire_player(request, *args, **kwargs):
     team = get_object_or_404(Team, id=team_id)
     player = get_object_or_404(TeamPlayer, id=player_id)
 
-    logger.debug('User ' + str(request.user) + ' try to fire ' + str(player) + ' for team '
-                 + str(team))
+    logger.debug(f"User {request.user} try to fire {player} for team {team}")
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot fire a player for a team not belongs to you')
         return redirect('teams:my_teams')
 
@@ -557,7 +557,7 @@ def manage_fire_player(request, *args, **kwargs):
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
         return redirect('teams:my_teams')
 
-    if fire_player(player, team, request):
+    if fire_player_helper(player, team, request):
         return redirect('teams:my_team_detail', **kwargs)
     else:
         return redirect('teams:my_teams')
@@ -568,7 +568,7 @@ def manage_buy_re_roll(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot buy a re roll for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -582,7 +582,7 @@ def manage_remove_re_roll(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot remove a re roll for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -596,7 +596,7 @@ def manage_buy_assistant_coach(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot buy an assistant coach for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -610,7 +610,7 @@ def manage_remove_assistant_coach(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot remove an assistant coach for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -624,7 +624,7 @@ def manage_buy_cheerleader(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot buy an cheerleader for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -638,7 +638,7 @@ def manage_remove_cheerleader(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot remove a cheerleader for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -652,7 +652,7 @@ def manage_buy_apothecary(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot buy an apothecary for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -666,7 +666,7 @@ def manage_remove_apothecary(request, *args, **kwargs):
     team_id = kwargs.get('team_id')
     team = get_object_or_404(Team, id=team_id)
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot remove an apothecary for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -682,10 +682,9 @@ def manage_buy_player(request, *args, **kwargs):
     team = get_object_or_404(Team, id=team_id)
     roster_player_to_buy = get_object_or_404(RosterPlayer, id=roster_player_id)
 
-    logger.debug('User ' + str(request.user) + ' try to hire ' + str(roster_player_to_buy) + ' for team '
-                 + str(team))
+    logger.debug(f"User {request.user} try to hire {roster_player_to_buy} for team {team}")
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot buy a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -709,8 +708,7 @@ def manage_buy_player(request, *args, **kwargs):
                 team.save()
                 player.set_initial_skills_and_traits(roster_player_to_buy)
         except Exception as e:
-            logger.error('User ' + str(request.user) + ' try to hire ' + str(player) +
-                         ' Exception ' + str(e))
+            logger.error(f"User {request.user} try to hire {player} - Exception {e}")
             messages.error(request, 'Internal error during hire Player')
             return redirect('teams:my_teams')
 
@@ -725,7 +723,7 @@ def manage_buy_player(request, *args, **kwargs):
 def player_level_up(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
-    if not is_team_belong_to_logged_user(player.team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         kwargs = {'team_id': player.team.id}
         return redirect('teams:my_team_detail', **kwargs)
@@ -742,7 +740,7 @@ def random_first_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player))
     kwargs = {'team_id': player.team.id}
 
-    if not is_team_belong_to_logged_user(player.team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -805,7 +803,7 @@ def random_second_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not is_team_belong_to_logged_user(player.team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
@@ -867,7 +865,7 @@ def select_first_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not is_team_belong_to_logged_user(player.team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
@@ -920,7 +918,7 @@ def select_second_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' second skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not is_team_belong_to_logged_user(player.team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
@@ -1009,7 +1007,7 @@ def confirm_journeyman(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' try to confirm journeymanId ' + str(player_id) + ' for team '
                  + str(team))
 
-    if not is_team_belong_to_logged_user(team, request):
+    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
         messages.error(request, 'You cannot confirm a journeyman for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 

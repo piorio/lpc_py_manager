@@ -110,22 +110,6 @@
     </div>
     <br>
     <hr>
-    <h1>Action</h1>
-    <br>
-    <UL>
-        <a href="{% url 'teams:manage_fire_player' team.id %}?player={{ player.id }}" class="btn btn-primary">FIRE</a>
-        <BR>
-        <BR>
-        {% if player.is_journeyman %}
-            <a href="{% url 'teams:confirm_journeyman' team.id %}?player={{ player.id }}"
-               class="btn btn-primary">CONFIRM</a>
-            <BR>
-            <BR>
-        {% endif %}
-        {{ player | add_level_up_action }}
-    </UL>
-
-    <br>
     <hr>
     <h1>Change Name or number</h1>
     <br>
