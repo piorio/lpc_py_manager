@@ -9,6 +9,11 @@
 
     <h3>Details -- <a href="{% url 'teams:create_pdf' team.id %}" class="btn btn-primary">Create PDF</a></h3>
     <br>
+    {% if enable_edit %}
+        <a href="{% url 'teams:my_team_detail' team.id %}" class="btn btn-primary">EDIT TEAM</a>
+        <br>
+        <br>
+    {% endif %}
 
     <!-- FIRST ROW -->
     <div class="row">

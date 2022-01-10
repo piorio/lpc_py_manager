@@ -16,13 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('accounts.urls')),
+    path('auth', obtain_auth_token),
     path('teams/', include('teams.urls')),
     path('matches/', include('match.urls')),
     path('league/', include('league.urls')),
+    path('apiLeague/', include('leagueApi.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]

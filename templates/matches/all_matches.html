@@ -27,11 +27,13 @@
                                 <a href="{% url 'teams:my_team_detail' obj.first_team.id %}">
                                     {{ obj.first_team }}
                                 </a>
+                                - [CTV {{ obj.first_team.current_team_value }}]
                             </td>
                             <td>
                                 <a href="{% url 'teams:my_team_detail' obj.second_team.id %}">
                                     {{ obj.second_team }}
                                 </a>
+                                - [CTV {{ obj.second_team.current_team_value }}]
                             </td>
                             <td>{{ obj.match_date_from }}</td>
                             <td>{{ obj.match_date_to }}</td>

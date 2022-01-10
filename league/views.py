@@ -10,7 +10,7 @@ from .league_utils import create_new_season, get_number_of_teams_for_season, get
     create_new_tournament, get_all_teams_for_season, get_all_ready_teams_without_season, get_all_teams_for_tournament, \
     get_all_matches_for_tournament, get_all_results_for_tournament, \
     get_joined_leagues_contained_info, get_joined_seasons_contained_info, get_joined_tournaments_contained_info, \
-    get_managed_leagues_by_league_id, get_all_leagues_contained_info
+    get_managed_leagues_by_league_id, get_all_leagues_contained_info, add_team_to_season_util
 from .models import League, Season, Tournament
 import logging
 
@@ -219,7 +219,7 @@ def add_team_to_season(request, *args, **kwargs):
         teams_id = [team.id for team in teams]
         chosen_team = form.data['team']
         if chosen_team is not None:
-            result = add_team_to_season(chosen_team, teams_id, season, request)
+            result = add_team_to_season_util(chosen_team, teams_id, season, request)
             if result:
                 return redirect('league:season_detail', **kwargs)
             else:

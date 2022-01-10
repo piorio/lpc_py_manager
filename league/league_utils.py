@@ -118,7 +118,7 @@ def get_all_matches_for_tournament(tournament):
     return Match.objects.filter(tournament=tournament).all()
 
 
-def add_team_to_season(chosen_team, teams_id, season, request):
+def add_team_to_season_util(chosen_team, teams_id, season, request):
     chosen_team_id = int(chosen_team)
     if chosen_team_id in teams_id:
         team = Team.objects.filter(id=chosen_team).get()

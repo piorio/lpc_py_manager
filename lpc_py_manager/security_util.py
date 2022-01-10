@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 def is_team_belong_to_logged_user(team, request):
     if team.coach.id != request.user.id:
-        logger.warning('User ' + str(request.user) + ' try to operate on not owned team ' + str(team))
+        logger.warning(f"User {request.user} try to operate on not owned team {team}")
         return False
     return True
 
@@ -26,3 +26,18 @@ def is_player_belongs_to_team(team, player_id, user):
                        + str(team))
         return False
     return True
+
+
+def is_team_in_league_i_manage(team, request):
+    # If the team is not in a league, False for sure
+    if team.season is None:
+        return False
+
+    managers_of_league = team.season.league.managers.all()
+    if managers_of_league is not None and len(managers_of_league) > 0:
+        managers_of_league_id = [manager.id for manager in managers_of_league]
+        if request.user.id in managers_of_league_id:
+            return True
+
+    # If the request user is not admin return False
+    return False
