@@ -723,7 +723,7 @@ def manage_buy_player(request, *args, **kwargs):
 def player_level_up(request, player_id):
     player = get_object_or_404(TeamPlayer, id=player_id)
 
-    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
+    if not (is_team_belong_to_logged_user(player.team, request) or is_team_in_league_i_manage(player.team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         kwargs = {'team_id': player.team.id}
         return redirect('teams:my_team_detail', **kwargs)
@@ -740,7 +740,7 @@ def random_first_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' random first skill for player ' + str(player))
     kwargs = {'team_id': player.team.id}
 
-    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
+    if not (is_team_belong_to_logged_user(player.team, request) or is_team_in_league_i_manage(player.team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
@@ -803,7 +803,7 @@ def random_second_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' random second skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
+    if not (is_team_belong_to_logged_user(player.team, request) or is_team_in_league_i_manage(player.team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
@@ -865,7 +865,7 @@ def select_first_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' first skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
+    if not (is_team_belong_to_logged_user(player.team, request) or is_team_in_league_i_manage(player.team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
@@ -918,7 +918,7 @@ def select_second_skill(request, *args, **kwargs):
     logger.debug('User ' + str(request.user) + ' second skill for player ' + str(player))
     kwargs_team = {'team_id': player.team.id}
 
-    if not (is_team_belong_to_logged_user(team, request) or is_team_in_league_i_manage(team, request)):
+    if not (is_team_belong_to_logged_user(player.team, request) or is_team_in_league_i_manage(player.team, request)):
         messages.error(request, 'You cannot level up a player for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs_team)
 
