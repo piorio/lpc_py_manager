@@ -333,17 +333,55 @@
                                         <td>{{ player.player_number }}</td>
                                         <td>{{ player.name }}</td>
                                         <td>{{ player.position }}</td>
-                                        <td>{{ player.movement_allowance }}</td>
-                                        <td>{{ player.strength }}</td>
-                                        <td>{{ player.agility }}+</td>
-                                        <td>
-                                            {% if player.passing != 0 %}
-                                                {{ player.passing }}+
-                                            {% else %}
-                                                -
-                                            {% endif %}
+                                        {% if player.movement_allowance == player.roster_player.movement_allowance %}
+                                            <td>
+                                                {% elif player.movement_allowance > player.roster_player.movement_allowance %}
+                                            <td style="background-color: lightblue">
+                                                {% else %}
+                                            <td style="background-color: lightcoral">
+                                        {% endif %}
+                                        {{ player.movement_allowance }}
                                         </td>
-                                        <td>{{ player.armor_value }}+</td>
+                                        {% if player.strength == player.roster_player.strength %}
+                                            <td>
+                                                {% elif player.strength > player.roster_player.strength %}
+                                            <td style="background-color: lightblue">
+                                                {% else %}
+                                            <td style="background-color: lightcoral">
+                                        {% endif %}
+                                        {{ player.strength }}
+                                        </td>
+                                        {% if player.agility == player.roster_player.agility %}
+                                            <td>
+                                                {% elif player.agility < player.roster_player.agility %}
+                                            <td style="background-color: lightblue">
+                                                {% else %}
+                                            <td style="background-color: lightcoral">
+                                        {% endif %}
+                                        {{ player.agility }}+
+                                        </td>
+                                        {% if player.passing == player.roster_player.passing %}
+                                            <td>
+                                                {% elif player.passing < player.roster_player.passing %}
+                                            <td style="background-color: lightblue">
+                                                {% else %}
+                                            <td style="background-color: lightcoral">
+                                        {% endif %}
+                                        {% if player.passing != 0 %}
+                                            {{ player.passing }}+
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                        </td>
+                                        {% if player.armor_value == player.roster_player.armor_value %}
+                                            <td>
+                                                {% elif player.armor_value > player.roster_player.armor_value %}
+                                            <td style="background-color: lightblue">
+                                                {% else %}
+                                            <td style="background-color: lightcoral">
+                                        {% endif %}
+                                        {{ player.armor_value }}+
+                                        </td>
                                         <td>
                                             {% for skill in player.base_skills.all %}
                                                 {{ skill.name }},
@@ -351,10 +389,13 @@
                                             {% for trait in player.traits.all %}
                                                 {{ trait.name }},
                                             {% endfor %}
+                                            {% for skill in player.extra_skills.all %}
+                                                {{ skill.name }},
+                                            {% endfor %}
                                         </td>
                                         <td>{{ player.value }}</td>
-                                    <td>{{ player.spp }}</td>
-                                <td>{{ player.niggling_injury }}</td>
+                                        <td>{{ player.spp }}</td>
+                                        <td>{{ player.niggling_injury }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}

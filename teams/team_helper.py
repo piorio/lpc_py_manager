@@ -252,7 +252,7 @@ def fire_player_helper(player, team, request):
 
 def buy_team_re_roll(team, request):
     # check money spent and max number
-    if team.roster_team.re_roll_cost > team.treasury or team.re_roll > team.roster_team.re_roll_max:
+    if team.roster_team.re_roll_cost * 2 > team.treasury or team.re_roll > team.roster_team.re_roll_max:
         messages.error(request,
                        'You don\'t have money for another re roll or you reached the max number of re roll permitted')
     else:
@@ -269,7 +269,8 @@ def remove_team_re_roll(team, request):
         messages.error(request, 'You don\'t have re roll to remove')
     else:
         team.re_roll -= 1
-        team.treasury += team.roster_team.re_roll_cost
+        # We don't receive money back for re roll
+        # team.treasury += team.roster_team.re_roll_cost
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
         team.save()
