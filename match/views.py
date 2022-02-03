@@ -9,6 +9,7 @@ from match.models import Match
 from django.shortcuts import render, redirect, get_object_or_404
 from teams.team_helper import update_team_value
 from .close_helpers.tournament_helper import update_tournament_result
+from .match_container import MatchContainer
 from .match_util import CloseMatchDataReader, reset_missing_next_game, is_conceded
 from django.contrib import messages
 import logging
@@ -183,6 +184,8 @@ def close_match(request, *args, **kwargs):
                 match.second_team.save()
                 match.played = True
                 match.save()
+
+                # match_container = MatchContainer(match)
 
                 # UPDATE TOURNAMENT RESULT
                 if match.tournament is not None:

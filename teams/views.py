@@ -557,7 +557,7 @@ def manage_fire_player(request, *args, **kwargs):
         messages.error(request, 'You cannot fire that player because it is not belong with team you are working on')
         return redirect('teams:my_teams')
 
-    if fire_player_helper(player, team, request):
+    if fire_player_helper(player, team, request, False):
         return redirect('teams:my_team_detail', **kwargs)
     else:
         return redirect('teams:my_teams')
@@ -586,7 +586,7 @@ def manage_remove_re_roll(request, *args, **kwargs):
         messages.error(request, 'You cannot remove a re roll for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
-    remove_team_re_roll(team, request)
+    remove_team_re_roll(team, request, False)
 
     return redirect('teams:my_team_detail', **kwargs)
 
@@ -614,7 +614,7 @@ def manage_remove_assistant_coach(request, *args, **kwargs):
         messages.error(request, 'You cannot remove an assistant coach for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
-    remove_team_assistant_coach(team, request)
+    remove_team_assistant_coach(team, request, False)
 
     return redirect('teams:my_team_detail', **kwargs)
 
@@ -642,7 +642,7 @@ def manage_remove_cheerleader(request, *args, **kwargs):
         messages.error(request, 'You cannot remove a cheerleader for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
-    remove_team_cheerleader(team, request)
+    remove_team_cheerleader(team, request, False)
 
     return redirect('teams:my_team_detail', **kwargs)
 
@@ -670,7 +670,7 @@ def manage_remove_apothecary(request, *args, **kwargs):
         messages.error(request, 'You cannot remove an apothecary for a team not belongs to you')
         return redirect('teams:my_team_detail', **kwargs)
 
-    remove_team_apothecary(team, request)
+    remove_team_apothecary(team, request, False)
 
     return redirect('teams:my_team_detail', **kwargs)
 

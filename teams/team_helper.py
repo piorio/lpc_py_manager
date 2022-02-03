@@ -221,11 +221,12 @@ def change_player_name_number_by_request(player, request):
     player.save()
 
 
-def fire_player_helper(player, team, request):
+def fire_player_helper(player, team, request, money_back):
     # Fired player and add again the cost
     if not player.roster_player.is_journeyman:
-        logger.debug('User ' + str(request.user) + ' fire ' + str(player) + ' for team '
-                     + str(team) + ' and is not a journeyman so update treasury')
+        logger.debug(f"User {request.user} fire {player} for team {team} and is not a journeyman so update treasury")
+
+    if money_back:
         team.treasury = team.treasury + player.cost
 
     if player.big_guy:
@@ -241,8 +242,7 @@ def fire_player_helper(player, team, request):
             team.current_team_value = update_team_value(team)
             team.save()
     except Exception as e:
-        logger.error('User ' + str(request.user) + ' try to fire ' + str(player) +
-                     ' Exception ' + str(e))
+        logger.error(f"User {request.user} try to fire {player} Exception {e}")
         messages.error(request, 'Internal error during fire Player')
         return False
 
@@ -263,14 +263,14 @@ def buy_team_re_roll(team, request):
         team.save()
 
 
-def remove_team_re_roll(team, request):
+def remove_team_re_roll(team, request, money_back):
     # check quantity
     if team.re_roll <= 0:
         messages.error(request, 'You don\'t have re roll to remove')
     else:
         team.re_roll -= 1
-        # We don't receive money back for re roll
-        # team.treasury += team.roster_team.re_roll_cost
+        if money_back:
+            team.treasury += team.roster_team.re_roll_cost
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
         team.save()
@@ -288,13 +288,14 @@ def buy_team_assistant_coach(team, request):
         team.save()
 
 
-def remove_team_assistant_coach(team, request):
+def remove_team_assistant_coach(team, request, money_back):
     # check quantity
     if team.assistant_coach <= 0:
         messages.error(request, 'You don\'t have assistant coach to remove or too many assistant coach')
     else:
         team.assistant_coach -= 1
-        team.treasury += 10000
+        if money_back:
+            team.treasury += 10000
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
         team.save()
@@ -312,13 +313,14 @@ def buy_team_cheerleader(team, request):
         team.save()
 
 
-def remove_team_cheerleader(team, request):
+def remove_team_cheerleader(team, request, money_back):
     # check money spent and max number
     if team.cheerleader <= 0:
         messages.error(request, 'You don\'t have cheerleader to remove')
     else:
         team.cheerleader -= 1
-        team.treasury += 10000
+        if money_back:
+            team.treasury += 10000
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
         team.save()
@@ -340,13 +342,14 @@ def buy_team_apothecary(team, request):
             team.save()
 
 
-def remove_team_apothecary(team, request):
+def remove_team_apothecary(team, request, money_back):
     # check quantity
     if team.apothecary is False:
         messages.error(request, 'You don\'t have apothecary to remove')
     else:
         team.apothecary = False
-        team.treasury += 50000
+        if money_back:
+            team.treasury += 50000
         team.value = update_team_value(team, True)
         team.current_team_value = update_team_value(team)
         team.save()
